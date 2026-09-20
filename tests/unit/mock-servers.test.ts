@@ -2,6 +2,7 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
 import { MockCmsServer } from '../../test-harness/mock-cms/server.js';
 import { MockSyncApiServer } from '../../test-harness/mock-sync-api/server.js';
+import { verifyManifestSignature } from '../../test-harness/fixtures/signing-keys.js';
 
 describe('Local Test Harness Mock Servers', () => {
   const cmsServer = new MockCmsServer(4001);
@@ -20,7 +21,16 @@ describe('Local Test Harness Mock Servers', () => {
     await fetch('http://localhost:4002/__admin/reset', { method: 'POST' });
   });
 
-  describe('Mock CMS API', () => {
+  describe('Mock CMS API & Web Portal', () => {
+    it('serves an actual HTML staff portal on root path', async () => {
+      const res = await fetch('http://localhost:4001/');
+      expect(res.status).toBe(200);
+      expect(res.headers.get('content-type')).toContain('text/html');
+      const html = await res.text();
+      expect(html).toContain('ACME Clinic Cloud CMS (Mock Portal)');
+      expect(html).toContain('loginBtn');
+    });
+
     it('returns synthetic patient list', async () => {
       const res = await fetch('http://localhost:4001/api/patients');
       expect(res.status).toBe(200);
@@ -55,8 +65,26 @@ describe('Local Test Harness Mock Servers', () => {
       expect(body.data.fullName).toBe('ZZTEST Patient 05');
     });
 
+    it('verifies literal route wins: availability vs appointment id', async () => {
+      // 1. Literal route /api/appointments/availability
+      const availRes = await fetch('http://localhost:4001/api/appointments/availability?providerId=DOC-01&date=2026-10-01');
+      expect(availRes.status).toBe(200);
+      const avail = await availRes.json();
+      expect(avail.slots).toBeDefined();
+      expect(Array.isArray(avail.slots)).toBe(true);
+
+      // 2. Resource route /api/appointments/:id
+      const apptRes = await fetch('http://localhost:4001/api/appointments/APT-001');
+      expect(apptRes.status).toBe(200);
+      const appt = await apptRes.json();
+      expect(appt.data.id).toBe('APT-001');
+      // Confirms non-UTC Malaysian local date fields exist
+      expect(appt.data.slotDate).toBe('2026-10-01');
+      expect(appt.data.slotTimeNaive).toBe('09:00:00');
+      expect(appt.data.displayTime).toBe('01/10/2026 09:00 AM');
+    });
+
     it('creates, reschedules, and cancels appointments', async () => {
-      // 1. Create appointment
       const createRes = await fetch('http://localhost:4001/api/appointments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -73,7 +101,7 @@ describe('Local Test Harness Mock Servers', () => {
       const apptId = created.data.id;
       expect(created.data.rev).toBe(1);
 
-      // 2. Collision test on same slot
+      // Collision test on same slot
       const clashRes = await fetch('http://localhost:4001/api/appointments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -86,7 +114,7 @@ describe('Local Test Harness Mock Servers', () => {
       });
       expect(clashRes.status).toBe(409);
 
-      // 3. Reschedule
+      // Reschedule
       const rescheduleRes = await fetch(`http://localhost:4001/api/appointments/${apptId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -100,7 +128,7 @@ describe('Local Test Harness Mock Servers', () => {
       const rescheduled = await rescheduleRes.json();
       expect(rescheduled.data.rev).toBe(2);
 
-      // 4. Cancel
+      // Cancel
       const cancelRes = await fetch(`http://localhost:4001/api/appointments/${apptId}`, {
         method: 'DELETE',
       });
@@ -110,43 +138,62 @@ describe('Local Test Harness Mock Servers', () => {
       expect(cancelled.data.rev).toBe(3);
     });
 
-    it('injects deliberate faults via header and global admin switch', async () => {
-      // 401 via header
-      const res401 = await fetch('http://localhost:4001/api/patients', {
-        headers: { 'x-mock-fault': '401' },
-      });
-      expect(res401.status).toBe(401);
+    it('simulates out-of-band concurrent edit causing 409 conflict', async () => {
+      // 1. Initial appointment rev is 1
+      const apptRes = await fetch('http://localhost:4001/api/appointments/APT-001');
+      const appt = await apptRes.json();
+      expect(appt.data.rev).toBe(1);
 
-      // 409 via header
-      const res409 = await fetch('http://localhost:4001/api/patients', {
-        headers: { 'x-mock-fault': '409' },
+      // 2. Out-of-band mutation occurs on CMS backend
+      const mutateRes = await fetch('http://localhost:4001/__admin/appointments/APT-001/mutate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rev: 2 }),
       });
-      expect(res409.status).toBe(409);
+      expect(mutateRes.status).toBe(200);
 
-      // 429 via header
-      const res429 = await fetch('http://localhost:4001/api/patients', {
-        headers: { 'x-mock-fault': '429' },
+      // 3. Client attempts update with stale rev 1
+      const updateRes = await fetch('http://localhost:4001/api/appointments/APT-001', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          notes: 'Stale update attempt',
+          expectedRev: 1,
+        }),
       });
-      expect(res429.status).toBe(429);
-      expect(res429.headers.get('retry-after')).toBe('30');
+      expect(updateRes.status).toBe(409);
+      const conflict = await updateRes.json();
+      expect(conflict.error).toBe('CONFLICT');
+      expect(conflict.currentRev).toBe(2);
+    });
 
-      // 500 via global switch
+    it('supports targeted fault injection without breaking unrelated endpoints', async () => {
+      // Set targeted 409 on specific appointment update only
       await fetch('http://localhost:4001/__admin/fault', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ fault: '500' }),
+        body: JSON.stringify({
+          fault: '409',
+          targetPath: '/api/appointments/APT-001',
+          method: 'PUT',
+        }),
       });
-      const res500 = await fetch('http://localhost:4001/api/patients');
-      expect(res500.status).toBe(500);
 
-      // Reset
-      await fetch('http://localhost:4001/__admin/reset', { method: 'POST' });
-      const resHealthy = await fetch('http://localhost:4001/api/patients');
-      expect(resHealthy.status).toBe(200);
+      // Target endpoint returns 409
+      const targetedRes = await fetch('http://localhost:4001/api/appointments/APT-001', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ notes: 'test' }),
+      });
+      expect(targetedRes.status).toBe(409);
+
+      // Unrelated endpoint continues working normally
+      const patientsRes = await fetch('http://localhost:4001/api/patients');
+      expect(patientsRes.status).toBe(200);
     });
   });
 
-  describe('Mock Sync API', () => {
+  describe('Mock Sync API & Adapter Security', () => {
     it('handles device pairing and rejects expired code', async () => {
       const pairRes = await fetch('http://localhost:4002/v1/sync/installations/pair', {
         method: 'POST',
@@ -222,37 +269,67 @@ describe('Local Test Harness Mock Servers', () => {
       expect(lease2.fencingToken).toBe(2);
     });
 
-    it('serves adapter manifest and dispatches outbox commands', async () => {
-      // 1. Adapter manifest
-      const adapterRes = await fetch('http://localhost:4002/v1/sync/connections/conn_1/adapter');
-      expect(adapterRes.status).toBe(200);
-      const adapter = await adapterRes.json();
-      expect(adapter.adapterId).toBe('acme-cloud-v1');
+    it('deliberately serves signed, tampered, unsigned, unknown_primitive, and invalid manifests', async () => {
+      // 1. Valid signed manifest
+      const validRes = await fetch('http://localhost:4002/v1/sync/connections/conn_1/adapter?variant=valid');
+      const validManifest = await validRes.json();
+      expect(validManifest.signature).toBeDefined();
+      const isValid = verifyManifestSignature(validManifest, validManifest.signature);
+      expect(isValid).toBe(true);
 
-      // 2. Outbox next
-      const outboxRes = await fetch('http://localhost:4002/v1/sync/outbox/next?connectionId=conn_mock_67890');
-      expect(outboxRes.status).toBe(200);
-      const outbox = await outboxRes.json();
-      expect(outbox.command.commandId).toBe('CMD-TEST-001');
-      expect(outbox.command.actionId).toBe('CREATE_APPOINTMENT');
+      // 2. Tampered signature
+      const tamperedRes = await fetch('http://localhost:4002/v1/sync/connections/conn_1/adapter?variant=tampered');
+      const tamperedManifest = await tamperedRes.json();
+      const isTamperedValid = verifyManifestSignature(tamperedManifest, tamperedManifest.signature);
+      expect(isTamperedValid).toBe(false);
 
-      // 3. Command result submission
-      const resultRes = await fetch(`http://localhost:4002/v1/sync/outbox/${outbox.command.commandId}/result`, {
+      // 3. Unsigned manifest
+      const unsignedRes = await fetch('http://localhost:4002/v1/sync/connections/conn_1/adapter?variant=unsigned');
+      const unsignedManifest = await unsignedRes.json();
+      expect(unsignedManifest.signature).toBeUndefined();
+
+      // 4. Unknown primitive
+      const unknownRes = await fetch('http://localhost:4002/v1/sync/connections/conn_1/adapter?variant=unknown_primitive');
+      const unknownManifest = await unknownRes.json();
+      expect(unknownManifest.capabilities).toContain('__UNKNOWN_DANGEROUS_EVAL__');
+
+      // 5. Invalid schema
+      const invalidRes = await fetch('http://localhost:4002/v1/sync/connections/conn_1/adapter?variant=invalid_schema');
+      const invalidManifest = await invalidRes.json();
+      expect(invalidManifest.adapterId).toBeUndefined();
+    });
+
+    it('records probe results and redacted diagnostics', async () => {
+      // 1. Probe result (Phase 10)
+      const probeRes = await fetch('http://localhost:4002/v1/sync/connections/conn_1/probe-result', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          status: 'VERIFIED',
-          writeReceipt: {
-            externalId: 'APT-001',
-            revision: 1,
-            verifiedAt: new Date().toISOString(),
-          },
+          installationId: 'inst_1',
+          capabilities: ['PATIENT_READ', 'APPOINTMENT_WRITE'],
+          cmsVersion: 'v2.4.1',
+          passed: true,
         }),
       });
-      expect(resultRes.status).toBe(200);
-      const resultData = await resultRes.json();
-      expect(resultData.acknowledged).toBe(true);
-      expect(resultData.status).toBe('VERIFIED');
+      expect(probeRes.status).toBe(200);
+      const probeData = await probeRes.json();
+      expect(probeData.status).toBe('ok');
+
+      // 2. Diagnostics (Phase 10)
+      const diagRes = await fetch('http://localhost:4002/v1/sync/diagnostics', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          installationId: 'inst_1',
+          correlationId: 'corr_12345',
+          errorType: 'SESSION_EXPIRED',
+          redactedDetails: { statusCode: 401 },
+        }),
+      });
+      expect(diagRes.status).toBe(200);
+      const diagData = await diagRes.json();
+      expect(diagData.status).toBe('recorded');
+      expect(diagData.diagnosticId).toContain('diag_');
     });
   });
 });

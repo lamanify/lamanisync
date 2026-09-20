@@ -1,5 +1,7 @@
 import http from 'node:http';
 import { URL } from 'node:url';
+import fs from 'node:fs';
+import path from 'node:path';
 import { createInitialCmsState } from '../fixtures/synthetic-data.js';
 
 export class MockCmsServer {
@@ -9,17 +11,29 @@ export class MockCmsServer {
     this.state = createInitialCmsState();
     this.globalFault = 'none';
     this.faultDelayMs = 1000;
+    this.targetedFaults = new Map(); // key: "METHOD:pathname" -> fault
+    this.indexPath = path.resolve('test-harness/mock-cms/index.html');
   }
 
   reset() {
     this.state = createInitialCmsState();
     this.globalFault = 'none';
     this.faultDelayMs = 1000;
+    this.targetedFaults.clear();
   }
 
-  setFault(fault, delayMs = 1000) {
-    this.globalFault = fault;
-    this.faultDelayMs = delayMs;
+  setFault(fault, delayMs = 1000, targetPath = null, method = null) {
+    if (targetPath) {
+      const key = `${(method || 'ALL').toUpperCase()}:${targetPath}`;
+      if (fault === 'none') {
+        this.targetedFaults.delete(key);
+      } else {
+        this.targetedFaults.set(key, { fault, delayMs });
+      }
+    } else {
+      this.globalFault = fault;
+      this.faultDelayMs = delayMs;
+    }
   }
 
   start() {
@@ -60,13 +74,30 @@ export class MockCmsServer {
     const parsedUrl = new URL(req.url, `http://${host}`);
     const pathname = parsedUrl.pathname;
 
-    // Check fault injection (header takes precedence over global)
-    const activeFault = req.headers['x-mock-fault'] || this.globalFault;
+    // Serve HTML page on root
+    if ((pathname === '/' || pathname === '/index.html') && req.method === 'GET') {
+      try {
+        const html = fs.readFileSync(this.indexPath, 'utf-8');
+        res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+        res.end(html);
+        return;
+      } catch (err) {
+        return this.sendJson(res, 500, { error: 'HTML_LOAD_FAILED', message: err.message });
+      }
+    }
+
+    // Check fault injection (header > targeted > global)
+    const reqKey = `${req.method.toUpperCase()}:${pathname}`;
+    const wildKey = `ALL:${pathname}`;
+    const targeted = this.targetedFaults.get(reqKey) || this.targetedFaults.get(wildKey);
+
+    const activeFault = req.headers['x-mock-fault'] || (targeted ? targeted.fault : this.globalFault);
+    const delay = targeted ? targeted.delayMs : this.faultDelayMs;
 
     // Admin endpoints bypass fault injection so the admin can always reset/inspect
     if (!pathname.startsWith('/__admin')) {
       if (activeFault === 'slow') {
-        await new Promise((r) => setTimeout(r, this.faultDelayMs));
+        await new Promise((r) => setTimeout(r, delay));
       } else if (activeFault === '401') {
         return this.sendJson(res, 401, {
           error: 'UNAUTHORIZED',
@@ -102,11 +133,11 @@ export class MockCmsServer {
 
       // --- Admin Endpoints ---
       if (pathname === '/__admin/fault' && req.method === 'POST') {
-        this.setFault(body.fault || 'none', body.delayMs || 1000);
+        this.setFault(body.fault || 'none', body.delayMs || 1000, body.targetPath || null, body.method || null);
         return this.sendJson(res, 200, {
           status: 'ok',
           globalFault: this.globalFault,
-          delayMs: this.faultDelayMs,
+          targetedFaultsCount: this.targetedFaults.size,
         });
       }
 
@@ -114,7 +145,23 @@ export class MockCmsServer {
         return this.sendJson(res, 200, {
           globalFault: this.globalFault,
           delayMs: this.faultDelayMs,
+          targetedFaults: Array.from(this.targetedFaults.entries()),
         });
+      }
+
+      if (pathname.startsWith('/__admin/appointments/') && pathname.endsWith('/mutate') && req.method === 'POST') {
+        const parts = pathname.split('/');
+        const id = parts[parts.length - 2];
+        const appt = this.state.appointments.find((a) => a.id === id);
+        if (!appt) {
+          return this.sendJson(res, 404, { error: 'NOT_FOUND', message: `Appointment ${id} not found` });
+        }
+        if (body.rev !== undefined) appt.rev = body.rev;
+        else appt.rev += 1;
+        if (body.startTime) appt.startTime = body.startTime;
+        if (body.status) appt.status = body.status;
+        appt.updatedAt = new Date().toISOString();
+        return this.sendJson(res, 200, { status: 'mutated', data: appt });
       }
 
       if (pathname === '/__admin/reset' && req.method === 'POST') {
@@ -285,6 +332,15 @@ export class MockCmsServer {
         });
       }
 
+      if (pathname.startsWith('/api/appointments/') && pathname !== '/api/appointments/availability' && req.method === 'GET') {
+        const id = pathname.replace('/api/appointments/', '');
+        const appt = this.state.appointments.find((a) => a.id === id);
+        if (!appt) {
+          return this.sendJson(res, 404, { error: 'NOT_FOUND', message: `Appointment ${id} not found` });
+        }
+        return this.sendJson(res, 200, { data: appt });
+      }
+
       if (pathname === '/api/appointments' && req.method === 'POST') {
         if (!body.patientId || !body.providerId || !body.startTime || !body.endTime) {
           return this.sendJson(res, 400, {
@@ -310,6 +366,8 @@ export class MockCmsServer {
         }
 
         const newId = `APT-${String(this.state.appointments.length + 1).padStart(3, '0')}`;
+        const slotDate = body.startTime.split('T')[0];
+        const slotTimeNaive = body.startTime.includes('T') ? body.startTime.split('T')[1].slice(0, 8) : '00:00:00';
         const newAppt = {
           id: newId,
           patientId: body.patientId,
@@ -318,6 +376,9 @@ export class MockCmsServer {
           locationId: body.locationId || 'LOC-01',
           startTime: body.startTime,
           endTime: body.endTime,
+          slotDate,
+          slotTimeNaive,
+          displayTime: `${slotDate} ${slotTimeNaive}`,
           status: 'booked',
           notes: body.notes || '',
           rev: 1,

@@ -17,6 +17,9 @@ Both servers run locally and never connect to external network hosts.
 
 ## 2. Mock Cloud CMS Contract (`http://localhost:4001`)
 
+### 2.0 Web Portal Interface
+- **`GET /` or `GET /index.html`**: Serves the interactive staff web portal UI (`text/html`). Provides buttons for login (cookie setting), patient/appointment fetches, and simulated background polling to generate live same-origin traffic for Phase 5 extension content script observation.
+
 ### 2.1 Authentication & Session
 
 #### `POST /api/auth/login`
@@ -329,16 +332,32 @@ Cancel an appointment. Retains record with `status: "cancelled"` and increments 
 ### 2.5 Admin Endpoints & Fault Controls
 
 #### `POST /__admin/fault`
-Sets global deliberate fault condition for all subsequent CMS requests.
+Sets global or targeted deliberate fault condition for CMS requests.
 
 - **Request Body**:
   ```json
   {
     "fault": "401" | "403" | "409" | "429" | "500" | "slow" | "drift" | "none",
-    "delayMs": 1500
+    "delayMs": 1500,
+    "targetPath": "/api/appointments/APT-001",
+    "method": "PUT"
   }
   ```
-- **Response `200 OK`**: `{ "status": "ok", "globalFault": "401", "delayMs": 1500 }`
+  *(If `targetPath` is omitted, applies globally to all CMS requests. If provided, affects only that exact endpoint/method, leaving other operations healthy).*
+- **Response `200 OK`**: `{ "status": "ok", "globalFault": "401", "targetedFaultsCount": 1 }`
+
+#### `POST /__admin/appointments/:id/mutate`
+Performs an out-of-band mutation on an appointment directly on the CMS backend (e.g. increments `rev` or changes `startTime`) to simulate external changes for Phase 8 concurrent edit conflict testing.
+
+- **Request Body**:
+  ```json
+  {
+    "rev": 2,
+    "startTime": "2026-10-01T16:00:00+08:00",
+    "status": "booked"
+  }
+  ```
+- **Response `200 OK`**: `{ "status": "mutated", "data": { ... } }`
 
 #### `POST /__admin/reset`
 Resets all patients, appointments, and faults back to the baseline deterministic synthetic fixtures.
@@ -402,19 +421,36 @@ Revokes an installation server-side during unpair flow.
 
 ---
 
-### 3.2 Adapter Distribution
+### 3.2 Adapter Distribution & Cryptographic Pinning
+
+#### `GET /v1/sync/public-key`
+Returns the server's Ed25519 public key (PEM format) used for manifest signature verification.
+
+- **Response `200 OK`**:
+  ```json
+  {
+    "publicKey": "-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEA...\n-----END PUBLIC KEY-----\n"
+  }
+  ```
 
 #### `GET /v1/sync/connections/:id/adapter`
 Fetches the signed adapter manifest defining allowlisted endpoints, transforms, and capabilities.
 
-- **Response `200 OK`**:
+- **Query Parameters / Headers**:
+  - `variant` *(query param, default: `valid`)* or `x-adapter-variant` *(header)*:
+    - `valid`: Returns canonical manifest with valid Ed25519 signature.
+    - `tampered`: Returns manifest with a corrupted signature string to test signature rejection.
+    - `unsigned`: Returns manifest with `signature` omitted.
+    - `unknown_primitive`: Returns manifest injecting an unrecognized capability/primitive (`__UNKNOWN_DANGEROUS_EVAL__`).
+    - `invalid_schema`: Returns manifest missing mandatory schema keys (e.g. `adapterId`, `targetOrigin`).
+- **Response `200 OK` (Valid Signed Example)**:
   ```json
   {
     "adapterId": "acme-cloud-v1",
     "name": "ACME Cloud CMS Adapter (Mock)",
     "version": "1.0.0",
     "targetOrigin": "http://localhost:4001",
-    "signature": "simulated_ed25519_signature_test_key_valid",
+    "signature": "c2ltdWxhdGVkX2VkMjU1MTlfc2lnbmF0dXJl...",
     "capabilities": [
       "PATIENT_READ",
       "PATIENT_WRITE",
@@ -579,6 +615,42 @@ Reports the read-after-write verified result of command execution.
     "status": "VERIFIED"
   }
   ```
+
+---
+
+### 3.6 Diagnostics & Probes (Phase 10)
+
+#### `POST /v1/sync/connections/:id/probe-result`
+Transmits the results of an extension environment probe evaluating CMS edition, capabilities, and schema compatibility.
+
+- **Request Body**:
+  ```json
+  {
+    "installationId": "inst_mock_12345",
+    "capabilities": ["PATIENT_READ", "APPOINTMENT_WRITE"],
+    "cmsVersion": "v2.4.1",
+    "passed": true,
+    "details": { "activeModules": ["booking", "billing"] }
+  }
+  ```
+- **Response `200 OK`**: `{ "status": "ok", "connectionId": "conn_mock_67890", "recordedAt": "..." }`
+
+#### `POST /v1/sync/diagnostics`
+Uploads redacted diagnostics logs and correlation IDs for server-side troubleshooting without transmitting PHI or session secrets.
+
+- **Request Body**:
+  ```json
+  {
+    "installationId": "inst_mock_12345",
+    "correlationId": "corr_98765",
+    "errorType": "SESSION_EXPIRED",
+    "redactedDetails": {
+      "statusCode": 401,
+      "endpoint": "/api/patients"
+    }
+  }
+  ```
+- **Response `200 OK`**: `{ "status": "recorded", "diagnosticId": "diag_1758433500000" }`
 
 ---
 

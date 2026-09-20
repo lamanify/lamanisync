@@ -2,6 +2,7 @@ import http from 'node:http';
 import { URL } from 'node:url';
 import fs from 'node:fs';
 import path from 'node:path';
+import { TEST_PUBLIC_KEY, signManifest } from '../fixtures/signing-keys.js';
 
 function createInitialSyncState() {
   return {
@@ -9,6 +10,8 @@ function createInitialSyncState() {
     leases: new Map(),
     fencingCounter: 0,
     events: [],
+    probeResults: new Map(),
+    diagnostics: [],
     outbox: [
       {
         commandId: 'CMD-TEST-001',
@@ -38,6 +41,7 @@ export class MockSyncApiServer {
     this.state = createInitialSyncState();
     const manifestPath = path.resolve('test-harness/fixtures/adapter-manifest.json');
     this.adapterManifest = JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
+    this.publicKey = TEST_PUBLIC_KEY;
   }
 
   reset() {
@@ -178,9 +182,72 @@ export class MockSyncApiServer {
         return this.sendJson(res, 200, { status: 'revoked' });
       }
 
-      // --- Adapter Manifest Distribution ---
+      // --- Public Key Endpoint ---
+      if (pathname === '/v1/sync/public-key' && req.method === 'GET') {
+        return this.sendJson(res, 200, { publicKey: this.publicKey });
+      }
+
+      // --- Adapter Manifest Distribution (Variants Supported) ---
       if (pathname.startsWith('/v1/sync/connections/') && pathname.endsWith('/adapter') && req.method === 'GET') {
-        return this.sendJson(res, 200, this.adapterManifest);
+        const variant = parsedUrl.searchParams.get('variant') || req.headers['x-adapter-variant'] || 'valid';
+        const manifest = JSON.parse(JSON.stringify(this.adapterManifest));
+
+        if (variant === 'tampered') {
+          manifest.signature = 'corrupted_ed25519_signature_tampered';
+        } else if (variant === 'unsigned') {
+          delete manifest.signature;
+        } else if (variant === 'unknown_primitive') {
+          manifest.capabilities.push('__UNKNOWN_DANGEROUS_EVAL__');
+          manifest.signature = signManifest(manifest);
+        } else if (variant === 'invalid_schema') {
+          delete manifest.adapterId;
+          delete manifest.targetOrigin;
+          manifest.signature = signManifest(manifest);
+        } else {
+          // Default: valid Ed25519 signature
+          manifest.signature = signManifest(manifest);
+        }
+
+        return this.sendJson(res, 200, manifest);
+      }
+
+      // --- Probe Result Recording ---
+      if (pathname.startsWith('/v1/sync/connections/') && pathname.endsWith('/probe-result') && req.method === 'POST') {
+        const parts = pathname.split('/');
+        const connectionId = parts[parts.length - 2];
+        const probeRecord = {
+          connectionId,
+          installationId: body.installationId,
+          capabilities: body.capabilities || [],
+          cmsVersion: body.cmsVersion || 'unknown',
+          passed: Boolean(body.passed),
+          details: body.details || {},
+          recordedAt: new Date().toISOString(),
+        };
+        this.state.probeResults.set(connectionId, probeRecord);
+        return this.sendJson(res, 200, {
+          status: 'ok',
+          connectionId,
+          recordedAt: probeRecord.recordedAt,
+        });
+      }
+
+      // --- Diagnostics Logging ---
+      if (pathname === '/v1/sync/diagnostics' && req.method === 'POST') {
+        const diagnostic = {
+          id: `diag_${Date.now()}`,
+          installationId: body.installationId || 'anonymous',
+          correlationId: body.correlationId || null,
+          errorType: body.errorType || 'UNSPECIFIED',
+          redactedDetails: body.redactedDetails || {},
+          receivedAt: new Date().toISOString(),
+        };
+        this.state.diagnostics.push(diagnostic);
+        return this.sendJson(res, 200, {
+          status: 'recorded',
+          diagnosticId: diagnostic.id,
+          receivedAt: diagnostic.receivedAt,
+        });
       }
 
       // --- Event Batch Ingestion ---

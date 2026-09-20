@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ACME Clinic Cloud CMS (Mock Portal)</title>
+    <style>
+      :root {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        color: #1e293b;
+        background-color: #f8fafc;
+      }
+      body {
+        margin: 0;
+        padding: 24px;
+      }
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #ffffff;
+        padding: 16px 24px;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        margin-bottom: 24px;
+      }
+      .title {
+        margin: 0;
+        font-size: 20px;
+        color: #0f172a;
+      }
+      .session-badge {
+        font-size: 13px;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-weight: 500;
+        background: #fee2e2;
+        color: #991b1b;
+      }
+      .session-badge.active {
+        background: #dcfce7;
+        color: #166534;
+      }
+      .card {
+        background: #ffffff;
+        padding: 20px;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+        margin-bottom: 20px;
+      }
+      .btn {
+        padding: 8px 16px;
+        border-radius: 6px;
+        border: none;
+        cursor: pointer;
+        font-weight: 500;
+        font-size: 14px;
+        background: #2563eb;
+        color: #ffffff;
+        margin-right: 8px;
+        margin-bottom: 8px;
+      }
+      .btn:hover { background: #1d4ed8; }
+      .btn-secondary { background: #64748b; }
+      .btn-secondary:hover { background: #475569; }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 12px;
+        font-size: 13px;
+      }
+      th, td {
+        padding: 10px;
+        text-align: left;
+        border-bottom: 1px solid #e2e8f0;
+      }
+      th {
+        background: #f1f5f9;
+        color: #475569;
+        font-weight: 600;
+      }
+      .log-box {
+        background: #0f172a;
+        color: #38bdf8;
+        padding: 12px;
+        border-radius: 6px;
+        font-family: monospace;
+        font-size: 12px;
+        max-height: 160px;
+        overflow-y: auto;
+        white-space: pre-wrap;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <div>
+        <h1 class="title">ACME Clinic Cloud CMS (Mock Portal)</h1>
+        <small style="color: #64748b;">Target origin for LamaniSync Chrome Extension observation</small>
+      </div>
+      <div id="sessionBadge" class="session-badge">Session: Not Logged In</div>
+    </div>
+
+    <div class="card">
+      <h3>Staff Actions & Simulated Browser Traffic</h3>
+      <button class="btn" id="loginBtn">1. Staff Login (Sets Session Cookie)</button>
+      <button class="btn btn-secondary" id="checkSessionBtn">Check Session</button>
+      <button class="btn btn-secondary" id="loadPatientsBtn">Fetch Patients (XHR/Fetch)</button>
+      <button class="btn btn-secondary" id="loadApptsBtn">Fetch Appointments</button>
+      <button class="btn btn-secondary" id="toggleTrafficBtn">Start Background Polling</button>
+    </div>
+
+    <div class="card">
+      <h3>Patient Records</h3>
+      <table id="patientsTable">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>MRN</th>
+            <th>Name</th>
+            <th>Phone</th>
+            <th>DOB</th>
+            <th>Gender</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td colspan="6" style="text-align:center; color:#94a3b8;">No data loaded yet. Click "Fetch Patients".</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h3>Live Page Activity Log</h3>
+      <div id="activityLog" class="log-box">[System] Mock CMS Portal loaded. Ready for same-origin observation.</div>
+    </div>
+
+    <script>
+      const logBox = document.getElementById('activityLog');
+      const badge = document.getElementById('sessionBadge');
+      let trafficInterval = null;
+
+      function log(msg) {
+        const time = new Date().toLocaleTimeString();
+        logBox.textContent = `[${time}] ${msg}\n` + logBox.textContent;
+      }
+
+      async function checkSession() {
+        try {
+          const res = await fetch('/api/auth/session', { credentials: 'include' });
+          if (res.ok) {
+            const data = await res.json();
+            badge.textContent = `Staff: ${data.staff.name} (${data.clinicId})`;
+            badge.className = 'session-badge active';
+            log(`Session active: ${data.staff.name}`);
+          } else {
+            badge.textContent = 'Session: Not Logged In (401)';
+            badge.className = 'session-badge';
+            log('No active session.');
+          }
+        } catch (e) {
+          log('Session check error: ' + e.message);
+        }
+      }
+
+      document.getElementById('loginBtn').addEventListener('click', async () => {
+        try {
+          const res = await fetch('/api/auth/login', {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username: 'staff_alice', password: 'password123' })
+          });
+          const data = await res.json();
+          log(`Login successful. Token issued for ${data.staff.name}. Cookie set.`);
+          await checkSession();
+        } catch (e) {
+          log('Login error: ' + e.message);
+        }
+      });
+
+      document.getElementById('checkSessionBtn').addEventListener('click', checkSession);
+
+      document.getElementById('loadPatientsBtn').addEventListener('click', async () => {
+        try {
+          const res = await fetch('/api/patients', { credentials: 'include' });
+          const json = await res.json();
+          log(`Fetched ${json.total || json.data?.length || 0} patients.`);
+          const tbody = document.querySelector('#patientsTable tbody');
+          tbody.innerHTML = '';
+          (json.data || []).forEach(p => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `<td>${p.id}</td><td>${p.mrn}</td><td>${p.fullName}</td><td>${p.phone}</td><td>${p.dateOfBirth}</td><td>${p.gender}</td>`;
+            tbody.appendChild(tr);
+          });
+        } catch (e) {
+          log('Fetch patients error: ' + e.message);
+        }
+      });
+
+      document.getElementById('loadApptsBtn').addEventListener('click', async () => {
+        try {
+          const res = await fetch('/api/appointments', { credentials: 'include' });
+          const json = await res.json();
+          log(`Fetched ${json.total || json.data?.length || 0} appointments.`);
+        } catch (e) {
+          log('Fetch appointments error: ' + e.message);
+        }
+      });
+
+      const trafficBtn = document.getElementById('toggleTrafficBtn');
+      trafficBtn.addEventListener('click', () => {
+        if (trafficInterval) {
+          clearInterval(trafficInterval);
+          trafficInterval = null;
+          trafficBtn.textContent = 'Start Background Polling';
+          log('Background traffic stopped.');
+        } else {
+          trafficInterval = setInterval(async () => {
+            await fetch('/api/appointments', { credentials: 'include' });
+            log('Background fetch: /api/appointments');
+          }, 5000);
+          trafficBtn.textContent = 'Stop Background Polling';
+          log('Background traffic started (every 5s).');
+        }
+      });
+
+      // Initial check on page load
+      checkSession();
+    </script>
+  </body>
+</html>
