@@ -1,0 +1,127 @@
+// Deterministic synthetic dataset for local testing.
+// Zero real patient data. Synthetic Malaysian healthcare records.
+
+export function createInitialCmsState() {
+  return {
+    patients: [
+      {
+        id: 'ZZTEST-P01',
+        mrn: 'MRN-ZZ-001',
+        fullName: 'ZZTEST Patient 01',
+        icOrPassport: '900101-14-5001',
+        phone: '+60123456701',
+        email: 'zztest.patient01@example.test',
+        dateOfBirth: '1990-01-01',
+        gender: 'female',
+        createdAt: '2026-01-01T08:00:00+08:00',
+        updatedAt: '2026-01-01T08:00:00+08:00',
+      },
+      {
+        id: 'ZZTEST-P02',
+        mrn: 'MRN-ZZ-002',
+        fullName: 'ZZTEST Patient 02',
+        icOrPassport: '920202-10-5002',
+        phone: '+60123456702',
+        email: 'zztest.patient02@example.test',
+        dateOfBirth: '1992-02-02',
+        gender: 'male',
+        createdAt: '2026-01-02T08:00:00+08:00',
+        updatedAt: '2026-01-02T08:00:00+08:00',
+      },
+      {
+        id: 'ZZTEST-P03',
+        mrn: 'MRN-ZZ-003',
+        fullName: 'ZZTEST Patient 03',
+        icOrPassport: '880303-14-5003',
+        phone: '+60123456703',
+        email: 'zztest.patient03@example.test',
+        dateOfBirth: '1988-03-03',
+        gender: 'female',
+        createdAt: '2026-01-03T08:00:00+08:00',
+        updatedAt: '2026-01-03T08:00:00+08:00',
+      },
+      {
+        id: 'ZZTEST-P04',
+        mrn: 'MRN-ZZ-004',
+        fullName: 'ZZTEST Patient 04',
+        icOrPassport: '950404-08-5004',
+        phone: '+60123456704',
+        email: 'zztest.patient04@example.test',
+        dateOfBirth: '1995-04-04',
+        gender: 'male',
+        createdAt: '2026-01-04T08:00:00+08:00',
+        updatedAt: '2026-01-04T08:00:00+08:00',
+      },
+    ],
+    providers: [
+      {
+        id: 'DOC-01',
+        fullName: 'Dr. Siti Aminah',
+        specialty: 'General Practitioner',
+        active: true,
+      },
+      {
+        id: 'DOC-02',
+        fullName: 'Dr. Tan Wei Lun',
+        specialty: 'Dental Surgeon',
+        active: true,
+      },
+    ],
+    services: [
+      {
+        id: 'SRV-01',
+        name: 'General Consultation',
+        durationMinutes: 15,
+        defaultPrice: 60.0,
+      },
+      {
+        id: 'SRV-02',
+        name: 'Dental Scaling & Polish',
+        durationMinutes: 30,
+        defaultPrice: 150.0,
+      },
+    ],
+    locations: [
+      {
+        id: 'LOC-01',
+        name: 'Consultation Room 1',
+        roomType: 'clinical',
+      },
+      {
+        id: 'LOC-02',
+        name: 'Dental Suite A',
+        roomType: 'dental',
+      },
+    ],
+    appointments: [
+      {
+        id: 'APT-001',
+        patientId: 'ZZTEST-P01',
+        providerId: 'DOC-01',
+        serviceId: 'SRV-01',
+        locationId: 'LOC-01',
+        startTime: '2026-10-01T09:00:00+08:00',
+        endTime: '2026-10-01T09:15:00+08:00',
+        status: 'booked',
+        notes: 'Initial checkup',
+        rev: 1,
+        createdAt: '2026-09-01T10:00:00+08:00',
+        updatedAt: '2026-09-01T10:00:00+08:00',
+      },
+      {
+        id: 'APT-002',
+        patientId: 'ZZTEST-P02',
+        providerId: 'DOC-02',
+        serviceId: 'SRV-02',
+        locationId: 'LOC-02',
+        startTime: '2026-10-01T10:00:00+08:00',
+        endTime: '2026-10-01T10:30:00+08:00',
+        status: 'booked',
+        notes: 'Routine scaling',
+        rev: 1,
+        createdAt: '2026-09-01T11:00:00+08:00',
+        updatedAt: '2026-09-01T11:00:00+08:00',
+      },
+    ],
+  };
+}

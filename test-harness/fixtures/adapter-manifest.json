@@ -1,0 +1,39 @@
+{
+  "adapterId": "acme-cloud-v1",
+  "name": "ACME Cloud CMS Adapter (Mock)",
+  "version": "1.0.0",
+  "minExtensionVersion": "0.1.0",
+  "targetOrigin": "http://localhost:4001",
+  "signature": "simulated_ed25519_signature_test_key_valid",
+  "capabilities": [
+    "PATIENT_READ",
+    "PATIENT_WRITE",
+    "APPOINTMENT_READ",
+    "APPOINTMENT_WRITE",
+    "REFERENCE_DATA_READ"
+  ],
+  "endpoints": {
+    "patients": {
+      "list": "/api/patients",
+      "get": "/api/patients/:id",
+      "create": "/api/patients",
+      "update": "/api/patients/:id"
+    },
+    "appointments": {
+      "list": "/api/appointments",
+      "availability": "/api/appointments/availability",
+      "create": "/api/appointments",
+      "reschedule": "/api/appointments/:id",
+      "cancel": "/api/appointments/:id"
+    },
+    "reference": {
+      "providers": "/api/reference/providers",
+      "services": "/api/reference/services",
+      "locations": "/api/reference/locations"
+    }
+  },
+  "polling": {
+    "intervalSeconds": 60,
+    "deltaField": "updatedAt"
+  }
+}

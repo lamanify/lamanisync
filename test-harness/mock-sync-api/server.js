@@ -1,0 +1,366 @@
+import http from 'node:http';
+import { URL } from 'node:url';
+import fs from 'node:fs';
+import path from 'node:path';
+
+function createInitialSyncState() {
+  return {
+    installations: new Map(),
+    leases: new Map(),
+    fencingCounter: 0,
+    events: [],
+    outbox: [
+      {
+        commandId: 'CMD-TEST-001',
+        connectionId: 'conn_mock_67890',
+        actionId: 'CREATE_APPOINTMENT',
+        payload: {
+          patientId: 'ZZTEST-P01',
+          providerId: 'DOC-01',
+          serviceId: 'SRV-01',
+          locationId: 'LOC-01',
+          startTime: '2026-10-02T14:00:00+08:00',
+          endTime: '2026-10-02T14:15:00+08:00',
+          notes: 'Sync API dispatched booking',
+        },
+        status: 'PENDING',
+        createdAt: '2026-09-20T12:00:00Z',
+      },
+    ],
+    receipts: [],
+  };
+}
+
+export class MockSyncApiServer {
+  constructor(port = 4002) {
+    this.port = port;
+    this.server = null;
+    this.state = createInitialSyncState();
+    const manifestPath = path.resolve('test-harness/fixtures/adapter-manifest.json');
+    this.adapterManifest = JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
+  }
+
+  reset() {
+    this.state = createInitialSyncState();
+  }
+
+  start() {
+    return new Promise((resolve, reject) => {
+      this.server = http.createServer((req, res) => this.handleRequest(req, res));
+      this.server.on('error', reject);
+      this.server.listen(this.port, () => {
+        console.log(`[Mock Sync API] Running at http://localhost:${this.port}`);
+        resolve();
+      });
+    });
+  }
+
+  stop() {
+    return new Promise((resolve) => {
+      if (!this.server) return resolve();
+      this.server.close(() => {
+        this.server = null;
+        resolve();
+      });
+    });
+  }
+
+  async handleRequest(req, res) {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-device-signature, x-correlation-id');
+
+    if (req.method === 'OPTIONS') {
+      res.writeHead(204);
+      res.end();
+      return;
+    }
+
+    const host = req.headers.host || `localhost:${this.port}`;
+    const parsedUrl = new URL(req.url, `http://${host}`);
+    const pathname = parsedUrl.pathname;
+
+    try {
+      const body = await this.readJsonBody(req);
+
+      // --- Admin Endpoints ---
+      if (pathname === '/__admin/reset' && req.method === 'POST') {
+        this.reset();
+        return this.sendJson(res, 200, { status: 'ok', message: 'Sync API state reset' });
+      }
+
+      if (pathname === '/__admin/outbox' && req.method === 'POST') {
+        const cmd = {
+          commandId: `CMD-TEST-${Date.now()}`,
+          connectionId: body.connectionId || 'conn_mock_67890',
+          actionId: body.actionId || 'CREATE_APPOINTMENT',
+          payload: body.payload || {},
+          status: 'PENDING',
+          createdAt: new Date().toISOString(),
+        };
+        this.state.outbox.push(cmd);
+        return this.sendJson(res, 201, { status: 'ok', command: cmd });
+      }
+
+      if (pathname === '/__admin/health' && req.method === 'GET') {
+        return this.sendJson(res, 200, { status: 'ok', service: 'mock-sync-api', port: this.port });
+      }
+
+      // --- Installations & Pairing ---
+      if (pathname === '/v1/sync/installations/pair' && req.method === 'POST') {
+        if (!body.pairingCode || !body.clientPublicKey) {
+          return this.sendJson(res, 400, {
+            error: 'BAD_REQUEST',
+            message: 'pairingCode and clientPublicKey are required',
+          });
+        }
+
+        if (body.pairingCode === 'EXPIRED') {
+          return this.sendJson(res, 400, {
+            error: 'PAIRING_CODE_EXPIRED',
+            message: 'The pairing code has expired',
+          });
+        }
+
+        const installationId = `inst_mock_${Date.now()}`;
+        const connectionId = 'conn_mock_67890';
+        const sessionToken = `stk_mock_${Date.now()}`;
+        const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+
+        const installation = {
+          installationId,
+          connectionId,
+          clinicId: 'CLN-001',
+          clientPublicKey: body.clientPublicKey,
+          deviceName: body.deviceName || 'Chrome Dev Profile',
+          sessionToken,
+          expiresAt,
+          pairedAt: new Date().toISOString(),
+          lastHeartbeat: new Date().toISOString(),
+        };
+
+        this.state.installations.set(installationId, installation);
+
+        return this.sendJson(res, 200, {
+          installationId,
+          connectionId,
+          clinicId: 'CLN-001',
+          sessionToken,
+          expiresAt,
+          targetOrigin: 'http://localhost:4001',
+        });
+      }
+
+      if (pathname === '/v1/sync/installations/heartbeat' && req.method === 'POST') {
+        const { installationId } = body;
+        if (!installationId || !this.state.installations.has(installationId)) {
+          return this.sendJson(res, 401, {
+            error: 'UNAUTHORIZED',
+            message: 'Unknown or unauthenticated installation',
+          });
+        }
+
+        const inst = this.state.installations.get(installationId);
+        inst.lastHeartbeat = new Date().toISOString();
+        inst.extensionVersion = body.version || inst.extensionVersion;
+
+        return this.sendJson(res, 200, {
+          status: 'ok',
+          serverTime: new Date().toISOString(),
+        });
+      }
+
+      if (pathname === '/v1/sync/installations/revoke' && req.method === 'POST') {
+        const { installationId } = body;
+        if (installationId) {
+          this.state.installations.delete(installationId);
+        }
+        return this.sendJson(res, 200, { status: 'revoked' });
+      }
+
+      // --- Adapter Manifest Distribution ---
+      if (pathname.startsWith('/v1/sync/connections/') && pathname.endsWith('/adapter') && req.method === 'GET') {
+        return this.sendJson(res, 200, this.adapterManifest);
+      }
+
+      // --- Event Batch Ingestion ---
+      if (pathname === '/v1/sync/events/batch' && req.method === 'POST') {
+        const events = body.events || [];
+        this.state.events.push(...events);
+
+        return this.sendJson(res, 200, {
+          acknowledged: true,
+          batchId: body.batchId || `batch_${Date.now()}`,
+          processedCount: events.length,
+          checkpoint: `chk_${Date.now()}`,
+        });
+      }
+
+      // --- Leader Lease Coordination with Fencing Token ---
+      if (pathname === '/v1/sync/leases/acquire' && req.method === 'POST') {
+        const { connectionId, installationId, durationSeconds = 30 } = body;
+        if (!connectionId || !installationId) {
+          return this.sendJson(res, 400, {
+            error: 'BAD_REQUEST',
+            message: 'connectionId and installationId are required',
+          });
+        }
+
+        const currentLease = this.state.leases.get(connectionId);
+        const now = Date.now();
+
+        if (currentLease && currentLease.expiresAtMs > now && currentLease.installationId !== installationId) {
+          return this.sendJson(res, 409, {
+            status: 'DENIED',
+            error: 'LEASE_CONFLICT',
+            message: 'Another installation holds the active leader lease',
+            currentHolder: currentLease.installationId,
+            expiresAt: new Date(currentLease.expiresAtMs).toISOString(),
+          });
+        }
+
+        this.state.fencingCounter += 1;
+        const fencingToken = this.state.fencingCounter;
+        const leaseId = `lease_${connectionId}_${fencingToken}`;
+        const expiresAtMs = now + durationSeconds * 1000;
+
+        const newLease = {
+          leaseId,
+          fencingToken,
+          installationId,
+          connectionId,
+          expiresAtMs,
+        };
+
+        this.state.leases.set(connectionId, newLease);
+
+        return this.sendJson(res, 200, {
+          status: 'GRANTED',
+          leaseId,
+          fencingToken,
+          expiresAt: new Date(expiresAtMs).toISOString(),
+        });
+      }
+
+      if (pathname === '/v1/sync/leases/renew' && req.method === 'POST') {
+        const { connectionId, leaseId, fencingToken, installationId, durationSeconds = 30 } = body;
+        const currentLease = this.state.leases.get(connectionId);
+
+        if (
+          !currentLease ||
+          currentLease.leaseId !== leaseId ||
+          currentLease.fencingToken !== fencingToken ||
+          currentLease.installationId !== installationId
+        ) {
+          return this.sendJson(res, 409, {
+            status: 'EXPIRED',
+            error: 'LEASE_LOST',
+            message: 'Lease expired or token invalid',
+          });
+        }
+
+        currentLease.expiresAtMs = Date.now() + durationSeconds * 1000;
+
+        return this.sendJson(res, 200, {
+          status: 'RENEWED',
+          leaseId,
+          fencingToken,
+          expiresAt: new Date(currentLease.expiresAtMs).toISOString(),
+        });
+      }
+
+      if (pathname === '/v1/sync/leases/release' && req.method === 'POST') {
+        const { connectionId, leaseId } = body;
+        const currentLease = this.state.leases.get(connectionId);
+        if (currentLease && currentLease.leaseId === leaseId) {
+          this.state.leases.delete(connectionId);
+        }
+        return this.sendJson(res, 200, { status: 'RELEASED' });
+      }
+
+      // --- Outbox & Command Verification ---
+      if (pathname === '/v1/sync/outbox/next' && req.method === 'GET') {
+        const connectionId = parsedUrl.searchParams.get('connectionId') || 'conn_mock_67890';
+        const pending = this.state.outbox.find(
+          (cmd) => cmd.connectionId === connectionId && cmd.status === 'PENDING',
+        );
+
+        if (!pending) {
+          return this.sendJson(res, 200, { command: null });
+        }
+
+        pending.status = 'LEASED';
+        return this.sendJson(res, 200, { command: pending });
+      }
+
+      if (pathname.startsWith('/v1/sync/outbox/') && pathname.endsWith('/result') && req.method === 'POST') {
+        const parts = pathname.split('/');
+        const commandId = parts[parts.length - 2];
+        const cmd = this.state.outbox.find((c) => c.commandId === commandId);
+
+        const receipt = {
+          commandId,
+          status: body.status || 'VERIFIED',
+          writeReceipt: body.writeReceipt || null,
+          error: body.error || null,
+          recordedAt: new Date().toISOString(),
+        };
+
+        if (cmd) {
+          cmd.status = body.status || 'VERIFIED';
+          cmd.result = receipt;
+        }
+
+        this.state.receipts.push(receipt);
+
+        return this.sendJson(res, 200, {
+          acknowledged: true,
+          commandId,
+          status: receipt.status,
+        });
+      }
+
+      // Fallthrough: 404
+      return this.sendJson(res, 404, { error: 'NOT_FOUND', message: `Endpoint ${req.method} ${pathname} not found` });
+    } catch (err) {
+      console.error('[Mock Sync API Error]', err);
+      return this.sendJson(res, 500, { error: 'INTERNAL_ERROR', message: err.message });
+    }
+  }
+
+  sendJson(res, statusCode, data) {
+    res.writeHead(statusCode, { 'Content-Type': 'application/json; charset=utf-8' });
+    res.end(JSON.stringify(data, null, 2));
+  }
+
+  readJsonBody(req) {
+    return new Promise((resolve, reject) => {
+      if (req.method === 'GET' || req.method === 'DELETE') {
+        return resolve({});
+      }
+      let body = '';
+      req.on('data', (chunk) => {
+        body += chunk;
+      });
+      req.on('end', () => {
+        if (!body) return resolve({});
+        try {
+          resolve(JSON.parse(body));
+        } catch {
+          reject(new Error('Invalid JSON payload'));
+        }
+      });
+      req.on('error', reject);
+    });
+  }
+}
+
+// Standalone execution support
+if (process.argv[1] && process.argv[1].endsWith('server.js')) {
+  const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 4002;
+  const server = new MockSyncApiServer(port);
+  server.start().catch((err) => {
+    console.error('Failed to start Mock Sync API:', err);
+    process.exit(1);
+  });
+}
