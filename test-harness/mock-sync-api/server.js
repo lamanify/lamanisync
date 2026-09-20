@@ -193,7 +193,11 @@ export class MockSyncApiServer {
       // --- Adapter Manifest Distribution (Variants Supported) ---
       if (pathname.startsWith('/v1/sync/connections/') && pathname.endsWith('/adapter') && req.method === 'GET') {
         const variant = parsedUrl.searchParams.get('variant') || req.headers['x-adapter-variant'] || 'valid';
+        const targetOriginParam = parsedUrl.searchParams.get('targetOrigin');
         const manifest = JSON.parse(JSON.stringify(this.adapterManifest));
+        if (targetOriginParam) {
+          manifest.targetOrigin = targetOriginParam;
+        }
 
         if (variant === 'tampered') {
           manifest.signature = 'corrupted_ed25519_signature_tampered';
