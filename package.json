@@ -1,0 +1,17 @@
+{
+  "name": "lamanisync-extension",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Secure bridge between authenticated cloud CMS tabs and LamaniHub",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:contract": "vitest run --project=contract",
+    "test:e2e": "playwright test",
+    "package": "node scripts/package.js"
+  }
+}
