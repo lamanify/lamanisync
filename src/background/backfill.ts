@@ -24,6 +24,7 @@ export interface BackfillCheckpoint {
   cursor: number;
   status: 'IDLE' | 'IN_PROGRESS' | 'PAUSED' | 'COMPLETED' | 'ERROR';
   lastSyncTime: string;
+  lastSuccessfulSync?: string;
   processedCount: number;
   totalRecords?: number;
   error?: string;
@@ -73,6 +74,8 @@ export interface BackfillEngineOptions {
   connectionId: string;
   installationId: string;
   pageSize?: number;
+  appointmentWindowDaysPast?: number;
+  appointmentWindowDaysFuture?: number;
   storage?: StorageAdapter;
   fetchFn?: typeof fetch;
 }
@@ -85,6 +88,8 @@ export class BackfillEngine {
   private connectionId: string;
   private installationId: string;
   private pageSize: number;
+  private appointmentWindowDaysPast: number;
+  private appointmentWindowDaysFuture: number;
   private storage: StorageAdapter;
   private fetchFn: typeof fetch;
 
@@ -93,6 +98,7 @@ export class BackfillEngine {
     cursor: 1,
     status: 'IDLE',
     lastSyncTime: new Date().toISOString(),
+    lastSuccessfulSync: new Date().toISOString(),
     processedCount: 0,
   };
 
@@ -106,6 +112,8 @@ export class BackfillEngine {
     this.connectionId = options.connectionId;
     this.installationId = options.installationId;
     this.pageSize = options.pageSize || 50;
+    this.appointmentWindowDaysPast = options.appointmentWindowDaysPast ?? 30;
+    this.appointmentWindowDaysFuture = options.appointmentWindowDaysFuture ?? 90;
     this.storage = resolveStorage(options.storage);
     this.fetchFn = options.fetchFn || ((...args) => globalThis.fetch(...args));
 
@@ -129,11 +137,13 @@ export class BackfillEngine {
     const raw = data[BACKFILL_CHECKPOINT_KEY] as BackfillCheckpoint | undefined;
 
     if (raw && (raw.entityType === 'patient' || raw.entityType === 'appointment')) {
+      const lastTime = raw.lastSyncTime || raw.lastSuccessfulSync || new Date().toISOString();
       this.checkpoint = {
         entityType: raw.entityType,
         cursor: Number.isInteger(raw.cursor) ? raw.cursor : 1,
         status: raw.status || 'IDLE',
-        lastSyncTime: raw.lastSyncTime || new Date().toISOString(),
+        lastSyncTime: lastTime,
+        lastSuccessfulSync: lastTime,
         processedCount: raw.processedCount || 0,
         totalRecords: raw.totalRecords,
         error: raw.error,
@@ -159,11 +169,13 @@ export class BackfillEngine {
    * Resets checkpoint state to clean initial values.
    */
   async resetCheckpoint(): Promise<void> {
+    const nowIso = new Date().toISOString();
     this.checkpoint = {
       entityType: 'patient',
       cursor: 1,
       status: 'IDLE',
-      lastSyncTime: new Date().toISOString(),
+      lastSyncTime: nowIso,
+      lastSuccessfulSync: nowIso,
       processedCount: 0,
     };
     await this.storage.remove(BACKFILL_CHECKPOINT_KEY);
@@ -193,8 +205,23 @@ export class BackfillEngine {
     }
 
     const { entityType, cursor } = this.checkpoint;
-    const path = entityType === 'patient' ? '/api/patients' : '/api/appointments';
-    const url = `${this.targetOrigin}${path}?page=${cursor}&limit=${this.pageSize}`;
+    let url: string;
+
+    if (entityType === 'patient') {
+      url = `${this.targetOrigin}/api/patients?page=${cursor}&limit=${this.pageSize}`;
+    } else {
+      // Bounded date window for appointments (today - pastDays to today + futureDays)
+      const now = Date.now();
+      const pastMs = this.appointmentWindowDaysPast * 24 * 60 * 60 * 1000;
+      const futureMs = this.appointmentWindowDaysFuture * 24 * 60 * 60 * 1000;
+      const startDate = new Date(now - pastMs).toISOString();
+      const endDate = new Date(now + futureMs).toISOString();
+      url = `${this.targetOrigin}/api/appointments?page=${cursor}&limit=${this.pageSize}&startDate=${encodeURIComponent(
+        startDate
+      )}&endDate=${encodeURIComponent(endDate)}&fromDate=${encodeURIComponent(
+        startDate
+      )}&toDate=${encodeURIComponent(endDate)}`;
+    }
 
     let res: Response;
     try {
@@ -285,7 +312,9 @@ export class BackfillEngine {
 
     // Advance cursor ONLY after verified acknowledgment
     this.checkpoint.processedCount += items.length;
-    this.checkpoint.lastSyncTime = new Date().toISOString();
+    const nowIso = new Date().toISOString();
+    this.checkpoint.lastSyncTime = nowIso;
+    this.checkpoint.lastSuccessfulSync = nowIso;
 
     if (items.length < this.pageSize) {
       // Current entity backfill finished

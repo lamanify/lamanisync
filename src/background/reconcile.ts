@@ -16,6 +16,8 @@ import {
 } from '../core/event-normalizer.js';
 import { type SyncEvent } from '../core/contracts/events.js';
 
+import { ConnectionFSM } from './connection-fsm.js';
+
 export interface ReconcileResult {
   status: 'OK' | 'REPAIRED' | 'SKIPPED' | 'ERROR';
   inspectedCount: number;
@@ -30,6 +32,8 @@ export interface ReconcileWorkerOptions {
   batchUploader: BatchUploader;
   targetOrigin: string;
   connectionId: string;
+  installationId?: string;
+  fsm?: ConnectionFSM;
   fetchFn?: typeof fetch;
 }
 
@@ -39,6 +43,8 @@ export class ReconcileWorker {
   private batchUploader: BatchUploader;
   private targetOrigin: string;
   private connectionId: string;
+  private installationId?: string;
+  private fsm?: ConnectionFSM;
   private fetchFn: typeof fetch;
 
   constructor(options: ReconcileWorkerOptions) {
@@ -47,6 +53,8 @@ export class ReconcileWorker {
     this.batchUploader = options.batchUploader;
     this.targetOrigin = options.targetOrigin.replace(/\/$/, '');
     this.connectionId = options.connectionId;
+    this.installationId = options.installationId;
+    this.fsm = options.fsm;
     this.fetchFn = options.fetchFn || ((...args) => globalThis.fetch(...args));
   }
 
@@ -84,6 +92,24 @@ export class ReconcileWorker {
         credentials: 'include',
       });
 
+      if (patientsRes.status === 401) {
+        if (this.fsm?.canTransition('REAUTH_REQUIRED')) {
+          this.fsm.transition('REAUTH_REQUIRED', {
+            reason: 'CMS session expired during reconciliation (HTTP 401)',
+            connectionId: this.connectionId,
+            installationId: this.installationId || '',
+            targetOrigin: this.targetOrigin,
+          });
+        }
+        return {
+          status: 'ERROR',
+          inspectedCount,
+          repairedCount: 0,
+          repairedIds: [],
+          error: 'UNAUTHORIZED',
+        };
+      }
+
       if (patientsRes.ok) {
         const pJson = (await patientsRes.json()) as Record<string, unknown>;
         const patients = (pJson.data ?? pJson) as Array<Record<string, unknown>>;
@@ -107,6 +133,24 @@ export class ReconcileWorker {
         headers: { Accept: 'application/json' },
         credentials: 'include',
       });
+
+      if (apptsRes.status === 401) {
+        if (this.fsm?.canTransition('REAUTH_REQUIRED')) {
+          this.fsm.transition('REAUTH_REQUIRED', {
+            reason: 'CMS session expired during reconciliation (HTTP 401)',
+            connectionId: this.connectionId,
+            installationId: this.installationId || '',
+            targetOrigin: this.targetOrigin,
+          });
+        }
+        return {
+          status: 'ERROR',
+          inspectedCount,
+          repairedCount: 0,
+          repairedIds: [],
+          error: 'UNAUTHORIZED',
+        };
+      }
 
       if (apptsRes.ok) {
         const aJson = (await apptsRes.json()) as Record<string, unknown>;

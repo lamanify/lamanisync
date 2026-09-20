@@ -300,6 +300,20 @@ export class MockCmsServer {
         if (providerId) {
           appointments = appointments.filter((a) => a.providerId === providerId);
         }
+        const startDate = parsedUrl.searchParams.get('startDate') || parsedUrl.searchParams.get('fromDate');
+        const endDate = parsedUrl.searchParams.get('endDate') || parsedUrl.searchParams.get('toDate');
+        if (startDate) {
+          const startMs = new Date(startDate).getTime();
+          if (!Number.isNaN(startMs)) {
+            appointments = appointments.filter((a) => !a.startTime || new Date(a.startTime).getTime() >= startMs);
+          }
+        }
+        if (endDate) {
+          const endMs = new Date(endDate).getTime();
+          if (!Number.isNaN(endMs)) {
+            appointments = appointments.filter((a) => !a.startTime || new Date(a.startTime).getTime() <= endMs);
+          }
+        }
 
         const total = appointments.length;
         if (parsedUrl.searchParams.has('page') || parsedUrl.searchParams.has('limit')) {

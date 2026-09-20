@@ -97,6 +97,7 @@ describe('Phase 7 Read Pipeline & Leader Lease Integration Tests', () => {
     leaseCoordinator = new LeaseCoordinator({
       apiClient,
       defaultDurationSeconds: 15,
+      storage,
     });
 
     dedupeCache = new DeduplicationCache();
@@ -176,9 +177,19 @@ describe('Phase 7 Read Pipeline & Leader Lease Integration Tests', () => {
     expect(getServerEvents().map((e) => e.entityId)).toEqual(['ZZTEST-P01', 'ZZTEST-P02']);
 
     // --- SIMULATE SERVICE WORKER SUSPENSION / TERMINATION & RESTART ---
-    // Create completely fresh BackfillEngine instance sharing persisted storage
+    // Simulate SW restart: create completely fresh LeaseCoordinator and BackfillEngine instances
+    leaseCoordinator.destroy();
+    const restartedLeaseCoordinator = new LeaseCoordinator({
+      apiClient,
+      defaultDurationSeconds: 15,
+      storage,
+    });
+    const restoredLease = await restartedLeaseCoordinator.restore();
+    expect(restoredLease).not.toBeNull();
+    expect(restartedLeaseCoordinator.hasActiveLease()).toBe(true);
+
     const engine2 = new BackfillEngine({
-      leaseCoordinator,
+      leaseCoordinator: restartedLeaseCoordinator,
       fsm,
       batchUploader,
       targetOrigin: CMS_URL,

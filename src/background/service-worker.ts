@@ -30,17 +30,35 @@ export const batchUploader = new BatchUploader({
 });
 export const referenceSync = new ReferenceSyncManager({ targetOrigin: '' });
 
-// Forward lease changes to pairing coordinator
+// Forward lease changes to pairing coordinator and schedule/clear alarms
 leaseCoordinator.onLeaseAcquired((lease) => {
   coordinator.setActiveLease({
     connectionId: lease.connectionId,
     leaseId: lease.leaseId,
     fencingToken: lease.fencingToken,
   });
+
+  if (typeof chrome !== 'undefined' && chrome.alarms?.create) {
+    try {
+      chrome.alarms.create('reconcile_check', {
+        periodInMinutes: 5,
+      });
+    } catch (err) {
+      console.warn('[LamaniSync SW] Failed to schedule reconcile alarm:', err);
+    }
+  }
 });
 
 leaseCoordinator.onLeaseLost(() => {
   coordinator.setActiveLease(null);
+
+  if (typeof chrome !== 'undefined' && chrome.alarms?.clear) {
+    try {
+      chrome.alarms.clear('reconcile_check');
+    } catch {
+      // ignore
+    }
+  }
 });
 
 export const recentObservations: unknown[] = [];
@@ -57,24 +75,32 @@ export function clearObservations(): void {
   recentObservations.length = 0;
 }
 
+export async function ensureServiceWorkerRestored(): Promise<void> {
+  try {
+    await leaseCoordinator.restore();
+    const record = await coordinator.restoreState();
+    const session = await coordinator.getSession();
+    if (session) {
+      batchUploader.setInstallationId(session.installationId);
+      referenceSync.setTargetOrigin(session.targetOrigin);
+      await referenceSync.restore();
+    }
+    return record as unknown as void;
+  } catch (err) {
+    console.error('[LamaniSync SW] Failed to restore service worker state:', err);
+  }
+}
+
 chrome.runtime.onInstalled.addListener(async () => {
   const version = chrome.runtime.getManifest().version;
   console.log(`[LamaniSync Dev] Service Worker installed. Version: ${version}`);
-  try {
-    await coordinator.restoreState();
-  } catch (err) {
-    console.error('[LamaniSync Dev] Failed to restore state on install:', err);
-  }
+  await ensureServiceWorkerRestored();
 });
 
 chrome.runtime.onStartup.addListener(async () => {
   const version = chrome.runtime.getManifest().version;
   console.log(`[LamaniSync Dev] Service Worker started. Version: ${version}`);
-  try {
-    await coordinator.restoreState();
-  } catch (err) {
-    console.error('[LamaniSync Dev] Failed to restore state on startup:', err);
-  }
+  await ensureServiceWorkerRestored();
 });
 
 // Real-time host permission removal listener (Chrome settings or browser drop)
@@ -254,6 +280,8 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
 // Alarm listener for MV3 background lease renewal & periodic reconciliation
 if (typeof chrome !== 'undefined' && chrome.alarms?.onAlarm) {
   chrome.alarms.onAlarm.addListener(async (alarm) => {
+    await ensureServiceWorkerRestored();
+
     if (alarm.name === 'lease_renewal') {
       try {
         await leaseCoordinator.renew();
@@ -271,6 +299,8 @@ if (typeof chrome !== 'undefined' && chrome.alarms?.onAlarm) {
             batchUploader,
             targetOrigin: session.targetOrigin,
             connectionId: session.connectionId,
+            installationId: session.installationId,
+            fsm,
           });
           await worker.runReconciliation();
         }

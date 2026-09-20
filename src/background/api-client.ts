@@ -8,7 +8,7 @@
 
 import { z } from 'zod';
 import { TargetOriginSchema } from '../core/contracts/primitives.js';
-import { type SyncEvent } from '../core/contracts/events.js';
+import { type SyncEvent, BatchSyncEventsSchema } from '../core/contracts/events.js';
 import { LamaniError, classifyError } from '../core/errors.js';
 import { signPayload } from '../storage/device-key.js';
 
@@ -333,13 +333,22 @@ export class SyncApiClient {
     batchId?: string
   ): Promise<{ acknowledged: boolean; batchId: string; processedCount: number; checkpoint: string }> {
     const finalBatchId = batchId || `batch_${Date.now()}_${crypto.randomUUID().slice(0, 8)}`;
+    const parsed = BatchSyncEventsSchema.safeParse({
+      installationId,
+      batchId: finalBatchId,
+      events,
+    });
+
+    if (!parsed.success) {
+      throw new LamaniError('Invalid event batch payload schema', 'CMS_SCHEMA_ERROR', {
+        statusCode: 400,
+        details: { issues: parsed.error.issues },
+      });
+    }
+
     return this.request('/v1/sync/events/batch', {
       method: 'POST',
-      body: {
-        installationId,
-        batchId: finalBatchId,
-        events,
-      },
+      body: parsed.data,
     });
   }
 

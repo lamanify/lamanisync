@@ -239,4 +239,68 @@ describe('Checkpointed Backfill Engine (Phase 7)', () => {
     // Cursor MUST remain 1 (never lost or prematurely incremented)
     expect(engine.getCheckpoint().cursor).toBe(1);
   });
+
+  it('queries appointments with bounded date window parameters and updates lastSuccessfulSync', async () => {
+    const storage = createMockStorage();
+    // Start at appointment entityType
+    await storage.set({
+      [BACKFILL_CHECKPOINT_KEY]: {
+        entityType: 'appointment',
+        cursor: 1,
+        status: 'IDLE',
+        lastSyncTime: '2026-09-20T00:00:00Z',
+        lastSuccessfulSync: '2026-09-20T00:00:00Z',
+        processedCount: 0,
+      },
+    });
+
+    const mockFetch = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        data: [
+          {
+            id: 'APT-01',
+            patientId: 'P-01',
+            providerId: 'DOC-01',
+            serviceId: 'SRV-01',
+            startTime: '2026-10-01T09:00:00+08:00',
+            endTime: '2026-10-01T09:15:00+08:00',
+            status: 'booked',
+            rev: 1,
+          },
+        ],
+        total: 1,
+      }),
+    } as Response);
+
+    const engine = new BackfillEngine({
+      leaseCoordinator,
+      fsm,
+      batchUploader,
+      targetOrigin: 'http://localhost:4001',
+      connectionId: 'conn_1',
+      installationId: 'inst_1',
+      pageSize: 50,
+      appointmentWindowDaysPast: 15,
+      appointmentWindowDaysFuture: 45,
+      storage,
+      fetchFn: mockFetch,
+    });
+
+    await engine.restoreCheckpoint();
+    const hasMore = await engine.step();
+    expect(hasMore).toBe(false); // only 1 record, completed
+
+    // Verify appointment URL was bounded with startDate and endDate
+    const calledUrl = mockFetch.mock.calls[0][0] as string;
+    expect(calledUrl).toContain('/api/appointments');
+    expect(calledUrl).toContain('startDate=');
+    expect(calledUrl).toContain('endDate=');
+
+    const checkpoint = engine.getCheckpoint();
+    expect(checkpoint.status).toBe('COMPLETED');
+    expect(checkpoint.lastSuccessfulSync).toBeDefined();
+    expect(checkpoint.lastSyncTime).toBe(checkpoint.lastSuccessfulSync);
+  });
 });

@@ -4,6 +4,7 @@ import { ReconcileWorker } from '../../src/background/reconcile.js';
 import { LeaseCoordinator } from '../../src/background/lease-client.js';
 import { BatchUploader } from '../../src/background/batch-uploader.js';
 import { SyncApiClient } from '../../src/background/api-client.js';
+import { ConnectionFSM } from '../../src/background/connection-fsm.js';
 
 describe('Reconciliation Worker (Phase 7)', () => {
   let apiClient: SyncApiClient;
@@ -159,5 +160,39 @@ describe('Reconciliation Worker (Phase 7)', () => {
     const result = await worker.runReconciliation();
     expect(result.status).toBe('OK');
     expect(result.repairedCount).toBe(0);
+  });
+
+  it('transitions connection FSM to REAUTH_REQUIRED when CMS responds with 401 Unauthorized', async () => {
+    vi.spyOn(apiClient, 'getReconcileSummary').mockResolvedValue({
+      connectionId: 'conn_1',
+      totalEvents: 1,
+      entityCounts: { patient: 1, appointment: 0 },
+      knownEntityIds: { patient: ['P-01'], appointment: [] },
+      entityRevisions: {},
+    });
+
+    const mockFetch = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 401,
+      json: async () => ({ error: 'UNAUTHORIZED' }),
+    } as Response);
+
+    const fsm = new ConnectionFSM({ state: 'ACTIVE' });
+
+    const worker = new ReconcileWorker({
+      leaseCoordinator,
+      apiClient,
+      batchUploader,
+      targetOrigin: 'http://localhost:4001',
+      connectionId: 'conn_1',
+      installationId: 'inst_1',
+      fsm,
+      fetchFn: mockFetch,
+    });
+
+    const result = await worker.runReconciliation();
+    expect(result.status).toBe('ERROR');
+    expect(result.error).toBe('UNAUTHORIZED');
+    expect(fsm.getState()).toBe('REAUTH_REQUIRED');
   });
 });

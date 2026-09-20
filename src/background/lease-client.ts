@@ -20,9 +20,48 @@ export interface ActiveLease {
   acquiredAt: number;
 }
 
+export const LEASE_STORAGE_KEY = 'lamanisync_active_lease';
+export const LEASE_ALARM_NAME = 'lease_renewal';
+
+export interface StorageAdapter {
+  get(keys: string | string[]): Promise<Record<string, unknown>>;
+  set(items: Record<string, unknown>): Promise<void>;
+  remove(keys: string | string[]): Promise<void>;
+}
+
+function resolveStorage(custom?: StorageAdapter): StorageAdapter {
+  if (custom) return custom;
+  if (typeof chrome !== 'undefined' && chrome.storage?.local) {
+    return {
+      get: (keys) => chrome.storage.local.get(keys),
+      set: (items) => chrome.storage.local.set(items),
+      remove: (keys) => chrome.storage.local.remove(keys),
+    };
+  }
+  const mem = new Map<string, unknown>();
+  return {
+    get: async (keys) => {
+      const list = Array.isArray(keys) ? keys : [keys];
+      const res: Record<string, unknown> = {};
+      for (const k of list) {
+        if (mem.has(k)) res[k] = mem.get(k);
+      }
+      return res;
+    },
+    set: async (items) => {
+      for (const [k, v] of Object.entries(items)) mem.set(k, v);
+    },
+    remove: async (keys) => {
+      const list = Array.isArray(keys) ? keys : [keys];
+      for (const k of list) mem.delete(k);
+    },
+  };
+}
+
 export interface LeaseCoordinatorOptions {
   apiClient: SyncApiClient;
   defaultDurationSeconds?: number;
+  storage?: StorageAdapter;
 }
 
 export type LeaseLostListener = (reason: string) => void;
@@ -31,6 +70,7 @@ export type LeaseAcquiredListener = (lease: ActiveLease) => void;
 export class LeaseCoordinator {
   private apiClient: SyncApiClient;
   private defaultDurationSeconds: number;
+  private storage: StorageAdapter;
   private currentLease: ActiveLease | null = null;
   private highestFencingToken: number = 0;
   private renewalTimer: ReturnType<typeof setTimeout> | null = null;
@@ -41,6 +81,7 @@ export class LeaseCoordinator {
   constructor(options: LeaseCoordinatorOptions) {
     this.apiClient = options.apiClient;
     this.defaultDurationSeconds = options.defaultDurationSeconds || 30;
+    this.storage = resolveStorage(options.storage);
   }
 
   /**
@@ -108,6 +149,7 @@ export class LeaseCoordinator {
           acquiredAt: Date.now(),
         };
 
+        await this.saveLeaseToStorage();
         this.scheduleAutoRenewal(durationSeconds);
 
         // Notify acquired listeners
@@ -135,7 +177,11 @@ export class LeaseCoordinator {
    */
   async renew(durationSeconds: number = this.defaultDurationSeconds): Promise<boolean> {
     if (!this.currentLease) {
-      return false;
+      // Attempt to restore active lease from persistent storage if service worker restarted
+      await this.restore();
+      if (!this.currentLease) {
+        return false;
+      }
     }
 
     const { connectionId, leaseId, fencingToken, installationId } = this.currentLease;
@@ -156,6 +202,7 @@ export class LeaseCoordinator {
           ? Date.now() + durationSeconds * 1000
           : expiresAtMs;
 
+        await this.saveLeaseToStorage();
         this.scheduleAutoRenewal(durationSeconds);
         return true;
       }
@@ -172,12 +219,65 @@ export class LeaseCoordinator {
   }
 
   /**
+   * Restores active lease and highest fencing token across service worker suspensions/restarts.
+   */
+  async restore(): Promise<ActiveLease | null> {
+    try {
+      const data = await this.storage.get(LEASE_STORAGE_KEY);
+      const raw = data[LEASE_STORAGE_KEY] as
+        | { lease?: ActiveLease; highestFencingToken?: number }
+        | undefined;
+
+      if (raw?.highestFencingToken && raw.highestFencingToken > this.highestFencingToken) {
+        this.highestFencingToken = raw.highestFencingToken;
+      }
+
+      if (raw?.lease) {
+        const lease = raw.lease;
+        const now = Date.now();
+        if (now >= lease.expiresAtMs) {
+          // Expired during suspension/restart
+          await this.storage.remove(LEASE_STORAGE_KEY);
+          this.handleLeaseLost('Lease expired while service worker was suspended', true);
+          return null;
+        }
+
+        this.currentLease = lease;
+        const remainingSeconds = Math.max(1, Math.round((lease.expiresAtMs - now) / 1000));
+        this.scheduleAutoRenewal(remainingSeconds);
+        return Object.freeze({ ...this.currentLease });
+      }
+    } catch (err) {
+      console.warn('[LeaseCoordinator] Failed to restore lease state:', err);
+    }
+    return null;
+  }
+
+  private async saveLeaseToStorage(): Promise<void> {
+    try {
+      if (this.currentLease) {
+        await this.storage.set({
+          [LEASE_STORAGE_KEY]: {
+            lease: this.currentLease,
+            highestFencingToken: this.highestFencingToken,
+          },
+        });
+      } else {
+        await this.storage.remove(LEASE_STORAGE_KEY);
+      }
+    } catch (err) {
+      console.warn('[LeaseCoordinator] Failed to persist lease state:', err);
+    }
+  }
+
+  /**
    * Explicitly drops the lease on unpair, worker teardown, or manual release.
    */
   async release(): Promise<void> {
     this.stopAutoRenewal();
 
     if (!this.currentLease) {
+      await this.storage.remove(LEASE_STORAGE_KEY);
       return;
     }
 
@@ -194,10 +294,11 @@ export class LeaseCoordinator {
   /**
    * Immediate halt of tenant-level polling/backfill on lease loss.
    */
-  private handleLeaseLost(reason: string): void {
-    const wasHeld = Boolean(this.currentLease);
+  private handleLeaseLost(reason: string, forceNotify: boolean = false): void {
+    const wasHeld = Boolean(this.currentLease) || forceNotify;
     this.currentLease = null;
     this.stopAutoRenewal();
+    void this.saveLeaseToStorage();
 
     if (wasHeld) {
       for (const listener of this.onLostListeners) {
@@ -215,6 +316,18 @@ export class LeaseCoordinator {
     // Renew halfway through the lease period, minimum 2 seconds
     const intervalMs = Math.max(2000, (durationSeconds * 1000) / 2);
 
+    // 1. Chrome MV3 Alarm scheduling for background wakeups
+    if (typeof chrome !== 'undefined' && chrome.alarms?.create) {
+      try {
+        chrome.alarms.create(LEASE_ALARM_NAME, {
+          when: Date.now() + intervalMs,
+        });
+      } catch (err) {
+        console.warn('[LeaseCoordinator] Failed to schedule chrome.alarms for lease renewal:', err);
+      }
+    }
+
+    // 2. In-memory setTimeout fallback for unit tests and immediate runtime execution
     this.renewalTimer = setTimeout(async () => {
       this.renewalTimer = null;
       if (this.currentLease) {
@@ -227,6 +340,13 @@ export class LeaseCoordinator {
     if (this.renewalTimer) {
       clearTimeout(this.renewalTimer);
       this.renewalTimer = null;
+    }
+    if (typeof chrome !== 'undefined' && chrome.alarms?.clear) {
+      try {
+        chrome.alarms.clear(LEASE_ALARM_NAME);
+      } catch {
+        // ignore
+      }
     }
   }
 
