@@ -6,6 +6,9 @@ dist/
 build/
 *.zip
 
+# Local implementation phase plans
+Implementations/
+
 # Environment variables
 .env
 .env.*
