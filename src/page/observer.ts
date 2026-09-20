@@ -28,6 +28,15 @@ export const SENSITIVE_PARAM_NAMES = new Set([
   'xsrf',
   'key',
   'apikey',
+  'cookie',
+  'cookies',
+  'sessionid',
+  'jwt',
+  'code',
+  'sig',
+  'signature',
+  'auth_token',
+  'authorization',
 ]);
 
 export const SENSITIVE_BODY_KEYS = [
@@ -87,10 +96,14 @@ export function stripAuthSecrets(obj: unknown): unknown {
   if (typeof obj === 'string') {
     return obj
       .replace(/Bearer\s+[A-Za-z0-9._~+/-]+=*/gi, '[REDACTED_BEARER]')
-      .replace(/(?:cms_session|session_token|token|secret)=[^;,\s&]+/gi, '$1=[REDACTED]');
+      .replace(/(?:cms_session|session_token|token|secret|jwt|cookie|auth|bearer|csrf|xsrf)=[^;,\s&]+/gi, '$1=[REDACTED]');
   }
 
   if (typeof obj !== 'object') {
+    return obj;
+  }
+
+  if (obj instanceof Date || obj instanceof RegExp) {
     return obj;
   }
 
@@ -126,79 +139,159 @@ export interface NetworkObserverHandle {
 }
 
 /**
- * Installs the network observer on window.fetch.
+ * Installs the network observer on window.fetch and window.XMLHttpRequest.
  * Runs at document_start in the MAIN world to observe allowlisted CMS reads.
  */
 export function installNetworkObserver(options: NetworkObserverOptions): NetworkObserverHandle {
   const targetWindow = options.targetWindow || (typeof window !== 'undefined' ? window : undefined);
-  if (!targetWindow || typeof targetWindow.fetch !== 'function') {
-    throw new Error('Target window.fetch is not available to observe');
+  if (!targetWindow) {
+    throw new Error('Target window is not available to observe');
   }
 
   let currentToken = options.handshakeToken;
-  const originalFetch = targetWindow.fetch;
 
-  const observerFetch: typeof targetWindow.fetch = async (input, init) => {
-    // 1. Always execute native fetch first
-    const response = await originalFetch.call(targetWindow, input, init);
-
-    // 2. Wrap observation in safe try-catch so it never disrupts the page
+  const emitObservation = (endpoint: string, statusCode: number, rawData: unknown) => {
     try {
-      const method = (init?.method || 'GET').toUpperCase();
-      // Only observe read operations
-      if (method === 'GET' || method === 'HEAD') {
-        const rawUrl = typeof input === 'string' ? input : input instanceof URL ? input.toString() : (input as Request).url;
-        const parsedUrl = new URL(rawUrl, targetWindow.location.origin);
+      const sanitizedData = stripAuthSecrets(rawData);
+      const observationEvent = {
+        channel: BRIDGE_CHANNEL,
+        source: SOURCE_MAIN,
+        token: currentToken,
+        type: 'OBSERVATION',
+        payload: {
+          endpoint,
+          method: 'GET' as const,
+          statusCode,
+          data: sanitizedData,
+          timestamp: new Date().toISOString(),
+        },
+      };
 
-        // Verify same origin
-        if (parsedUrl.origin === targetWindow.location.origin) {
-          const pathname = parsedUrl.pathname;
-          if (isAllowlistedObservationPath(pathname)) {
-            // Clone response to read body without consuming original
-            const cloned = response.clone();
-            const contentType = cloned.headers.get('content-type') || '';
+      targetWindow.postMessage(observationEvent, options.targetOrigin);
 
-            if (contentType.includes('application/json') && cloned.ok) {
-              const rawData = await cloned.json();
-              const sanitizedData = stripAuthSecrets(rawData);
-              const sanitizedEndpoint = sanitizeUrlPath(pathname + parsedUrl.search, targetWindow.location.origin);
+      if (options.onObservation) {
+        options.onObservation(observationEvent);
+      }
+    } catch (err) {
+      console.warn('[LamaniSync Observer] Non-fatal observation event emission error:', err);
+    }
+  };
 
-              const observationEvent = {
-                channel: BRIDGE_CHANNEL,
-                source: SOURCE_MAIN,
-                token: currentToken,
-                type: 'OBSERVATION',
-                payload: {
-                  endpoint: sanitizedEndpoint,
-                  method: 'GET' as const,
-                  statusCode: response.status,
-                  data: sanitizedData,
-                  timestamp: new Date().toISOString(),
-                },
-              };
+  // --- 1. Patch window.fetch ---
+  let originalFetch: typeof targetWindow.fetch | undefined;
+  if (typeof targetWindow.fetch === 'function') {
+    originalFetch = targetWindow.fetch;
 
-              // Emit event via window.postMessage targeted strictly to exact origin
-              targetWindow.postMessage(observationEvent, options.targetOrigin);
+    const observerFetch: typeof targetWindow.fetch = async (input, init) => {
+      const response = await originalFetch!.call(targetWindow, input, init);
 
-              if (options.onObservation) {
-                options.onObservation(observationEvent);
+      try {
+        const rawMethod = init?.method || (typeof Request !== 'undefined' && input instanceof Request ? input.method : undefined) || 'GET';
+        const method = rawMethod.toUpperCase();
+
+        if (method === 'GET' || method === 'HEAD') {
+          const rawUrl = typeof input === 'string'
+            ? input
+            : (typeof URL !== 'undefined' && input instanceof URL)
+              ? input.toString()
+              : (typeof Request !== 'undefined' && input instanceof Request)
+                ? input.url
+                : String(input);
+
+          const parsedUrl = new URL(rawUrl, targetWindow.location.origin);
+
+          if (parsedUrl.origin === targetWindow.location.origin) {
+            const pathname = parsedUrl.pathname;
+            if (isAllowlistedObservationPath(pathname)) {
+              const cloned = response.clone();
+              const contentType = cloned.headers.get('content-type') || '';
+
+              if (cloned.status !== 204 && cloned.status !== 205 && contentType.includes('application/json') && cloned.ok) {
+                const rawData = await cloned.json();
+                const sanitizedEndpoint = sanitizeUrlPath(pathname + parsedUrl.search, targetWindow.location.origin);
+                emitObservation(sanitizedEndpoint, response.status, rawData);
               }
             }
           }
         }
+      } catch (err) {
+        console.warn('[LamaniSync Observer] Non-fatal fetch observation processing error:', err);
       }
-    } catch (err) {
-      console.warn('[LamaniSync Observer] Non-fatal observation processing error:', err);
-    }
 
-    return response;
-  };
+      return response;
+    };
 
-  targetWindow.fetch = observerFetch;
+    targetWindow.fetch = observerFetch;
+  }
+
+  // --- 2. Patch window.XMLHttpRequest ---
+  const winWithXhr = targetWindow as Window & { XMLHttpRequest?: typeof XMLHttpRequest };
+  let originalXhrOpen: typeof XMLHttpRequest.prototype.open | undefined;
+  let originalXhrSend: typeof XMLHttpRequest.prototype.send | undefined;
+
+  if (winWithXhr.XMLHttpRequest && winWithXhr.XMLHttpRequest.prototype) {
+    const xhrProto = winWithXhr.XMLHttpRequest.prototype;
+    originalXhrOpen = xhrProto.open;
+    originalXhrSend = xhrProto.send;
+
+    xhrProto.open = function (
+      this: XMLHttpRequest & { _lamaniMethod?: string; _lamaniUrl?: string },
+      method: string,
+      url: string | URL,
+      async?: boolean,
+      username?: string | null,
+      password?: string | null
+    ) {
+      try {
+        this._lamaniMethod = (method || 'GET').toUpperCase();
+        this._lamaniUrl = typeof url === 'string' ? url : url.toString();
+      } catch {
+        // non-fatal
+      }
+      return originalXhrOpen!.call(this, method, url, async !== undefined ? async : true, username, password);
+    };
+
+    xhrProto.send = function (
+      this: XMLHttpRequest & { _lamaniMethod?: string; _lamaniUrl?: string },
+      body?: Document | XMLHttpRequestBodyInit | null
+    ) {
+      this.addEventListener('load', () => {
+        try {
+          const method = this._lamaniMethod || 'GET';
+          if ((method === 'GET' || method === 'HEAD') && this.status >= 200 && this.status < 300) {
+            const rawUrl = this._lamaniUrl || '';
+            const parsedUrl = new URL(rawUrl, targetWindow.location.origin);
+
+            if (parsedUrl.origin === targetWindow.location.origin) {
+              const pathname = parsedUrl.pathname;
+              if (isAllowlistedObservationPath(pathname)) {
+                const contentType = this.getResponseHeader('content-type') || '';
+                if (contentType.includes('application/json') && this.responseText) {
+                  const rawData = JSON.parse(this.responseText);
+                  const sanitizedEndpoint = sanitizeUrlPath(pathname + parsedUrl.search, targetWindow.location.origin);
+                  emitObservation(sanitizedEndpoint, this.status, rawData);
+                }
+              }
+            }
+          }
+        } catch (err) {
+          console.warn('[LamaniSync Observer] Non-fatal XHR observation processing error:', err);
+        }
+      });
+
+      return originalXhrSend!.call(this, body as XMLHttpRequestBodyInit | null | undefined);
+    };
+  }
 
   return {
     uninstall: () => {
-      targetWindow.fetch = originalFetch;
+      if (originalFetch && targetWindow.fetch) {
+        targetWindow.fetch = originalFetch;
+      }
+      if (originalXhrOpen && originalXhrSend && winWithXhr.XMLHttpRequest?.prototype) {
+        winWithXhr.XMLHttpRequest.prototype.open = originalXhrOpen;
+        winWithXhr.XMLHttpRequest.prototype.send = originalXhrSend;
+      }
     },
     updateToken: (newToken: string) => {
       currentToken = newToken;

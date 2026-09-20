@@ -209,4 +209,56 @@ describe('Cross-World Bridge & Runner Integration (Phase 5)', () => {
     expect(response.success).toBe(false);
     expect(response.code).toBe('UNSUPPORTED_ACTION_ID');
   });
+
+  it('immediately returns HANDSHAKE_NOT_READY when service worker requests action before handshake', async () => {
+    // Start bridge without runner (handshake not ready)
+    bridge.start();
+
+    const handler = runtimeListeners[0];
+    expect(handler).toBeDefined();
+
+    const responsePromise = new Promise<ActionExecutionResponse>((resolve) => {
+      handler(
+        {
+          type: 'EXECUTE_PAGE_ACTION',
+          actionId: 'ACTION_APPOINTMENT_CREATE',
+          parameters: {
+            patientId: 'P01',
+            providerId: 'DOC01',
+            startTime: '2026-09-25T14:00:00+08:00',
+            endTime: '2026-09-25T14:30:00+08:00',
+          },
+        },
+        {},
+        (res) => resolve(res as ActionExecutionResponse)
+      );
+    });
+
+    const response = await responsePromise;
+    expect(response.success).toBe(false);
+    expect(response.code).toBe('HANDSHAKE_NOT_READY');
+  });
+
+  it('prevents established handshake token from being overwritten by subsequent HANDSHAKE_INIT', async () => {
+    runner.start();
+    bridge.start();
+    await new Promise((r) => setTimeout(r, 50));
+
+    const initialToken = runner.getHandshakeToken();
+    expect(initialToken).toBeTruthy();
+
+    // Rogue attacker sends rogue HANDSHAKE_INIT with a different token
+    window.postMessage({
+      channel: 'LAMANISYNC_PAGE_BRIDGE',
+      source: 'LAMANISYNC_ISOLATED',
+      token: 'rogue-token-666',
+      type: 'HANDSHAKE_INIT',
+      payload: { nonce: 'rogue-nonce' },
+    }, origin);
+
+    await new Promise((r) => setTimeout(r, 30));
+
+    // Token must remain locked to initialToken
+    expect(runner.getHandshakeToken()).toBe(initialToken);
+  });
 });

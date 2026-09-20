@@ -17,6 +17,7 @@ import {
 } from '../content/page-message-validator.js';
 import { installNetworkObserver, type NetworkObserverHandle } from './observer.js';
 import { executePredefinedAction } from './action-runner.js';
+import { normalizeExactOrigin } from '../background/permissions.js';
 
 export interface MainWorldRunnerOptions {
   targetWindow?: Window;
@@ -32,7 +33,15 @@ export class MainWorldRunner {
 
   constructor(options: MainWorldRunnerOptions = {}) {
     this.targetWindow = options.targetWindow || (typeof window !== 'undefined' ? window : ({} as Window));
-    this.targetOrigin = options.targetOrigin || (this.targetWindow.location?.origin || '');
+    const rawOrigin = options.targetOrigin || (this.targetWindow.location?.origin || '');
+    this.targetOrigin = rawOrigin;
+    if (this.targetOrigin && this.targetOrigin !== '*') {
+      try {
+        this.targetOrigin = normalizeExactOrigin(this.targetOrigin);
+      } catch {
+        // preserve for validator failure if malformed
+      }
+    }
   }
 
   getHandshakeToken(): string | null {
@@ -60,6 +69,7 @@ export class MainWorldRunner {
   }
 
   requestHandshake(): void {
+    if (!this.targetOrigin || this.targetOrigin === '*') return;
     const nonce = (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : `${Date.now()}`;
     const req = {
       channel: BRIDGE_CHANNEL,
@@ -67,7 +77,7 @@ export class MainWorldRunner {
       type: 'HANDSHAKE_REQUEST',
       payload: { nonce },
     };
-    this.targetWindow.postMessage(req, this.targetOrigin || '*');
+    this.targetWindow.postMessage(req, this.targetOrigin);
   }
 
   private async handleMessage(event: MessageEvent): Promise<void> {
@@ -90,6 +100,12 @@ export class MainWorldRunner {
     const message = result.message;
 
     if (message.type === 'HANDSHAKE_INIT') {
+      // Guard against rogue handshake overwrite once established
+      if (this.handshakeToken && this.handshakeToken !== message.token) {
+        console.warn('[LamaniSync Runner] Ignored duplicate HANDSHAKE_INIT with different token');
+        return;
+      }
+
       this.handshakeToken = message.token;
 
       // Acknowledge handshake
@@ -100,7 +116,9 @@ export class MainWorldRunner {
         type: 'HANDSHAKE_ACK',
         payload: { acknowledged: true as const },
       };
-      this.targetWindow.postMessage(ack, this.targetOrigin || '*');
+      if (this.targetOrigin && this.targetOrigin !== '*') {
+        this.targetWindow.postMessage(ack, this.targetOrigin);
+      }
 
       // Install or update network observer with verified handshake token
       if (!this.observerHandle) {
@@ -140,7 +158,9 @@ export class MainWorldRunner {
         },
       };
 
-      this.targetWindow.postMessage(responseMsg, this.targetOrigin || '*');
+      if (this.targetOrigin && this.targetOrigin !== '*') {
+        this.targetWindow.postMessage(responseMsg, this.targetOrigin);
+      }
     }
   }
 }

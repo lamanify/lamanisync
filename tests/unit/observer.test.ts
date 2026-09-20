@@ -168,6 +168,86 @@ describe('MAIN-World Network Observer (Phase 5)', () => {
       expect(emittedEvents).toHaveLength(0);
     });
 
+    it('does not observe POST requests initiated with Request object', async () => {
+      window.fetch = vi.fn(async () => {
+        return new Response(JSON.stringify({ data: { id: 'APT-CREATED' } }), {
+          status: 201,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      });
+
+      observerHandle = installNetworkObserver({
+        handshakeToken: token,
+        targetOrigin: origin,
+        onObservation: (obs) => emittedEvents.push(obs as Record<string, unknown>),
+      });
+
+      const req = new Request('http://localhost:4001/api/appointments', {
+        method: 'POST',
+        body: JSON.stringify({ patientId: 'P1' }),
+      });
+
+      await window.fetch(req);
+      expect(emittedEvents).toHaveLength(0);
+    });
+
+    it('handles 204 No Content safely without attempting to parse JSON', async () => {
+      window.fetch = vi.fn(async () => {
+        return new Response(null, {
+          status: 204,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      });
+
+      observerHandle = installNetworkObserver({
+        handshakeToken: token,
+        targetOrigin: origin,
+        onObservation: (obs) => emittedEvents.push(obs as Record<string, unknown>),
+      });
+
+      await window.fetch('http://localhost:4001/api/appointments');
+      expect(emittedEvents).toHaveLength(0);
+    });
+
+    it('intercepts allowlisted GET /api/appointments via XMLHttpRequest', () => {
+      // Mock the underlying native send to avoid real network call in JSDOM unit test
+      const nativeSend = window.XMLHttpRequest.prototype.send;
+      window.XMLHttpRequest.prototype.send = vi.fn();
+
+      try {
+        observerHandle = installNetworkObserver({
+          handshakeToken: token,
+          targetOrigin: origin,
+          onObservation: (obs) => emittedEvents.push(obs as Record<string, unknown>),
+        });
+
+        const xhr = new window.XMLHttpRequest();
+        xhr.open('GET', 'http://localhost:4001/api/appointments');
+
+        Object.defineProperty(xhr, 'status', { value: 200 });
+        Object.defineProperty(xhr, 'responseText', {
+          value: JSON.stringify({ data: [{ id: 'APT-XHR-1' }], token: 'secret-xhr' }),
+        });
+        xhr.getResponseHeader = (header: string) => (header.toLowerCase() === 'content-type' ? 'application/json' : null);
+
+        xhr.send();
+        xhr.dispatchEvent(new Event('load'));
+
+        expect(emittedEvents).toHaveLength(1);
+        const obs = emittedEvents[0] as {
+          payload: {
+            endpoint: string;
+            data: { data: Array<{ id: string }>; token?: string };
+          };
+        };
+        expect(obs.payload.endpoint).toBe('/api/appointments');
+        expect(obs.payload.data.data[0].id).toBe('APT-XHR-1');
+        expect(obs.payload.data.token).toBeUndefined();
+      } finally {
+        window.XMLHttpRequest.prototype.send = nativeSend;
+      }
+    });
+
     it('uninstalls cleanly and stops observing', async () => {
       const original = vi.fn(async () => new Response('{}', { status: 200, headers: { 'Content-Type': 'application/json' } }));
       window.fetch = original;

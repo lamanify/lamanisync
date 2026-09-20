@@ -30,4 +30,24 @@ describe('Manifest V3 Configuration', () => {
     expect(raw.optional_host_permissions).toBeDefined();
     expect(Array.isArray(raw.optional_host_permissions)).toBe(true);
   });
+
+  it('builds standalone IIFE classic scripts without module imports or chunk splitting', async () => {
+    const fs = await import('fs');
+    const path = await import('path');
+    const csPath = path.resolve('dist/content-script.js');
+    const pwPath = path.resolve('dist/page-world.js');
+
+    if (fs.existsSync(csPath) && fs.existsSync(pwPath)) {
+      const cs = fs.readFileSync(csPath, 'utf8');
+      const pw = fs.readFileSync(pwPath, 'utf8');
+
+      // Top-level ESM imports strictly prohibited in classic content scripts
+      expect(/\bimport\s+/.test(cs)).toBe(false);
+      expect(/\bimport\s+/.test(pw)).toBe(false);
+
+      // Must parse cleanly as classic scripts
+      expect(() => new Function(cs)).not.toThrow();
+      expect(() => new Function(pw)).not.toThrow();
+    }
+  });
 });

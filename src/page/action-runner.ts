@@ -146,6 +146,15 @@ const RECIPES: Record<PredefinedActionId, ActionRecipe> = {
     extractResult: (status, json) => {
       if (status === 201 || status === 200) {
         const appt = (json.data as Record<string, unknown>) || json;
+        if (!appt || typeof appt.id !== 'string' || !appt.id) {
+          return {
+            status: 'ERROR',
+            error: {
+              code: 'INVALID_CMS_RESPONSE',
+              message: 'CMS response missing appointment ID',
+            },
+          };
+        }
         return {
           status: 'SUCCESS',
           data: {
@@ -313,6 +322,15 @@ const RECIPES: Record<PredefinedActionId, ActionRecipe> = {
     extractResult: (status, json) => {
       if (status === 201 || status === 200) {
         const patient = (json.data as Record<string, unknown>) || json;
+        if (!patient || typeof patient.id !== 'string' || !patient.id) {
+          return {
+            status: 'ERROR',
+            error: {
+              code: 'INVALID_CMS_RESPONSE',
+              message: 'CMS response missing patient ID',
+            },
+          };
+        }
         return {
           status: 'SUCCESS',
           data: {

@@ -53,6 +53,7 @@ describe('Dynamic Script Registration (Phase 5)', () => {
     expect(isolatedScript?.runAt).toBe('document_start');
     expect(isolatedScript?.matches).toEqual(['http://localhost:4001/*']);
     expect(isolatedScript?.js).toEqual(['content-script.js']);
+    expect(isolatedScript?.persistAcrossSessions).toBe(true);
 
     const mainScript = mockScripts.find((s) => s.id === CONTENT_SCRIPT_MAIN_ID);
     expect(mainScript).toBeDefined();
@@ -60,6 +61,7 @@ describe('Dynamic Script Registration (Phase 5)', () => {
     expect(mainScript?.runAt).toBe('document_start');
     expect(mainScript?.matches).toEqual(['http://localhost:4001/*']);
     expect(mainScript?.js).toEqual(['page-world.js']);
+    expect(mainScript?.persistAcrossSessions).toBe(true);
   });
 
   it('strictly rejects wildcard origins (AGENTS.md Rule 3)', async () => {

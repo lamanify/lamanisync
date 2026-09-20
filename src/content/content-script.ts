@@ -18,6 +18,7 @@ import {
   type PageToIsolatedMessage,
 } from './page-message-validator.js';
 import { isAllowlistedActionId } from '../page/action-runner.js';
+import { normalizeExactOrigin } from '../background/permissions.js';
 import { LamaniError } from '../core/errors.js';
 
 export type MessageListenerCallback = (
@@ -61,7 +62,15 @@ export class IsolatedContentBridge {
 
   constructor(options: IsolatedBridgeOptions = {}) {
     this.targetWindow = options.targetWindow || (typeof window !== 'undefined' ? window : ({} as Window));
-    this.targetOrigin = options.targetOrigin || (this.targetWindow.location?.origin || '');
+    const rawOrigin = options.targetOrigin || (this.targetWindow.location?.origin || '');
+    this.targetOrigin = rawOrigin;
+    if (this.targetOrigin && this.targetOrigin !== '*') {
+      try {
+        this.targetOrigin = normalizeExactOrigin(this.targetOrigin);
+      } catch {
+        // preserve for validator failure if malformed
+      }
+    }
     this.chromeRuntime = options.chromeRuntime || (typeof chrome !== 'undefined' && chrome.runtime ? chrome.runtime : undefined);
     this.handshakeToken = (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : `hs-${Date.now()}-${Math.random()}`;
     this.actionTimeoutMs = options.actionTimeoutMs || 10000;
@@ -104,15 +113,19 @@ export class IsolatedContentBridge {
     this.pendingActions.clear();
   }
 
-  sendHandshakeInit(): void {
+  sendHandshakeInit(challengeNonce?: string): void {
+    if (!this.targetOrigin || this.targetOrigin === '*') {
+      console.warn('[LamaniSync Isolated] Cannot send handshake init: target origin is missing or wildcard');
+      return;
+    }
     const initMessage = {
       channel: BRIDGE_CHANNEL,
       source: SOURCE_ISOLATED,
       token: this.handshakeToken,
       type: 'HANDSHAKE_INIT',
-      payload: { nonce: (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : `${Date.now()}` },
+      payload: { nonce: challengeNonce || ((typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : `${Date.now()}`) },
     };
-    this.targetWindow.postMessage(initMessage, this.targetOrigin || '*');
+    this.targetWindow.postMessage(initMessage, this.targetOrigin);
   }
 
   private handleWindowMessage(event: MessageEvent): void {
@@ -139,7 +152,7 @@ export class IsolatedContentBridge {
 
     switch (message.type) {
       case 'HANDSHAKE_REQUEST': {
-        this.sendHandshakeInit();
+        this.sendHandshakeInit(message.payload.nonce);
         break;
       }
 
@@ -198,6 +211,15 @@ export class IsolatedContentBridge {
         return false;
       }
 
+      if (!this.isHandshakeEstablished) {
+        sendResponse({
+          success: false,
+          error: 'Handshake with page-world runner is not established',
+          code: 'HANDSHAKE_NOT_READY',
+        });
+        return false;
+      }
+
       const activeCorrId = correlationId || ((typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : `act-${Date.now()}`);
 
       this.executeActionInPage(actionId, activeCorrId, parameters)
@@ -232,6 +254,13 @@ export class IsolatedContentBridge {
   }
 
   executeActionInPage(actionId: string, correlationId: string, parameters: Record<string, unknown>): Promise<unknown> {
+    if (!this.isHandshakeEstablished) {
+      return Promise.reject(new LamaniError('Handshake with page-world runner is not established', 'HANDSHAKE_NOT_READY'));
+    }
+    if (!this.targetOrigin || this.targetOrigin === '*') {
+      return Promise.reject(new LamaniError('Target origin is not configured or is wildcard', 'INVALID_ORIGIN'));
+    }
+
     return new Promise((resolve, reject) => {
       const timer = setTimeout(() => {
         this.pendingActions.delete(correlationId);
@@ -252,7 +281,7 @@ export class IsolatedContentBridge {
         },
       };
 
-      this.targetWindow.postMessage(executeMsg, this.targetOrigin || '*');
+      this.targetWindow.postMessage(executeMsg, this.targetOrigin);
     });
   }
 }

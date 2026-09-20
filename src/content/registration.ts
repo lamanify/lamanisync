@@ -38,6 +38,7 @@ export interface RegisterScriptsOptions {
   isolatedScriptPath?: string;
   mainScriptPath?: string;
   runAt?: 'document_start' | 'document_end' | 'document_idle';
+  persistAcrossSessions?: boolean;
 }
 
 /**
@@ -57,6 +58,7 @@ export async function registerDynamicContentScripts(
   const isolatedPath = options.isolatedScriptPath || DEFAULT_ISOLATED_SCRIPT_PATH;
   const mainPath = options.mainScriptPath || DEFAULT_MAIN_SCRIPT_PATH;
   const runAt = options.runAt || 'document_start';
+  const persistAcrossSessions = options.persistAcrossSessions ?? true;
 
   // Check and unregister existing scripts to prevent duplicate ID collision
   try {
@@ -80,7 +82,7 @@ export async function registerDynamicContentScripts(
       runAt,
       world: 'ISOLATED',
       allFrames: false,
-      persistAcrossSessions: false,
+      persistAcrossSessions,
     },
     {
       id: CONTENT_SCRIPT_MAIN_ID,
@@ -89,7 +91,7 @@ export async function registerDynamicContentScripts(
       runAt,
       world: 'MAIN',
       allFrames: false,
-      persistAcrossSessions: false,
+      persistAcrossSessions,
     },
   ];
 

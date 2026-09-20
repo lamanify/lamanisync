@@ -100,6 +100,30 @@ describe('Predefined Action Runner (Phase 5)', () => {
     expect(data.status).toBe('booked');
   });
 
+  it('returns ERROR when CMS responds with 200/201 but missing appointment ID', async () => {
+    const mockFetch = vi.fn(async () => {
+      return new Response(JSON.stringify({ success: true, message: 'Created' }), {
+        status: 201,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    });
+
+    const result = await executePredefinedAction({
+      actionId: ACTION_APPOINTMENT_CREATE,
+      correlationId: 'cmd-create-noid',
+      parameters: {
+        patientId: 'P01',
+        providerId: 'DOC01',
+        startTime: '2026-09-25T10:00:00+08:00',
+        endTime: '2026-09-25T10:30:00+08:00',
+      },
+      fetchFn: mockFetch as unknown as typeof fetch,
+    });
+
+    expect(result.status).toBe('ERROR');
+    expect(result.error?.code).toBe('INVALID_CMS_RESPONSE');
+  });
+
   it('executes ACTION_APPOINTMENT_RESCHEDULE and handles 409 CONFLICT', async () => {
     const mockFetch = vi.fn(async () => {
       return new Response(
