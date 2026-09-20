@@ -14,6 +14,12 @@
 - **Security & Privacy Boundary**:  
   In strict compliance with AGENTS.md Rules 4 and 6, `chrome.storage.local` is **never** used to store CMS passwords, session cookies, bearer tokens, CSRF secrets, or raw Patient Health Information (PHI). Only connection metadata and LamaniHub session tokens are stored.
 
+### `scripting`
+- **Why it is needed**:  
+  Used strictly via `chrome.scripting.registerContentScripts` and `chrome.scripting.unregisterContentScripts` to dynamically register the safe page integration bridge scripts matching exclusively the exact paired CMS origin (`toExactOriginPattern(targetOrigin)`). Scripts are never declared statically with broad patterns (`<all_urls>` or wildcards), fulfilling AGENTS.md Rule 3.
+- **Security & Privacy Boundary**:  
+  Dynamic script registration is triggered strictly after explicit device pairing and user-approved host permission. When permissions are revoked or the device is unpaired, dynamic scripts are immediately unregistered. No remote scripts or dynamic code evaluation (`eval`, `new Function`) are ever executed (AGENTS.md Rule 2).
+
 ### `chrome.permissions` API (Manifest Check)
 - **Status in Manifest**:  
   The `chrome.permissions` API is an intrinsic Chrome Extensions API and does not require or accept a `'permissions'` permission token in `permissions: []` in Manifest V3. Attempting to declare `'permissions'` inside `permissions` generates a Chrome manifest warning and Web Store review flag (`unrecognized permission`). The extension uses the built-in `chrome.permissions` API (`request`, `contains`, `remove`, `onRemoved`) strictly to manage optional host permissions.

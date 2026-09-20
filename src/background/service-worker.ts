@@ -14,6 +14,20 @@ export const fsm = new ConnectionFSM();
 export const apiClient = new SyncApiClient();
 export const coordinator = new PairingCoordinator({ fsm, apiClient });
 
+export const recentObservations: unknown[] = [];
+export const MAX_RECENT_OBSERVATIONS = 50;
+
+export function recordObservation(obs: unknown): void {
+  recentObservations.unshift(obs);
+  if (recentObservations.length > MAX_RECENT_OBSERVATIONS) {
+    recentObservations.pop();
+  }
+}
+
+export function clearObservations(): void {
+  recentObservations.length = 0;
+}
+
 chrome.runtime.onInstalled.addListener(async () => {
   const version = chrome.runtime.getManifest().version;
   console.log(`[LamaniSync Dev] Service Worker installed. Version: ${version}`);
@@ -90,6 +104,17 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
       .then((record) => sendResponse({ record }))
       .catch((err) => sendResponse({ error: err.message, record: fsm.getRecord() }));
     return true; // async response
+  }
+
+  if (message?.type === 'CMS_OBSERVATION') {
+    recordObservation(message.payload);
+    sendResponse({ received: true });
+    return false;
+  }
+
+  if (message?.type === 'GET_RECENT_OBSERVATIONS') {
+    sendResponse({ observations: [...recentObservations] });
+    return false;
   }
 
   return false;

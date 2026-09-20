@@ -20,6 +20,11 @@ import {
   requestOriginPermission,
   type ChromePermissionsApi,
 } from './permissions.js';
+import {
+  registerDynamicContentScripts,
+  unregisterDynamicContentScripts,
+  type ChromeScriptingApi,
+} from '../content/registration.js';
 import { LamaniError } from '../core/errors.js';
 
 export const SESSION_STORAGE_KEY = 'lamanisync_connection_session';
@@ -58,6 +63,7 @@ export interface PairingCoordinatorOptions {
   apiClient?: SyncApiClient;
   storage?: StorageAdapter;
   permissionsApi?: ChromePermissionsApi;
+  scriptingApi?: ChromeScriptingApi;
   idbFactory?: IDBFactory;
 }
 
@@ -72,6 +78,7 @@ export class PairingCoordinator {
   readonly apiClient: SyncApiClient;
   private storage: StorageAdapter;
   private permissionsApi?: ChromePermissionsApi;
+  private scriptingApi?: ChromeScriptingApi;
   private idbFactory?: IDBFactory;
   private isPairingInFlight: boolean = false;
   private isUnpairingInFlight: boolean = false;
@@ -85,6 +92,7 @@ export class PairingCoordinator {
     }
     this.storage = options.storage || getDefaultStorage();
     this.permissionsApi = options.permissionsApi;
+    this.scriptingApi = options.scriptingApi;
     this.idbFactory = options.idbFactory;
   }
 
@@ -94,6 +102,14 @@ export class PairingCoordinator {
 
   setPermissionsApi(api: ChromePermissionsApi): void {
     this.permissionsApi = api;
+  }
+
+  setScriptingApi(api: ChromeScriptingApi): void {
+    this.scriptingApi = api;
+  }
+
+  private hasScriptingCapability(): boolean {
+    return Boolean(this.scriptingApi || (typeof chrome !== 'undefined' && chrome.scripting));
   }
 
   setActiveLease(lease: ActiveLeaseRecord | null): void {
@@ -223,6 +239,14 @@ export class PairingCoordinator {
     }
 
     if (granted) {
+      if (this.hasScriptingCapability()) {
+        try {
+          await registerDynamicContentScripts(session.targetOrigin, { scriptingApi: this.scriptingApi });
+        } catch (err) {
+          console.warn('[PairingCoordinator] Dynamic script registration warning:', err);
+        }
+      }
+
       if (this.fsm.canTransition('PROBING')) {
         this.fsm.transition('PROBING', {
           reason: 'User granted exact CMS origin permission',
@@ -241,7 +265,7 @@ export class PairingCoordinator {
    * Unpairs the device cleanly:
    * 1. Releases active leader leases (if any).
    * 2. Revokes installation on LamaniHub Sync API.
-   * 3. Drops host permissions via chrome.permissions.remove.
+   * 3. Drops host permissions via chrome.permissions.remove and unregisters dynamic scripts.
    * 4. Purges WebCrypto device private key and IndexedDB records.
    * 5. Clears chrome.storage.local session metadata.
    * 6. Transitions FSM to REVOKED and then UNPAIRED.
@@ -275,7 +299,15 @@ export class PairingCoordinator {
         }
       }
 
-      // 3. Remove runtime host permission
+      // 3. Unregister dynamic scripts & remove runtime host permission
+      if (this.hasScriptingCapability()) {
+        try {
+          await unregisterDynamicContentScripts(this.scriptingApi);
+        } catch (err) {
+          console.warn('[PairingCoordinator] Script unregistration warning:', err);
+        }
+      }
+
       if (session?.targetOrigin) {
         try {
           await removeOriginPermission(session.targetOrigin, this.permissionsApi);
@@ -322,6 +354,14 @@ export class PairingCoordinator {
     );
 
     if (isTargetRemoved) {
+      if (this.hasScriptingCapability()) {
+        try {
+          await unregisterDynamicContentScripts(this.scriptingApi);
+        } catch (err) {
+          console.warn('[PairingCoordinator] Script unregistration warning on removal:', err);
+        }
+      }
+
       if (this.fsm.canTransition('PAIRED_NO_PERMISSION')) {
         this.fsm.transition('PAIRED_NO_PERMISSION', {
           reason: 'Host permission was revoked by user or browser',
@@ -361,6 +401,16 @@ export class PairingCoordinator {
       hasPerm = await hasOriginPermission(session.targetOrigin, this.permissionsApi);
     } catch {
       hasPerm = false;
+    }
+
+    if (hasPerm) {
+      if (this.hasScriptingCapability()) {
+        try {
+          await registerDynamicContentScripts(session.targetOrigin, { scriptingApi: this.scriptingApi });
+        } catch (err) {
+          console.warn('[PairingCoordinator] Dynamic script registration warning on restore:', err);
+        }
+      }
     }
 
     const currentState = this.fsm.getState();

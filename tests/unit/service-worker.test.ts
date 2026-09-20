@@ -55,6 +55,11 @@ describe('Service Worker Lifecycle & Message Handling', () => {
           addListener: vi.fn((cb) => permissionsRemovedListeners.push(cb)),
         },
       },
+      scripting: {
+        registerContentScripts: vi.fn().mockResolvedValue(undefined),
+        unregisterContentScripts: vi.fn().mockResolvedValue(undefined),
+        getRegisteredContentScripts: vi.fn().mockResolvedValue([]),
+      },
     };
   });
 
@@ -148,5 +153,39 @@ describe('Service Worker Lifecycle & Message Handling', () => {
     expect(unpairRes.success).toBe(true);
     expect(unpairRes.record.state).toBe('UNPAIRED');
     expect(sw.fsm.getState()).toBe('UNPAIRED');
+  });
+
+  it('records incoming CMS_OBSERVATION and serves via GET_RECENT_OBSERVATIONS', async () => {
+    vi.resetModules();
+    const sw = await import('../../src/background/service-worker.js');
+    sw.clearObservations();
+    const handler = messageListeners[messageListeners.length - 1];
+
+    // 1. Send CMS_OBSERVATION message
+    const obsPayload = {
+      endpoint: '/api/appointments',
+      method: 'GET',
+      statusCode: 200,
+      data: [{ id: 'APT-1', status: 'booked' }],
+      timestamp: new Date().toISOString(),
+    };
+
+    const recordRes = await new Promise<{ received: boolean }>((resolve) => {
+      handler({ type: 'CMS_OBSERVATION', payload: obsPayload }, {}, (res) => resolve(res as { received: boolean }));
+    });
+    expect(recordRes.received).toBe(true);
+
+    // 2. Query recent observations
+    interface ObsRecord {
+      endpoint: string;
+      data: Array<{ id: string }>;
+    }
+
+    const queryRes = await new Promise<{ observations: ObsRecord[] }>((resolve) => {
+      handler({ type: 'GET_RECENT_OBSERVATIONS' }, {}, (res) => resolve(res as { observations: ObsRecord[] }));
+    });
+    expect(queryRes.observations).toHaveLength(1);
+    expect(queryRes.observations[0].endpoint).toBe('/api/appointments');
+    expect(queryRes.observations[0].data[0].id).toBe('APT-1');
   });
 });
