@@ -20,10 +20,14 @@ describe('Manifest V3 Configuration', () => {
     expect(manifest.background?.type).toBe('module');
   });
 
-  it('must strictly have zero host permissions and zero permissions in Phase 1', () => {
+  it('strictly adheres to Phase 4 permissions: storage declared, zero broad static host permissions', () => {
     const raw = manifest as unknown as Record<string, unknown>;
-    expect(raw.permissions).toBeUndefined();
+    // Storage permission required for session & connection persistence
+    expect(raw.permissions).toEqual(['storage']);
+    // Static host_permissions must remain strictly undefined (AGENTS.md Rule 3)
     expect(raw.host_permissions).toBeUndefined();
-    expect(raw.optional_host_permissions).toBeUndefined();
+    // Runtime exact origin requests are supported via optional_host_permissions
+    expect(raw.optional_host_permissions).toBeDefined();
+    expect(Array.isArray(raw.optional_host_permissions)).toBe(true);
   });
 });

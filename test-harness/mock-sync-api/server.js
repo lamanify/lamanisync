@@ -72,7 +72,10 @@ export class MockSyncApiServer {
   async handleRequest(req, res) {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-device-signature, x-correlation-id');
+    res.setHeader(
+      'Access-Control-Allow-Headers',
+      'Content-Type, Authorization, x-device-signature, x-correlation-id, x-device-timestamp, x-device-nonce'
+    );
 
     if (req.method === 'OPTIONS') {
       res.writeHead(204);
