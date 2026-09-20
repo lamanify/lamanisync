@@ -270,6 +270,34 @@ export class MockSyncApiServer {
         });
       }
 
+      // --- Reconciliation Summary Endpoint (Phase 7) ---
+      if (pathname.startsWith('/v1/sync/connections/') && pathname.endsWith('/reconcile-summary') && req.method === 'GET') {
+        const parts = pathname.split('/');
+        const connectionId = parts[parts.length - 2];
+        const patientEvents = this.state.events.filter((e) => e.entityType === 'patient');
+        const appointmentEvents = this.state.events.filter((e) => e.entityType === 'appointment');
+        const entityRevisions = {};
+        for (const e of this.state.events) {
+          if (e.entityId) {
+            entityRevisions[e.entityId] = Math.max(entityRevisions[e.entityId] || 0, e.revision || 1);
+          }
+        }
+
+        return this.sendJson(res, 200, {
+          connectionId,
+          totalEvents: this.state.events.length,
+          entityCounts: {
+            patient: new Set(patientEvents.map((e) => e.entityId)).size,
+            appointment: new Set(appointmentEvents.map((e) => e.entityId)).size,
+          },
+          knownEntityIds: {
+            patient: Array.from(new Set(patientEvents.map((e) => e.entityId))),
+            appointment: Array.from(new Set(appointmentEvents.map((e) => e.entityId))),
+          },
+          entityRevisions,
+        });
+      }
+
       // --- Leader Lease Coordination with Fencing Token ---
       if (pathname === '/v1/sync/leases/acquire' && req.method === 'POST') {
         const { connectionId, installationId, durationSeconds = 30 } = body;

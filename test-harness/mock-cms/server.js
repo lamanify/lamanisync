@@ -223,9 +223,17 @@ export class MockCmsServer {
           });
         }
 
+        const total = patients.length;
+        if (parsedUrl.searchParams.has('page') || parsedUrl.searchParams.has('limit')) {
+          const page = Math.max(1, parseInt(parsedUrl.searchParams.get('page') || '1', 10));
+          const limit = Math.max(1, parseInt(parsedUrl.searchParams.get('limit') || '50', 10));
+          const startIndex = (page - 1) * limit;
+          patients = patients.slice(startIndex, startIndex + limit);
+        }
+
         return this.sendJson(res, 200, {
           data: patients,
-          total: patients.length,
+          total,
         });
       }
 
@@ -293,9 +301,17 @@ export class MockCmsServer {
           appointments = appointments.filter((a) => a.providerId === providerId);
         }
 
+        const total = appointments.length;
+        if (parsedUrl.searchParams.has('page') || parsedUrl.searchParams.has('limit')) {
+          const page = Math.max(1, parseInt(parsedUrl.searchParams.get('page') || '1', 10));
+          const limit = Math.max(1, parseInt(parsedUrl.searchParams.get('limit') || '50', 10));
+          const startIndex = (page - 1) * limit;
+          appointments = appointments.slice(startIndex, startIndex + limit);
+        }
+
         return this.sendJson(res, 200, {
           data: appointments,
-          total: appointments.length,
+          total,
         });
       }
 

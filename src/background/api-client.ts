@@ -8,6 +8,7 @@
 
 import { z } from 'zod';
 import { TargetOriginSchema } from '../core/contracts/primitives.js';
+import { type SyncEvent } from '../core/contracts/events.js';
 import { LamaniError, classifyError } from '../core/errors.js';
 import { signPayload } from '../storage/device-key.js';
 
@@ -302,5 +303,58 @@ export class SyncApiClient {
       variant ? `?variant=${encodeURIComponent(variant)}` : ''
     }`;
     return this.request<unknown>(path, { method: 'GET' });
+  }
+
+  /**
+   * Submits environment & capability probe result to POST /v1/sync/connections/:id/probe-result.
+   */
+  async reportProbeResult(
+    connectionId: string,
+    payload: {
+      installationId: string;
+      capabilities: string[];
+      cmsVersion: string;
+      passed: boolean;
+      details?: Record<string, unknown>;
+    }
+  ): Promise<{ status: string; connectionId: string; recordedAt: string }> {
+    return this.request(`/v1/sync/connections/${encodeURIComponent(connectionId)}/probe-result`, {
+      method: 'POST',
+      body: payload,
+    });
+  }
+
+  /**
+   * Transmits batch of normalized sync events to POST /v1/sync/events/batch.
+   */
+  async sendEventBatch(
+    installationId: string,
+    events: SyncEvent[],
+    batchId?: string
+  ): Promise<{ acknowledged: boolean; batchId: string; processedCount: number; checkpoint: string }> {
+    const finalBatchId = batchId || `batch_${Date.now()}_${crypto.randomUUID().slice(0, 8)}`;
+    return this.request('/v1/sync/events/batch', {
+      method: 'POST',
+      body: {
+        installationId,
+        batchId: finalBatchId,
+        events,
+      },
+    });
+  }
+
+  /**
+   * Fetches reconciliation summary from GET /v1/sync/connections/:id/reconcile-summary.
+   */
+  async getReconcileSummary(connectionId: string): Promise<{
+    connectionId: string;
+    totalEvents: number;
+    entityCounts: Record<string, number>;
+    knownEntityIds: Record<string, string[]>;
+    entityRevisions: Record<string, number>;
+  }> {
+    return this.request(`/v1/sync/connections/${encodeURIComponent(connectionId)}/reconcile-summary`, {
+      method: 'GET',
+    });
   }
 }

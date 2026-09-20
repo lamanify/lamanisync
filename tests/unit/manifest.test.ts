@@ -20,10 +20,10 @@ describe('Manifest V3 Configuration', () => {
     expect(manifest.background?.type).toBe('module');
   });
 
-  it('strictly adheres to Phase 5 permissions: storage and scripting declared, zero broad static host permissions', () => {
+  it('strictly adheres to declared permissions: storage, scripting, and alarms declared, zero broad static host permissions', () => {
     const raw = manifest as unknown as Record<string, unknown>;
-    // Storage and scripting permissions required for session persistence and dynamic script registration
-    expect(raw.permissions).toEqual(['storage', 'scripting']);
+    // Storage, scripting, and alarms permissions required for session persistence, dynamic script registration, and lease renewal scheduling
+    expect(raw.permissions).toEqual(['storage', 'scripting', 'alarms']);
     // Static host_permissions must remain strictly undefined (AGENTS.md Rule 3)
     expect(raw.host_permissions).toBeUndefined();
     // Runtime exact origin requests are supported via optional_host_permissions

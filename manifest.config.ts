@@ -12,6 +12,6 @@ export default defineManifest({
     service_worker: 'src/background/service-worker.ts',
     type: 'module',
   },
-  permissions: ['storage', 'scripting'],
+  permissions: ['storage', 'scripting', 'alarms'],
   optional_host_permissions: ['http://localhost:4001/*', 'https://*/*'],
 });

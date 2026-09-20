@@ -9,10 +9,39 @@
 import { ConnectionFSM } from './connection-fsm.js';
 import { PairingCoordinator } from './pairing.js';
 import { SyncApiClient } from './api-client.js';
+import { LeaseCoordinator } from './lease-client.js';
+import { DeduplicationCache } from './dedupe.js';
+import { BatchUploader } from './batch-uploader.js';
+import { ReferenceSyncManager } from './reference-sync.js';
+import { ProbeRunner } from './probe.js';
+import { BackfillEngine } from './backfill.js';
+import { ReconcileWorker } from './reconcile.js';
 
 export const fsm = new ConnectionFSM();
 export const apiClient = new SyncApiClient();
 export const coordinator = new PairingCoordinator({ fsm, apiClient });
+
+export const leaseCoordinator = new LeaseCoordinator({ apiClient });
+export const dedupeCache = new DeduplicationCache();
+export const batchUploader = new BatchUploader({
+  apiClient,
+  installationId: '',
+  dedupeCache,
+});
+export const referenceSync = new ReferenceSyncManager({ targetOrigin: '' });
+
+// Forward lease changes to pairing coordinator
+leaseCoordinator.onLeaseAcquired((lease) => {
+  coordinator.setActiveLease({
+    connectionId: lease.connectionId,
+    leaseId: lease.leaseId,
+    fencingToken: lease.fencingToken,
+  });
+});
+
+leaseCoordinator.onLeaseLost(() => {
+  coordinator.setActiveLease(null);
+});
 
 export const recentObservations: unknown[] = [];
 export const MAX_RECENT_OBSERVATIONS = 50;
@@ -117,5 +146,138 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     return false;
   }
 
+  // --- Phase 7 Message Handlers ---
+  if (message?.type === 'ACQUIRE_LEASE') {
+    coordinator
+      .getSession()
+      .then(async (session) => {
+        if (!session) return sendResponse({ success: false, error: 'Not paired' });
+        const duration = typeof message.durationSeconds === 'number' ? message.durationSeconds : 30;
+        const acquired = await leaseCoordinator.acquire(session.connectionId, session.installationId, duration);
+        sendResponse({ success: acquired, lease: leaseCoordinator.getActiveLease() });
+      })
+      .catch((err) => sendResponse({ success: false, error: err.message }));
+    return true;
+  }
+
+  if (message?.type === 'RELEASE_LEASE') {
+    leaseCoordinator
+      .release()
+      .then(() => sendResponse({ success: true }))
+      .catch((err) => sendResponse({ success: false, error: err.message }));
+    return true;
+  }
+
+  if (message?.type === 'GET_LEASE_STATE') {
+    sendResponse({ lease: leaseCoordinator.getActiveLease() });
+    return false;
+  }
+
+  if (message?.type === 'RUN_PROBE') {
+    coordinator
+      .getSession()
+      .then(async (session) => {
+        if (!session) return sendResponse({ success: false, error: 'Not paired' });
+        const runner = new ProbeRunner({
+          fsm,
+          apiClient,
+          targetOrigin: session.targetOrigin,
+          connectionId: session.connectionId,
+          installationId: session.installationId,
+          expectedClinicId: session.clinicId,
+        });
+        const result = await runner.runProbe();
+        sendResponse({ success: true, result, record: fsm.getRecord() });
+      })
+      .catch((err) => sendResponse({ success: false, error: err.message }));
+    return true;
+  }
+
+  if (message?.type === 'SYNC_REFERENCE') {
+    coordinator
+      .getSession()
+      .then(async (session) => {
+        if (!session) return sendResponse({ success: false, error: 'Not paired' });
+        referenceSync.setTargetOrigin(session.targetOrigin);
+        const snapshot = await referenceSync.sync();
+        sendResponse({ success: true, snapshot });
+      })
+      .catch((err) => sendResponse({ success: false, error: err.message }));
+    return true;
+  }
+
+  if (message?.type === 'START_BACKFILL') {
+    coordinator
+      .getSession()
+      .then(async (session) => {
+        if (!session) return sendResponse({ success: false, error: 'Not paired' });
+        batchUploader.setInstallationId(session.installationId);
+        const engine = new BackfillEngine({
+          leaseCoordinator,
+          fsm,
+          batchUploader,
+          targetOrigin: session.targetOrigin,
+          connectionId: session.connectionId,
+          installationId: session.installationId,
+          pageSize: message.pageSize,
+        });
+        const checkpoint = await engine.start();
+        sendResponse({ success: true, checkpoint });
+      })
+      .catch((err) => sendResponse({ success: false, error: err.message }));
+    return true;
+  }
+
+  if (message?.type === 'RUN_RECONCILE') {
+    coordinator
+      .getSession()
+      .then(async (session) => {
+        if (!session) return sendResponse({ success: false, error: 'Not paired' });
+        batchUploader.setInstallationId(session.installationId);
+        const worker = new ReconcileWorker({
+          leaseCoordinator,
+          apiClient,
+          batchUploader,
+          targetOrigin: session.targetOrigin,
+          connectionId: session.connectionId,
+        });
+        const result = await worker.runReconciliation();
+        sendResponse({ success: true, result });
+      })
+      .catch((err) => sendResponse({ success: false, error: err.message }));
+    return true;
+  }
+
   return false;
 });
+
+// Alarm listener for MV3 background lease renewal & periodic reconciliation
+if (typeof chrome !== 'undefined' && chrome.alarms?.onAlarm) {
+  chrome.alarms.onAlarm.addListener(async (alarm) => {
+    if (alarm.name === 'lease_renewal') {
+      try {
+        await leaseCoordinator.renew();
+      } catch (err) {
+        console.warn('[LamaniSync SW] Lease renewal alarm error:', err);
+      }
+    } else if (alarm.name === 'reconcile_check') {
+      try {
+        const session = await coordinator.getSession();
+        if (session && leaseCoordinator.hasActiveLease()) {
+          batchUploader.setInstallationId(session.installationId);
+          const worker = new ReconcileWorker({
+            leaseCoordinator,
+            apiClient,
+            batchUploader,
+            targetOrigin: session.targetOrigin,
+            connectionId: session.connectionId,
+          });
+          await worker.runReconciliation();
+        }
+      } catch (err) {
+        console.warn('[LamaniSync SW] Reconcile alarm error:', err);
+      }
+    }
+  });
+}
+
