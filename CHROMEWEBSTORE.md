@@ -50,3 +50,14 @@
 
 - No remote code (`eval`, `new Function`, dynamic remote script tags) is used or loaded (AGENTS.md Rule 2).
 - All execution logic is packaged locally within the extension bundle.
+
+---
+
+## 4. Development Dependencies Justification (AGENTS.md Rule 13)
+
+### `@playwright/test` (v1.63.0)
+- **Why it is needed**:  
+  Added in Phase 11 as a development dependency to configure the Playwright browser test harness (`playwright.config.ts`) for launching unpacked Chrome extensions in headless Chromium (`--load-extension=dist`).
+- **Distribution Boundary**:  
+  Declared exclusively in `devDependencies`. It is completely excluded from Vite/CRXJS production build chunks (`dist/`), adds zero bytes to the distributed Chrome extension package, and has zero runtime footprint or permissions impact.
+

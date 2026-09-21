@@ -12,6 +12,7 @@
     "test": "vitest run",
     "test:contract": "node scripts/test-contract.js",
     "test:e2e": "node scripts/test-e2e.js",
+    "scan:phi": "node scripts/scan-phi.js",
     "package": "node scripts/package.js",
     "mock:cms": "node test-harness/mock-cms/server.js",
     "mock:sync": "node test-harness/mock-sync-api/server.js",
@@ -25,6 +26,7 @@
   "devDependencies": {
     "@crxjs/vite-plugin": "^2.7.1",
     "@eslint/js": "^9.21.0",
+    "@playwright/test": "^1.63.0",
     "@testing-library/react": "^16.2.0",
     "@types/chrome": "^0.3.0",
     "@types/node": "^22.13.9",

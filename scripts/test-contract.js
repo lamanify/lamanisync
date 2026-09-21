@@ -13,6 +13,7 @@ const res = spawnSync(
     'tests/unit/command-fsm.test.ts',
     'tests/unit/error-taxonomy.test.ts',
     'tests/contract/acme-cloud-adapter.test.ts',
+    'tests/contract/acme-cloud.contract.test.ts',
   ],
   {
     stdio: 'inherit',

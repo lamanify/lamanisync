@@ -21,6 +21,7 @@ import { CommandExecutor } from './command-executor.js';
 import { OutboxPoller, OUTBOX_ALARM_NAME } from './outbox-poller.js';
 import { KillSwitchCoordinator } from './kill-switch.js';
 import { TokenManager } from './token-manager.js';
+import { UpdateManager } from './update-manager.js';
 
 export const TOKEN_RENEWAL_ALARM_NAME = 'lamanisync_token_renewal';
 
@@ -96,6 +97,17 @@ export const outboxPoller = new OutboxPoller({
   },
 });
 
+export const updateManager = new UpdateManager({
+  commandExecutor,
+  leaseCoordinator,
+});
+
+if (typeof chrome !== 'undefined' && chrome.runtime?.onUpdateAvailable) {
+  chrome.runtime.onUpdateAvailable.addListener(async (details) => {
+    await updateManager.handleUpdateAvailable(details);
+  });
+}
+
 // Broadcast FSM state transitions to popup / extension views (Phase 9 reactive state)
 fsm.onTransition((record) => {
   if (typeof chrome !== 'undefined' && typeof chrome.runtime?.sendMessage === 'function') {
@@ -141,6 +153,7 @@ leaseCoordinator.onLeaseAcquired((lease) => {
 leaseCoordinator.onLeaseLost(() => {
   coordinator.setActiveLease(null);
   outboxPoller.stop();
+  updateManager.onCommandSettled().catch(() => {});
 
   if (typeof chrome !== 'undefined' && chrome.alarms?.clear) {
     try {

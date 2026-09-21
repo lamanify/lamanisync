@@ -9,14 +9,18 @@ on:
 jobs:
   validate:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [20, 22]
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: Setup Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: ${{ matrix.node-version }}
           cache: npm
 
       - name: Install dependencies
@@ -28,8 +32,20 @@ jobs:
       - name: Run typecheck
         run: npm run typecheck
 
-      - name: Run tests
+      - name: Run unit & integration tests
         run: npm run test
+
+      - name: Run capability contract tests
+        run: npm run test:contract
+
+      - name: Run 15 E2E browser & runtime scenarios
+        run: npm run test:e2e
+
+      - name: Run automated PHI & secrets scanner (AGENTS.md Rules 4, 5, 6)
+        run: npm run scan:phi
 
       - name: Build extension
         run: npm run build
+
+      - name: Verify build artifacts for zero PHI leaks
+        run: npm run scan:phi
