@@ -20,6 +20,21 @@ describe('Manifest V3 Configuration', () => {
     expect(manifest.background?.type).toBe('module');
   });
 
+  it('should declare standard icons and default action icons', () => {
+    expect(manifest.icons).toEqual({
+      16: 'icons/icon-16.png',
+      32: 'icons/icon-32.png',
+      48: 'icons/icon-48.png',
+      128: 'icons/icon-128.png',
+    });
+    expect(manifest.action?.default_icon).toEqual({
+      16: 'icons/icon-16.png',
+      32: 'icons/icon-32.png',
+      48: 'icons/icon-48.png',
+      128: 'icons/icon-128.png',
+    });
+  });
+
   it('strictly adheres to declared permissions: storage, scripting, and alarms declared, zero broad static host permissions', () => {
     const raw = manifest as unknown as Record<string, unknown>;
     // Storage, scripting, and alarms permissions required for session persistence, dynamic script registration, and lease renewal scheduling

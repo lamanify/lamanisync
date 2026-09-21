@@ -4,6 +4,7 @@ node_modules/
 # Build artifacts & packages
 dist/
 build/
+release/
 *.zip
 
 # Local implementation phase plans

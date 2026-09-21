@@ -1,63 +1,134 @@
-# Chrome Web Store Permission Justifications & Extension Metadata
+# Chrome Web Store Metadata, Disclosures & Release Documentation
 
-**Extension Name**: LamaniSync Dev  
+**Extension Title**: LamaniSync  
+**Development Identifier**: LamaniSync Dev  
 **Manifest Version**: 3  
-**Description**: Secure bridge between authenticated cloud CMS tabs and LamaniHub  
+**Target Category**: Productivity / Workflow & Planning  
+**Primary Language**: English  
+**Support Contact**: compliance@lamanify.com / support@lamanify.com  
+**Privacy Policy URL**: https://lamanify.com/privacy-policy  
 
 ---
 
-## 1. Declared Permissions
+## 1. Store Metadata & Single Purpose Declaration
 
-### `storage`
-- **Why it is needed**:  
-  Used to persist ephemeral connection session metadata (`installationId`, `connectionId`, `clinicId`, `targetOrigin`, and short-lived LamaniHub `sessionToken`) across service worker suspensions and browser restarts (AGENTS.md Rule 7).
-- **Security & Privacy Boundary**:  
-  In strict compliance with AGENTS.md Rules 4 and 6, `chrome.storage.local` is **never** used to store CMS passwords, session cookies, bearer tokens, CSRF secrets, or raw Patient Health Information (PHI). Only connection metadata and LamaniHub session tokens are stored.
+### Single Purpose Statement
+LamaniSync serves a single, well-defined operational purpose: **to provide a secure, authenticated synchronization bridge between certified cloud Clinic Management Systems (CMS) and the LamaniHub operational platform.**
 
-### `scripting`
-- **Why it is needed**:  
-  Used strictly via `chrome.scripting.registerContentScripts` and `chrome.scripting.unregisterContentScripts` to dynamically register the safe page integration bridge scripts matching exclusively the exact paired CMS origin (`toExactOriginPattern(targetOrigin)`). Scripts are never declared statically with broad patterns (`<all_urls>` or wildcards), fulfilling AGENTS.md Rule 3.
-- **Security & Privacy Boundary**:  
-  Dynamic script registration is triggered strictly after explicit device pairing and user-approved host permission. When permissions are revoked or the device is unpaired, dynamic scripts are immediately unregistered. No remote scripts or dynamic code evaluation (`eval`, `new Function`) are ever executed (AGENTS.md Rule 2).
+### Short Description (Chrome Web Store Listing — max 132 chars)
+Secure operational synchronization bridge between certified cloud clinic management systems (CMS) and LamaniHub.
 
-### `alarms`
-- **Why it is needed**:  
-  Used by the MV3 service worker to schedule background wakeups for leader lease renewal heartbeats, periodic event count reconciliation, and retry backoff resumption (AGENTS.md Rules 1 & 7). Because Manifest V3 service workers are ephemeral and suspended when inactive, `chrome.alarms` is the standard, battery-efficient browser API required to maintain leadership leases and prevent split-brain execution across multiple tabs.
-- **Security & Privacy Boundary**:  
-  The `chrome.alarms` API is used strictly for internal timer scheduling within the extension's background service worker (`lease_renewal`, `reconcile_check`, `backfill_resume`). It does not transmit data over the network, does not grant origin access, and never processes or stores raw Patient Health Information (PHI) (AGENTS.md Rules 4 & 6).
+### Detailed Store Description
+LamaniSync connects authorized healthcare clinic staff workstations running certified cloud-based Clinic Management Systems (CMS) directly with their organization's LamaniHub operational dashboard.
 
-### `chrome.permissions` API (Manifest Check)
-- **Status in Manifest**:  
-  The `chrome.permissions` API is an intrinsic Chrome Extensions API and does not require or accept a `'permissions'` permission token in `permissions: []` in Manifest V3. Attempting to declare `'permissions'` inside `permissions` generates a Chrome manifest warning and Web Store review flag (`unrecognized permission`). The extension uses the built-in `chrome.permissions` API (`request`, `contains`, `remove`, `onRemoved`) strictly to manage optional host permissions.
+Designed specifically for healthcare practices and clinical workflows, LamaniSync operates under strict security and zero-knowledge privacy boundaries:
+- **Zero Raw PHI Storage or Transmission**: Patient health records, identification numbers, and contact details remain strictly contained within the clinic's authenticated CMS session. Only anonymized operational synchronization events (e.g. schedule slot availability, anonymized appointment identifiers, confirmation receipts) are communicated.
+- **Hardware-Backed Device Authentication**: Every workstation generates a local WebCrypto keypair upon installation, requiring explicit administrator pairing before any sync operations can begin.
+- **Exact-Origin CMS Binding**: Access is restricted strictly to the clinic's exact certified CMS domain. Wildcard permissions (`*://*/*`) are rejected at the architectural level.
+- **Ephemeral & Battery-Efficient**: Built entirely on Chrome Extension Manifest V3 with an event-driven background service worker, automatic leader-lease coordination across tabs, and zero persistent background overhead.
 
 ---
 
-## 2. Optional Host Permissions
+## 2. Permission Justifications Matrix
 
-### `optional_host_permissions` (`http://localhost:4001/*`, `https://*/*`)
-- **Why it is needed**:  
-  Allows the extension to request runtime host permissions dynamically via `chrome.permissions.request()` only after the device has successfully paired with a specific clinic CMS origin.
-- **Security & Privacy Boundary**:  
-  In strict compliance with AGENTS.md Rule 3:
-  - **Zero Broad Host Permissions**: Wildcards (such as `*://*/*` or `https://*/*`) are strictly rejected at runtime by `validateOriginMatch` and `normalizeExactOrigin`.
-  - **Exact Origin Only**: The extension prompts the staff user for host permission covering **only the exact paired CMS origin** (e.g. `http://localhost:4001` or clinical HTTPS domain) returned during the pairing handshake.
-  - **User Gesture Required**: Host permission prompts are triggered exclusively by an explicit user click on the "Grant CMS Access" button in the extension popup (never automatically).
-  - **Clean Revocation**: When the device is unpaired or revoked, host permissions are immediately dropped via `chrome.permissions.remove()`.
+Every permission requested by LamaniSync is strictly necessary to fulfill its single purpose. The extension adheres to the principle of least privilege.
 
----
-
-## 3. Remote Code & Content Security Policy (CSP)
-
-- No remote code (`eval`, `new Function`, dynamic remote script tags) is used or loaded (AGENTS.md Rule 2).
-- All execution logic is packaged locally within the extension bundle.
+| Permission / API | Scope | Necessity & Justification |
+| :--- | :--- | :--- |
+| **`storage`** | Local extension storage | Required to persist non-PHI workstation pairing state (`installationId`, `clinicId`, `connectionId`, `targetOrigin`, and ephemeral LamaniHub `sessionToken`) across service worker suspensions and browser restarts. **Boundary**: Never used to store CMS passwords, session cookies, bearer tokens, or raw Patient Health Information (AGENTS.md Rules 4 & 6). |
+| **`alarms`** | Internal event scheduler | Required to schedule low-frequency background wakeups for leader lease heartbeats (preventing split-brain execution across multiple open tabs), periodic event count reconciliation, and exponential retry backoff. **Boundary**: Used strictly for internal timer scheduling. Transmits no data and touches no host origins. |
+| **`scripting`** | Dynamic content script registration | Required to dynamically inject safe observation and action runner scripts exclusively into the tab matching the exact paired CMS origin via `chrome.scripting.registerContentScripts`. **Boundary**: Scripts are never declared statically with broad wildcards (`<all_urls>`). If permissions are revoked or the device is unpaired, dynamic scripts are immediately unregistered. Zero arbitrary remote code execution (AGENTS.md Rules 2 & 3). |
+| **`optional_host_permissions`**<br>`http://localhost:4001/*`<br>`https://*/*` | Runtime user-granted CMS origin | Allows the extension to dynamically request access to **only the exact CMS origin** utilized by the pairing clinic (e.g. `https://acme-clinic.cms-provider.com/*`) via `chrome.permissions.request()`. **Boundary**: Prompts are triggered solely by explicit user interaction ("Grant CMS Access" button in popup). Broad wildcards are rejected at runtime. Permissions are immediately revoked upon unpairing. |
+| **`chrome.permissions` API** | Intrinsic browser API | Used to query (`contains`), request (`request`), and revoke (`remove`) host permissions dynamically. Not declared in `permissions: []` to comply with Manifest V3 schema rules. |
 
 ---
 
-## 4. Development Dependencies Justification (AGENTS.md Rule 13)
+## 3. Privacy Practices, Health Data Disclosures & Zero-Knowledge PHI
+
+### Health & Sensitive Data Handling (AGENTS.md Rules 4, 5, 6)
+LamaniSync is engineered from the ground up for compliance with healthcare data protection standards (including HIPAA and Malaysian Personal Data Protection Act / PDPA):
+
+1. **Zero-Knowledge Architecture**:
+   - The extension operates in the context of an already authenticated clinic staff session in the cloud CMS.
+   - The extension **never** extracts, inspects, transmits, or stores Patient Health Information (PHI) such as patient names, identification numbers (NRIC/Passport), phone numbers, home addresses, or diagnostic/medical histories.
+   - Only operational metadata necessary for synchronization is processed: deterministic appointment UUIDs, schedule timestamps, slot duration, and status indicators (confirmed, arrived, completed).
+2. **No Credential Exfiltration**:
+   - CMS passwords, session cookies, bearer tokens, and CSRF secrets are never accessed, copied, or transmitted to LamaniHub or any external server (AGENTS.md Rule 4).
+   - Network interactions with the CMS rely entirely on the staff user's existing, ambient browser session.
+3. **No Third-Party Trackers or Analytics**:
+   - Zero analytics SDKs (no Google Analytics, Mixpanel, Segment, etc.).
+   - Zero advertising networks, tracking pixels, or data brokering.
+   - Zero external font, stylesheet, or script CDNs loaded at runtime.
+4. **Data Transmission Boundary**:
+   - Synchronization events flow strictly between the paired clinic CMS origin and the clinic's dedicated LamaniHub tenant API endpoint.
+   - All network traffic is strictly encrypted via TLS (HTTPS / WSS).
+
+---
+
+## 4. Remote Code Declaration (Manifest V3 Compliance)
+
+In strict compliance with Chrome Web Store policy and AGENTS.md Rule 2:
+
+- **Zero Remote JavaScript**: The extension does not use `eval()`, `new Function()`, `setTimeout([string])`, remote `import()`, or dynamically injected `<script>` tags pointing to remote URLs.
+- **Declarative Signed Adapter Manifests**:
+  - CMS adapters are distributed as declarative JSON documents (`acme-cloud.manifest.json`, `vendor-cms-1.manifest.json`).
+  - Manifests contain **only declarative data structures**: CSS selectors, JSON field paths, and predefined action enumerations.
+  - Manifests are digitally signed using Ed25519 cryptographic signatures verified against hardcoded vendor public keys before parsing.
+  - Parsing and execution are performed exclusively by a bounded, pre-packaged interpreter compiled directly into the extension bundle.
+  - Any tampered or unsigned manifest fails verification immediately and rolls back safely to the bundled Last-Known-Good configuration.
+
+---
+
+## 5. Development Dependencies Justification (AGENTS.md Rule 13)
 
 ### `@playwright/test` (v1.63.0)
-- **Why it is needed**:  
-  Added in Phase 11 as a development dependency to configure the Playwright browser test harness (`playwright.config.ts`) for launching unpacked Chrome extensions in headless Chromium (`--load-extension=dist`).
-- **Distribution Boundary**:  
-  Declared exclusively in `devDependencies`. It is completely excluded from Vite/CRXJS production build chunks (`dist/`), adds zero bytes to the distributed Chrome extension package, and has zero runtime footprint or permissions impact.
+- **Why it is needed**: Development-only test runner used to automate end-to-end browser scenarios (`playwright.config.ts`, `tests/e2e/`) in headless Chromium.
+- **Distribution Boundary**: Excluded completely from production bundles; zero footprint in release ZIP.
 
+### `@crxjs/vite-plugin` (v2.7.1) & `vite` (v6.2.0)
+- **Why it is needed**: Build tooling to compile TypeScript, bundle React popup UI, and package Manifest V3 assets into `dist/`.
+- **Distribution Boundary**: Runs strictly at build time. No development server or HMR code is included in production artifacts.
+
+---
+
+## 6. Dashboard Submission, Private Beta & Rollback Procedures
+
+### A. Pre-Submission Package Validation
+Before uploading to the Chrome Developer Dashboard, run the deterministic packaging suite:
+```bash
+npm run package
+```
+This executes:
+1. Full TypeScript typecheck and clean production Vite/CRXJS build.
+2. Integrity validation: confirms presence of all icons (16, 32, 48, 128), `manifest.json`, popup HTML, and dynamic runner scripts.
+3. Boundary enforcement: asserts zero test files, mocks, `.map` files, or `.env` secrets exist in `dist/`.
+4. Deterministic ZIP packaging in `release/lamanisync-extension-v{version}.zip`.
+5. Cryptographic SHA-256 generation recorded in `release/lamanisync-extension-v{version}.zip.sha256`.
+
+### B. Chrome Developer Dashboard Submission Flow
+1. **Account**: Sign in to the official verified Lamanify Google Developer Account.
+2. **Package Upload**:
+   - Navigate to the LamaniSync extension item.
+   - Upload the generated `release/lamanisync-extension-v{version}.zip`.
+   - Verify that the dashboard computes the matching package size and recognizes Manifest V3 without warnings.
+3. **Store Listing**:
+   - Enter Title: `LamaniSync`.
+   - Paste Short and Detailed Descriptions from Section 1 above.
+   - Upload official icons (`public/icons/icon-128.png`) and standard UI screenshots (1280x800) demonstrating device pairing and status indicators.
+4. **Privacy Tab**:
+   - Single Purpose: Paste the Single Purpose Statement from Section 1.
+   - Permission Justifications: Copy the exact justifications from Section 2 for `storage`, `alarms`, and `scripting`.
+   - Host Permissions: Specify that host access is requested dynamically at runtime for certified clinic domains.
+   - User Data Disclosures: Check "Zero sensitive personal data collected or stored". Check "Authentication information used strictly for internal sync". Confirm no data is sold or used for credit scoring/advertising.
+5. **Distribution & Visibility (Private Beta)**:
+   - In Phase 13, set visibility to **Private** / **Restricted Distribution**.
+   - Restrict access to designated tester Google Groups / allowed email list (clinical pilot partners).
+   - Save and submit for automated and manual review.
+
+### C. Rollback & Emergency Incident Procedures
+1. **Version Immutability**: Every release ZIP and SHA-256 checksum is permanently archived in tagged Git releases and build artifacts.
+2. **Dashboard Staged Rollback**:
+   - If an unexpected regression occurs in the field, maintain the previously certified release ZIP (`release/lamanisync-extension-v{prev}.zip`).
+   - Immediately upload the previous build with an incremented patch version to the Developer Dashboard.
+3. **Runtime Kill-Switch**:
+   - In addition to Web Store rollbacks, LamaniSync includes a built-in cryptographic kill-switch endpoint polled during session establishment. If an adapter or origin is flagged, the extension automatically halts background execution and notifies the user via the popup UI.
