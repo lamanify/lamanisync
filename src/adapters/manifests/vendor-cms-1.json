@@ -137,6 +137,74 @@
         }
       }
     },
+    "patients.update": {
+      "recipeId": "patients.update",
+      "type": "write",
+      "capability": "patients.update",
+      "method": "PUT",
+      "path": "/api/patients/:id",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "hook": "vendor-cms-1-extract-csrf",
+      "transforms": [
+        {
+          "field": "phone",
+          "transform": "phone_my"
+        },
+        {
+          "field": "fullName",
+          "transform": "trim"
+        }
+      ],
+      "bodyTemplate": {
+        "fullName": "$params.fullName",
+        "phone": "$params.phone",
+        "email": "$params.email"
+      },
+      "verification": {
+        "path": "/api/patients/:id",
+        "method": "GET",
+        "idParam": "id",
+        "expectedFields": {
+          "fullName": "$params.fullName"
+        }
+      }
+    },
+    "patient_update": {
+      "recipeId": "patient_update",
+      "type": "write",
+      "capability": "PATIENT_WRITE",
+      "method": "PUT",
+      "path": "/api/patients/:id",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "hook": "vendor-cms-1-extract-csrf",
+      "transforms": [
+        {
+          "field": "phone",
+          "transform": "phone_my"
+        },
+        {
+          "field": "fullName",
+          "transform": "trim"
+        }
+      ],
+      "bodyTemplate": {
+        "fullName": "$params.fullName",
+        "phone": "$params.phone",
+        "email": "$params.email"
+      },
+      "verification": {
+        "path": "/api/patients/:id",
+        "method": "GET",
+        "idParam": "id",
+        "expectedFields": {
+          "fullName": "$params.fullName"
+        }
+      }
+    },
     "appointments.read": {
       "recipeId": "appointments.read",
       "type": "read",
@@ -383,5 +451,5 @@
     "intervalSeconds": 60,
     "deltaField": "updatedAt"
   },
-  "signature": "JZ+aYkHcaOs1rMvv453Bjw852c9otf/xK0ZoII+Xdv+q4InlsE2q1RsZ14l8OOjgTA7/ORmCijD1H9/WZHNfDg=="
+  "signature": "HJ3t8Ca7xx2TVNEV0TYduqvEq2VxDTMi8wIGYzyVpsrazB4Xx7ZiklwZXs9bUOyOURkx2PoEp+Jux8xbDRF3Dw=="
 }

@@ -123,6 +123,31 @@ All paths are relative to the validated origin (AGENTS.md Rule 3: exact origin m
 }
 ```
 
+#### `PUT /api/patients/:id`
+- **Capability:** `PATIENT_WRITE` / `patients.update`
+- **Headers:** `Content-Type: application/json`, `X-CSRF-Token: <token>`
+- **Request Body:**
+```json
+{
+  "fullName": "ZZTEST Patient 01 Updated",
+  "phone": "+60123456701",
+  "email": "updated.p01@example.test"
+}
+```
+- **Response Format (200 OK):**
+```json
+{
+  "data": {
+    "id": "ZZTEST-P01",
+    "mrn": "MRN-ZZ-001",
+    "fullName": "ZZTEST Patient 01 Updated",
+    "phone": "+60123456701",
+    "email": "updated.p01@example.test",
+    "updatedAt": "2026-10-01T10:05:00+08:00"
+  }
+}
+```
+
 ---
 
 ### 3.2 Appointment Management

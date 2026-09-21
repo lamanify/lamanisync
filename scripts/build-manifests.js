@@ -343,6 +343,62 @@ const vendorCms1Manifest = {
         },
       },
     },
+    'patients.update': {
+      recipeId: 'patients.update',
+      type: 'write',
+      capability: 'patients.update',
+      method: 'PUT',
+      path: '/api/patients/:id',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      hook: 'vendor-cms-1-extract-csrf',
+      transforms: [
+        { field: 'phone', transform: 'phone_my' },
+        { field: 'fullName', transform: 'trim' },
+      ],
+      bodyTemplate: {
+        fullName: '$params.fullName',
+        phone: '$params.phone',
+        email: '$params.email',
+      },
+      verification: {
+        path: '/api/patients/:id',
+        method: 'GET',
+        idParam: 'id',
+        expectedFields: {
+          fullName: '$params.fullName',
+        },
+      },
+    },
+    patient_update: {
+      recipeId: 'patient_update',
+      type: 'write',
+      capability: 'PATIENT_WRITE',
+      method: 'PUT',
+      path: '/api/patients/:id',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      hook: 'vendor-cms-1-extract-csrf',
+      transforms: [
+        { field: 'phone', transform: 'phone_my' },
+        { field: 'fullName', transform: 'trim' },
+      ],
+      bodyTemplate: {
+        fullName: '$params.fullName',
+        phone: '$params.phone',
+        email: '$params.email',
+      },
+      verification: {
+        path: '/api/patients/:id',
+        method: 'GET',
+        idParam: 'id',
+        expectedFields: {
+          fullName: '$params.fullName',
+        },
+      },
+    },
     'appointments.read': {
       recipeId: 'appointments.read',
       type: 'read',

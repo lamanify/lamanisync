@@ -18,8 +18,8 @@ This audit report certifies that `vendor-cms-1` (Version 1.0.0) has satisfied al
 The adapter achieved:
 - **100.0%** Patient parity (exceeding ≥99.5% gate threshold)
 - **100.0%** Appointment parity (exceeding ≥99.5% gate threshold)
-- **Zero** false appointment confirmations (0 / 500)
-- **Zero** duplicate appointments or wrongly merged records (0 / 500)
+- **Zero** false appointment confirmations (0 / 1,000)
+- **Zero** duplicate appointments or wrongly merged records (0 / 1,000)
 - **100.0%** read-after-write verification on all mutating recipes
 
 ---
@@ -38,12 +38,13 @@ The adapter achieved:
 
 ## 3. Two-Tenant Contract Testing Matrix
 
-Both tenant variants were evaluated against the full V1 capability suite (`patients.read`, `patients.create`, `appointments.read`, `appointments.availability`, `appointments.create`, `appointments.reschedule`, `appointments.cancel`, and reference data).
+Both tenant variants were evaluated against the full V1 capability suite (`patients.read`, `patients.create`, `patients.update`, `appointments.read`, `appointments.availability`, `appointments.create`, `appointments.reschedule`, `appointments.cancel`, and reference data).
 
 | Capability | Tenant A (Standard Cloud) | Tenant B (Custom Field Variant) | Verification Mechanism |
 | :--- | :--- | :--- | :--- |
 | `patients.read` | PASSED | PASSED (via config mapping) | Validated against patient schema |
 | `patients.create` | PASSED | PASSED (`clientName`, `mobile_no`, `nric`) | Read-after-write verification + `phone_my` |
+| `patients.update` | PASSED | PASSED | Read-after-write verification + field check |
 | `appointments.read` | PASSED | PASSED (via config mapping) | Validated against `NormalizedAppointmentSchema` |
 | `appointments.availability` | PASSED | PASSED | Real-time slot availability check |
 | `appointments.create` | PASSED | PASSED | Precondition check + read-after-write verification |
@@ -57,14 +58,14 @@ Both tenant variants were evaluated against the full V1 capability suite (`patie
 
 ## 4. 7-Day Shadow Read-Only & Parity Simulation Audit
 
-A high-volume synthetic shadow ingestion simulation was conducted with 500 patient records and 500 appointment events representing 7 days of continuous clinical operations.
+A high-volume synthetic shadow ingestion simulation was conducted with 1,000 patient records and 1,000 appointment events representing 7 days of continuous clinical operations.
 
 ### Parity Audit Metrics
 
 | Metric | Target Threshold | Achieved Result | Audit Status |
 | :--- | :--- | :--- | :--- |
-| **Patient Record Parity** | ≥ 99.5% | **100.0%** (500 / 500) | **PASSED** |
-| **Appointment Record Parity** | ≥ 99.5% | **100.0%** (500 / 500) | **PASSED** |
+| **Patient Record Parity** | ≥ 99.5% | **100.0%** (1,000 / 1,000) | **PASSED** |
+| **Appointment Record Parity** | ≥ 99.5% | **100.0%** (1,000 / 1,000) | **PASSED** |
 | **False Confirmations Reported** | Exactly 0 | **0** | **PASSED** |
 | **Duplicate Appointments Created** | Exactly 0 | **0** | **PASSED** |
 | **Wrongly Merged Patients** | Exactly 0 | **0** | **PASSED** |
