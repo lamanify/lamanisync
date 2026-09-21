@@ -19,10 +19,46 @@ import { ReconcileWorker } from './reconcile.js';
 import { EchoSuppressor } from './echo-suppressor.js';
 import { CommandExecutor } from './command-executor.js';
 import { OutboxPoller, OUTBOX_ALARM_NAME } from './outbox-poller.js';
+import { KillSwitchCoordinator } from './kill-switch.js';
+import { TokenManager } from './token-manager.js';
 
 export const fsm = new ConnectionFSM();
 export const apiClient = new SyncApiClient();
 export const coordinator = new PairingCoordinator({ fsm, apiClient });
+
+export const killSwitch = new KillSwitchCoordinator({
+  fsm,
+  onPauseTriggered: () => {
+    outboxPoller.stop();
+  },
+});
+
+export const tokenManager = new TokenManager({
+  apiClient,
+  storage: {
+    get: (keys) =>
+      typeof chrome !== 'undefined' && chrome.storage?.local
+        ? chrome.storage.local.get(keys)
+        : Promise.resolve({}),
+    set: (items) =>
+      typeof chrome !== 'undefined' && chrome.storage?.local
+        ? chrome.storage.local.set(items)
+        : Promise.resolve(),
+    remove: (keys) =>
+      typeof chrome !== 'undefined' && chrome.storage?.local
+        ? chrome.storage.local.remove(keys)
+        : Promise.resolve(),
+  },
+  fsm,
+});
+
+apiClient.setKillSwitchHandler((payload) => {
+  killSwitch.processRemoteSignal(payload);
+});
+
+apiClient.setTokenRecoveryHandler(async () => {
+  return tokenManager.handleTokenExpired();
+});
 
 export const leaseCoordinator = new LeaseCoordinator({ apiClient });
 export const dedupeCache = new DeduplicationCache();
@@ -46,6 +82,11 @@ export const outboxPoller = new OutboxPoller({
   commandExecutor,
   fsm,
   connectionId: '',
+  killSwitches: {
+    isGlobalPaused: () => killSwitch.isGlobalPaused(),
+    isAdapterPaused: () => false,
+    isConnectionPaused: () => false,
+  },
 });
 
 // Broadcast FSM state transitions to popup / extension views (Phase 9 reactive state)

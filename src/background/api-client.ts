@@ -16,7 +16,8 @@ import {
   type WriteReceipt,
 } from '../core/contracts/commands.js';
 import { LamaniError, classifyError } from '../core/errors.js';
-import { signPayload } from '../storage/device-key.js';
+import { getSyncApiUrl } from '../config/env.js';
+import { signRequest } from '../core/crypto/signer.js';
 
 export const PairingResponseSchema = z.object({
   installationId: z.string().min(1, 'installationId is required'),
@@ -50,9 +51,11 @@ export class SyncApiClient {
   private fetchFn: typeof fetch;
   private idbFactory?: IDBFactory;
   private clockSkewMs: number = 0;
+  private killSwitchHandler?: (payload: unknown) => void;
+  private tokenRecoveryHandler?: () => Promise<boolean>;
 
   constructor(config: ApiClientConfig = {}) {
-    this.baseUrl = config.baseUrl || 'http://localhost:4002';
+    this.baseUrl = config.baseUrl || getSyncApiUrl();
     this.sessionToken = config.sessionToken ?? null;
     this.fetchFn = config.fetchFn || ((...args) => globalThis.fetch(...args));
     this.idbFactory = config.idbFactory;
@@ -97,43 +100,46 @@ export class SyncApiClient {
     }
   }
 
-  async request<T>(path: string, options: RequestOptions = {}): Promise<T> {
+  setKillSwitchHandler(handler?: (payload: unknown) => void): void {
+    this.killSwitchHandler = handler;
+  }
+
+  setTokenRecoveryHandler(handler?: () => Promise<boolean>): void {
+    this.tokenRecoveryHandler = handler;
+  }
+
+  async request<T>(path: string, options: RequestOptions = {}, isRetry: boolean = false): Promise<T> {
     const method = options.method || 'GET';
     const correlationId = options.correlationId || crypto.randomUUID();
-    const nonce = crypto.randomUUID();
-    const timestamp = new Date(Date.now() + this.clockSkewMs).toISOString();
-
     const url = new URL(path, this.baseUrl);
     const bodyString = options.body !== undefined ? JSON.stringify(options.body) : '';
 
-    const headers: Record<string, string> = {
+    let headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      'x-correlation-id': correlationId,
-      'x-device-timestamp': timestamp,
-      'x-device-nonce': nonce,
       ...options.headers,
     };
 
-    if (this.sessionToken) {
-      headers['Authorization'] = `Bearer ${this.sessionToken}`;
+    if (!options.skipSigning) {
+      const signed = await signRequest({
+        method,
+        url,
+        body: options.body,
+        correlationId,
+        clockSkewMs: this.clockSkewMs,
+        idbFactory: this.idbFactory,
+      });
+      headers = {
+        ...headers,
+        ...signed.headers,
+      };
+    } else {
+      headers['x-correlation-id'] = correlationId;
+      headers['x-device-timestamp'] = new Date(Date.now() + this.clockSkewMs).toISOString();
+      headers['x-device-nonce'] = crypto.randomUUID();
     }
 
-    if (!options.skipSigning) {
-      // Canonical request format for device signing:
-      // METHOD\nPATH\nTIMESTAMP\nNONCE\nBODY
-      const pathWithQuery = url.search ? `${url.pathname}${url.search}` : url.pathname;
-      const canonical = `${method.toUpperCase()}\n${pathWithQuery}\n${timestamp}\n${nonce}\n${bodyString}`;
-      try {
-        const signature = await signPayload(canonical, this.idbFactory);
-        headers['x-device-signature'] = signature;
-      } catch (signErr) {
-        // If device key is unavailable, throw a non-PHI classified error
-        throw new LamaniError(
-          'Failed to sign request with device identity key',
-          'SIGNING_FAILED',
-          { cause: signErr }
-        );
-      }
+    if (this.sessionToken) {
+      headers['Authorization'] = `Bearer ${this.sessionToken}`;
     }
 
     let response: Response;
@@ -167,6 +173,25 @@ export class SyncApiClient {
         ? (responseBody as Record<string, unknown>)
         : {};
 
+      // Check remote kill-switch signals (403 or PAUSED)
+      if (
+        response.status === 403 ||
+        errObj.status === 'PAUSED' ||
+        errObj.error === 'PAUSED' ||
+        errObj.paused === true
+      ) {
+        this.killSwitchHandler?.(responseBody || { status: 'PAUSED' });
+      }
+
+      // Expired token auto-recovery (401 Unauthorized)
+      if (response.status === 401 && !isRetry && this.tokenRecoveryHandler) {
+        const recovered = await this.tokenRecoveryHandler();
+        if (recovered) {
+          // Retry original request once with new token
+          return this.request<T>(path, options, true);
+        }
+      }
+
       if (errObj.error === 'PAIRING_CODE_EXPIRED') {
         throw new LamaniError(
           (errObj.message as string) || 'The pairing code has expired',
@@ -183,7 +208,30 @@ export class SyncApiClient {
       });
     }
 
+    // Also check 200 responses that may carry a PAUSED kill-switch indicator
+    if (
+      typeof responseBody === 'object' &&
+      responseBody !== null &&
+      (responseBody as Record<string, unknown>).status === 'PAUSED'
+    ) {
+      this.killSwitchHandler?.(responseBody);
+    }
+
     return responseBody as T;
+  }
+
+  /**
+   * Proactively renews device session token via POST /v1/sync/tokens/renew.
+   */
+  async renewSessionToken(installationId: string): Promise<{ sessionToken: string; expiresAt: string }> {
+    const res = await this.request<{ sessionToken: string; expiresAt: string }>('/v1/sync/tokens/renew', {
+      method: 'POST',
+      body: { installationId },
+    });
+    if (res?.sessionToken) {
+      this.sessionToken = res.sessionToken;
+    }
+    return res;
   }
 
   /**

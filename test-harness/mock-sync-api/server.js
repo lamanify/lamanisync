@@ -32,6 +32,14 @@ function createInitialSyncState() {
     ],
     /** @type {any[]} */
     receipts: [],
+    seenNonces: new Set(),
+    killSwitch: {
+      global: { paused: false, reason: '' },
+      adapters: new Map(),
+      connections: new Map(),
+    },
+    batches: new Map(),
+    receiptsByCommand: new Map(),
   };
 }
 
@@ -114,6 +122,100 @@ export class MockSyncApiServer {
         return this.sendJson(res, 200, { status: 'ok', service: 'mock-sync-api', port: this.port });
       }
 
+      if (pathname === '/__admin/kill-switch' && req.method === 'POST') {
+        const { level, paused, targetId, reason } = body;
+        if (level === 'global') {
+          this.state.killSwitch.global.paused = Boolean(paused);
+          this.state.killSwitch.global.reason = reason || '';
+        } else if (level === 'adapter' && targetId) {
+          if (paused) {
+            this.state.killSwitch.adapters.set(targetId, reason || '');
+          } else {
+            this.state.killSwitch.adapters.delete(targetId);
+          }
+        } else if (level === 'connection' && targetId) {
+          if (paused) {
+            this.state.killSwitch.connections.set(targetId, reason || '');
+          } else {
+            this.state.killSwitch.connections.delete(targetId);
+          }
+        }
+        return this.sendJson(res, 200, {
+          status: 'ok',
+          level,
+          paused: Boolean(paused),
+          targetId,
+        });
+      }
+
+      // --- Replay Protection & Drift Verification ---
+      if (pathname.startsWith('/v1/sync/') && pathname !== '/v1/sync/public-key') {
+        const timestampHeader = req.headers['x-device-timestamp'];
+        const nonceHeader = req.headers['x-device-nonce'];
+
+        if (timestampHeader) {
+          const timestampMs = new Date(timestampHeader).getTime();
+          if (!Number.isNaN(timestampMs)) {
+            const driftMs = Math.abs(Date.now() - timestampMs);
+            if (driftMs > 60_000) {
+              return this.sendJson(res, 401, {
+                error: 'CLOCK_DRIFT_EXCEEDED',
+                message: `Request timestamp drift exceeds 60 seconds tolerance (${Math.round(driftMs / 1000)}s)`,
+              });
+            }
+          }
+        }
+
+        if (nonceHeader) {
+          if (this.state.seenNonces.has(nonceHeader)) {
+            return this.sendJson(res, 401, {
+              error: 'NONCE_REPLAY_DETECTED',
+              message: `Nonce '${nonceHeader}' has already been processed (replay attack detected)`,
+            });
+          }
+          this.state.seenNonces.add(nonceHeader);
+        }
+      }
+
+      // --- Remote Kill-Switch Enforcer ---
+      if (pathname.startsWith('/v1/sync/') && pathname !== '/v1/sync/public-key') {
+        // 1. Global Kill-Switch
+        if (this.state.killSwitch.global.paused) {
+          return this.sendJson(res, 403, {
+            error: 'PAUSED',
+            status: 'PAUSED',
+            killSwitchLevel: 'global',
+            message: this.state.killSwitch.global.reason || 'Service globally paused remotely',
+          });
+        }
+
+        // 2. Connection Kill-Switch
+        const connIdMatch = pathname.match(/\/connections\/([^/]+)/);
+        const queryConnId = parsedUrl.searchParams.get('connectionId');
+        const connId = (connIdMatch ? connIdMatch[1] : null) || queryConnId || body.connectionId;
+        if (connId && this.state.killSwitch.connections.has(connId)) {
+          return this.sendJson(res, 403, {
+            error: 'PAUSED',
+            status: 'PAUSED',
+            killSwitchLevel: 'connection',
+            targetId: connId,
+            message: this.state.killSwitch.connections.get(connId) || `Connection '${connId}' paused remotely`,
+          });
+        }
+
+        // 3. Adapter Kill-Switch
+        const adapterId = req.headers['x-adapter-id'] || body.adapterId;
+        if (adapterId && this.state.killSwitch.adapters.has(adapterId)) {
+          return this.sendJson(res, 403, {
+            error: 'PAUSED',
+            status: 'PAUSED',
+            killSwitchLevel: 'adapter',
+            targetId: adapterId,
+            message: this.state.killSwitch.adapters.get(adapterId) || `Adapter '${adapterId}' paused remotely`,
+          });
+        }
+      }
+
       // --- Installations & Pairing ---
       if (pathname === '/v1/sync/installations/pair' && req.method === 'POST') {
         if (!body.pairingCode || !body.clientPublicKey) {
@@ -184,6 +286,29 @@ export class MockSyncApiServer {
           this.state.installations.delete(installationId);
         }
         return this.sendJson(res, 200, { status: 'revoked' });
+      }
+
+      // --- Session Token Renewal (Phase 10) ---
+      if ((pathname === '/v1/sync/tokens/renew' || pathname === '/v1/sync/session/renew') && req.method === 'POST') {
+        const { installationId } = body;
+        if (!installationId || !this.state.installations.has(installationId)) {
+          return this.sendJson(res, 401, {
+            error: 'UNAUTHORIZED',
+            message: 'Unknown or unauthenticated installation',
+          });
+        }
+
+        const inst = this.state.installations.get(installationId);
+        const sessionToken = `stk_mock_${Date.now()}`;
+        const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+        inst.sessionToken = sessionToken;
+        inst.expiresAt = expiresAt;
+
+        return this.sendJson(res, 200, {
+          status: 'ok',
+          sessionToken,
+          expiresAt,
+        });
       }
 
       // --- Public Key Endpoint ---
@@ -260,15 +385,23 @@ export class MockSyncApiServer {
 
       // --- Event Batch Ingestion ---
       if (pathname === '/v1/sync/events/batch' && req.method === 'POST') {
+        const batchId = body.batchId || `batch_${Date.now()}`;
+        if (this.state.batches.has(batchId)) {
+          return this.sendJson(res, 200, this.state.batches.get(batchId));
+        }
+
         const events = body.events || [];
         this.state.events.push(...events);
 
-        return this.sendJson(res, 200, {
+        const responsePayload = {
           acknowledged: true,
-          batchId: body.batchId || `batch_${Date.now()}`,
+          batchId,
           processedCount: events.length,
           checkpoint: `chk_${Date.now()}`,
-        });
+        };
+        this.state.batches.set(batchId, responsePayload);
+
+        return this.sendJson(res, 200, responsePayload);
       }
 
       // --- Reconciliation Summary Endpoint (Phase 7) ---
@@ -414,7 +547,13 @@ export class MockSyncApiServer {
           cmd.result = receipt;
         }
 
-        this.state.receipts.push(receipt);
+        this.state.receiptsByCommand.set(commandId, receipt);
+        const existingIdx = this.state.receipts.findIndex((r) => r.commandId === commandId);
+        if (existingIdx >= 0) {
+          this.state.receipts[existingIdx] = receipt;
+        } else {
+          this.state.receipts.push(receipt);
+        }
 
         return this.sendJson(res, 200, {
           acknowledged: true,

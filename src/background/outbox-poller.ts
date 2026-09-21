@@ -162,6 +162,7 @@ export class OutboxPoller {
 
     // 2. Respect kill switches & connection readiness
     if (this.isPaused()) {
+      this.stop();
       return null;
     }
 
@@ -173,7 +174,24 @@ export class OutboxPoller {
 
     try {
       // 3. Pull next command from outbox
-      const rawCommand = await this.apiClient.fetchNextCommand(this.connectionId);
+      let rawCommand: SyncCommand | null = null;
+      try {
+        rawCommand = await this.apiClient.fetchNextCommand(this.connectionId);
+      } catch (fetchErr) {
+        const errStatusCode = (fetchErr as { statusCode?: number }).statusCode;
+        const errMsg = (fetchErr as Error).message || '';
+        if (errStatusCode === 403 || errMsg.includes('PAUSED') || (fetchErr as { code?: string }).code === 'SERVICE_PAUSED') {
+          this.stop();
+          if (this.fsm.canTransition('PAUSED')) {
+            this.fsm.transition('PAUSED', {
+              reason: `Outbox polling halted due to remote kill-switch: ${errMsg}`,
+            });
+          }
+          return null;
+        }
+        throw fetchErr;
+      }
+
       if (!rawCommand) {
         return null;
       }
