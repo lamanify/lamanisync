@@ -137,6 +137,13 @@ export function App() {
             isLoading={isLoading}
             onRetry={retry}
             onOpenDiagnostics={() => setIsDiagOpen(true)}
+            onCopyDiagnostics={async () => {
+              const bundle = getDiagnosticBundle();
+              const json = JSON.stringify(bundle, null, 2);
+              if (navigator?.clipboard?.writeText) {
+                await navigator.clipboard.writeText(json).catch(() => {});
+              }
+            }}
             onUnpair={() => setIsUnpairConfirmOpen(true)}
           />
         );

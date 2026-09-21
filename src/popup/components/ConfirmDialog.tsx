@@ -1,4 +1,4 @@
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useRef } from 'react';
 
 export interface ConfirmDialogProps {
   isOpen: boolean;
@@ -25,11 +25,34 @@ export function ConfirmDialog({
   onCancel,
   testId = 'confirm-dialog',
 }: ConfirmDialogProps) {
+  const cardRef = useRef<HTMLDivElement>(null);
+
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         e.preventDefault();
         onCancel();
+        return;
+      }
+      if (e.key === 'Tab' && cardRef.current) {
+        const focusable = cardRef.current.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        );
+        if (focusable.length === 0) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+
+        if (e.shiftKey) {
+          if (document.activeElement === first) {
+            e.preventDefault();
+            last.focus();
+          }
+        } else {
+          if (document.activeElement === last) {
+            e.preventDefault();
+            first.focus();
+          }
+        }
       }
     },
     [onCancel]
@@ -39,7 +62,18 @@ export function ConfirmDialog({
     if (!isOpen) return;
 
     window.addEventListener('keydown', handleKeyDown);
+
+    const timer = setTimeout(() => {
+      const focusable = cardRef.current?.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+      if (focusable && focusable.length > 0) {
+        focusable[0].focus();
+      }
+    }, 0);
+
     return () => {
+      clearTimeout(timer);
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, [isOpen, handleKeyDown]);
@@ -60,7 +94,7 @@ export function ConfirmDialog({
         }
       }}
     >
-      <div className="modal-card">
+      <div className="modal-card" ref={cardRef}>
         <div className="modal-header">
           <h2 id="confirm-dialog-title" className="modal-title">
             {title}

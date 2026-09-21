@@ -48,6 +48,23 @@ export const outboxPoller = new OutboxPoller({
   connectionId: '',
 });
 
+// Broadcast FSM state transitions to popup / extension views (Phase 9 reactive state)
+fsm.onTransition((record) => {
+  if (typeof chrome !== 'undefined' && typeof chrome.runtime?.sendMessage === 'function') {
+    try {
+      const p = chrome.runtime.sendMessage({
+        type: 'CONNECTION_STATE_CHANGED',
+        record,
+      });
+      if (p && typeof (p as Promise<unknown>).catch === 'function') {
+        (p as Promise<unknown>).catch(() => {});
+      }
+    } catch {
+      // Ignore when no listener is listening (e.g. popup closed)
+    }
+  }
+});
+
 // Forward lease changes to pairing coordinator and schedule/clear alarms
 leaseCoordinator.onLeaseAcquired((lease) => {
   coordinator.setActiveLease({

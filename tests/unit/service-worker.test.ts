@@ -27,6 +27,7 @@ describe('Service Worker Lifecycle & Message Handling', () => {
         onMessage: {
           addListener: vi.fn((cb) => messageListeners.push(cb)),
         },
+        sendMessage: vi.fn().mockResolvedValue(undefined),
       },
       storage: {
         local: {
@@ -187,5 +188,23 @@ describe('Service Worker Lifecycle & Message Handling', () => {
     expect(queryRes.observations).toHaveLength(1);
     expect(queryRes.observations[0].endpoint).toBe('/api/appointments');
     expect(queryRes.observations[0].data[0].id).toBe('APT-1');
+  });
+
+  it('broadcasts CONNECTION_STATE_CHANGED via chrome.runtime.sendMessage on FSM transition', async () => {
+    vi.resetModules();
+    const sw = await import('../../src/background/service-worker.js');
+
+    // Trigger an FSM transition
+    sw.fsm.transition('PAIRING', { reason: 'User started pairing' });
+
+    expect(chrome.runtime.sendMessage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'CONNECTION_STATE_CHANGED',
+        record: expect.objectContaining({
+          state: 'PAIRING',
+          reason: 'User started pairing',
+        }),
+      })
+    );
   });
 });

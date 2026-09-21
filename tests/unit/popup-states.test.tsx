@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import { UnpairedView } from '../../src/popup/states/UnpairedView.js';
 import { PermissionPromptView } from '../../src/popup/states/PermissionPromptView.js';
 import { ProbingView } from '../../src/popup/states/ProbingView.js';
@@ -174,9 +174,10 @@ describe('Phase 9 Connection States & Popup UI Tests', () => {
       expect(onRetry).toHaveBeenCalledTimes(1);
     });
 
-    it('7. DEGRADED: renders sanitized error summary without PHI, retry action, and diagnostics button', () => {
+    it('7. DEGRADED: renders sanitized error summary without PHI, retry action, and diagnostics button', async () => {
       const onRetry = vi.fn();
       const onOpenDiagnostics = vi.fn();
+      const onCopyDiagnostics = vi.fn();
       const onUnpair = vi.fn();
 
       render(
@@ -185,6 +186,7 @@ describe('Phase 9 Connection States & Popup UI Tests', () => {
           targetOrigin="http://localhost:4001"
           onRetry={onRetry}
           onOpenDiagnostics={onOpenDiagnostics}
+          onCopyDiagnostics={onCopyDiagnostics}
           onUnpair={onUnpair}
         />
       );
@@ -196,6 +198,13 @@ describe('Phase 9 Connection States & Popup UI Tests', () => {
       const retryBtn = screen.getByTestId('retry-button');
       fireEvent.click(retryBtn);
       expect(onRetry).toHaveBeenCalledTimes(1);
+
+      const copyBtn = screen.getByTestId('copy-diagnostics-button');
+      expect(copyBtn).toBeDefined();
+      await act(async () => {
+        fireEvent.click(copyBtn);
+      });
+      expect(onCopyDiagnostics).toHaveBeenCalledTimes(1);
 
       const diagBtn = screen.getByTestId('view-diagnostics-button');
       fireEvent.click(diagBtn);
@@ -303,12 +312,14 @@ describe('Phase 9 Connection States & Popup UI Tests', () => {
     it('guarantees zero NRIC, patient names, or bearer tokens in rendered DOM strings', () => {
       const taintedPHI = {
         name: 'Lee Chong Wei',
+        patronymicName: 'Ahmad bin Daud',
+        singleName: 'Siti',
         nric: '821021-14-5566',
         token: 'Bearer super_secret_bearer_token_xyz',
       };
 
       // Test DegradedView with tainted error string containing PHI & bearer token
-      const taintedError = `Failed processing patient ${taintedPHI.name} (NRIC: ${taintedPHI.nric}) using ${taintedPHI.token}`;
+      const taintedError = `Failed processing patient ${taintedPHI.name}, patient ${taintedPHI.patronymicName}, and patient ${taintedPHI.singleName} (NRIC: ${taintedPHI.nric}) using ${taintedPHI.token}`;
 
       const { container } = render(
         <DegradedView
@@ -324,6 +335,8 @@ describe('Phase 9 Connection States & Popup UI Tests', () => {
 
       expect(html).not.toContain(taintedPHI.nric);
       expect(html).not.toContain(taintedPHI.name);
+      expect(html).not.toContain(taintedPHI.patronymicName);
+      expect(html).not.toContain('patient Siti');
       expect(html).not.toContain('super_secret_bearer_token_xyz');
       expect(html).toContain('[REDACTED_NRIC]');
       expect(html).toContain('Bearer [REDACTED]');

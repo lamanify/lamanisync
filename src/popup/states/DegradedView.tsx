@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { redactSensitiveString } from '../../core/redaction.js';
 
 export interface DegradedViewProps {
@@ -6,6 +7,7 @@ export interface DegradedViewProps {
   isLoading?: boolean;
   onRetry: () => Promise<void> | void;
   onOpenDiagnostics: () => void;
+  onCopyDiagnostics?: () => Promise<void> | void;
   onUnpair: () => void;
 }
 
@@ -15,9 +17,21 @@ export function DegradedView({
   isLoading = false,
   onRetry,
   onOpenDiagnostics,
+  onCopyDiagnostics,
   onUnpair,
 }: DegradedViewProps) {
   const safeError = redactSensitiveString(errorSummary || 'An error interrupted synchronization');
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    if (onCopyDiagnostics) {
+      await onCopyDiagnostics();
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } else {
+      onOpenDiagnostics();
+    }
+  };
 
   return (
     <div className="state-card" data-testid="degraded-view">
@@ -58,6 +72,14 @@ export function DegradedView({
             disabled={isLoading}
           >
             {isLoading ? 'Retrying...' : 'Retry Connection'}
+          </button>
+          <button
+            type="button"
+            className="btn btn-secondary"
+            data-testid="copy-diagnostics-button"
+            onClick={handleCopy}
+          >
+            {copied ? '✓ Copied' : 'Copy Diagnostic Bundle'}
           </button>
           <button
             type="button"

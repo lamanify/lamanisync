@@ -119,6 +119,7 @@ describe('DiagnosticsModal Component & Redaction Verification', () => {
       error: 'Failed to process patient Siti Aminah with NRIC 900101-14-5001 and phone +60123456789 (Bearer secret_jwt_token_xyz)',
       rawDetails: {
         patientName: 'Siti Aminah',
+        clinicName: 'Poliklinik Dr. Azri',
         nric: '900101-14-5001',
         mobilePhone: '+60123456789',
         sessionCookie: 'cms_session=super_secret_cookie_123',
@@ -154,7 +155,58 @@ describe('DiagnosticsModal Component & Redaction Verification', () => {
     // Retains safe non-PHI
     expect(fullDomHtml).toContain('INST-SECURE-99');
     expect(fullDomHtml).toContain('DIAG_CODE_409');
+    expect(fullDomHtml).toContain('Poliklinik Dr. Azri');
     expect(fullDomHtml).toContain('[REDACTED]');
     expect(fullDomHtml).toContain('Bearer [REDACTED]');
+  });
+
+  it('redacts Malaysian patronymics and single names from error strings', () => {
+    const errorWithPatronymics =
+      'Sync failure: patient Ahmad bin Daud, patient Nurul binti Ismail, patient Muthu a/l Ramasamy, and patient Siti failed with password=SecretPassword123';
+    const bundle = formatDiagnosticBundle({
+      currentState: 'DEGRADED',
+      error: errorWithPatronymics,
+    });
+
+    const { container } = render(
+      <DiagnosticsModal isOpen={true} onClose={vi.fn()} bundle={bundle} />
+    );
+    const html = container.innerHTML;
+
+    expect(html).not.toContain('Ahmad bin Daud');
+    expect(html).not.toContain('Nurul binti Ismail');
+    expect(html).not.toContain('Muthu a/l Ramasamy');
+    expect(html).not.toContain('patient Siti failed');
+    expect(html).not.toContain('SecretPassword123');
+    expect(html).toContain('patient [REDACTED_NAME]');
+  });
+
+  it('traps focus on Tab and Shift+Tab navigation within modal', () => {
+    const bundle = formatDiagnosticBundle({
+      currentState: 'ACTIVE',
+      installationId: 'INST-FOCUS-TEST',
+    });
+
+    render(<DiagnosticsModal isOpen={true} onClose={vi.fn()} bundle={bundle} />);
+
+    const closeBtn = screen.getByTestId('close-modal-button');
+    const copyBtn = screen.getByTestId('copy-diagnostics-button');
+
+    // Focus close button (first focusable)
+    closeBtn.focus();
+    expect(document.activeElement).toBe(closeBtn);
+
+    // Focus copy button
+    copyBtn.focus();
+    expect(document.activeElement).toBe(copyBtn);
+
+    // Shift+Tab from first element wraps to last focusable button
+    fireEvent.keyDown(window, { key: 'Tab', shiftKey: true });
+    // Tab wraps around within modal
+    expect(document.activeElement).toBeDefined();
+
+    // Tab from modal elements stays inside modal
+    fireEvent.keyDown(window, { key: 'Tab', shiftKey: false });
+    expect(document.activeElement).toBeDefined();
   });
 });

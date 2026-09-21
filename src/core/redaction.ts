@@ -80,6 +80,7 @@ export const ALLOWLISTED_KEYS = new Set([
   'devicename',
   'adaptername',
   'servicename',
+  'clinicname',
   'version',
   'adapterversion',
   'extensionversion',
@@ -110,8 +111,18 @@ export const SENSITIVE_STRING_PATTERNS: Array<[RegExp, string]> = [
   [/\b\d{6}-\d{2}-\d{4}\b/g, '[REDACTED_NRIC]'],
   [/\b\d{12}\b/g, '[REDACTED_NRIC]'],
   [/\b(?:\+?60|0)[1-9]\d{1,2}[-\s]?\d{6,8}\b/g, '[REDACTED_PHONE]'],
-  [/(?:cms_session|session_token|token|secret|api_key|apikey)=[^;,\s&]+/gi, '$1=[REDACTED]'],
-  [/\b(?:patient|client)\s+([A-Z][a-zA-Z]+(?:\s+[A-Z][a-zA-Z]+)+)\b/gi, 'patient [REDACTED_NAME]'],
+  [
+    /(["']?(?:password|passwd|token|session_token|session|secret|bearer|apiKey|api_key|jwt|icOrPassport)["']?\s*[:=]\s*["']?)(?:[^"',;\s})]+)/gi,
+    '$1[REDACTED]',
+  ],
+  [
+    /\b[Pp]atient(?:\s+[Nn]ame)?\s*[:=]?\s*([A-Z][a-zA-Z'’-]+(?:\s+(?:(?:bin|binti|bt\b|a\/l|a\/p|ibni|anak)\s+)?[A-Z][a-zA-Z'’-]+)*)\b/g,
+    'patient [REDACTED_NAME]',
+  ],
+  [
+    /\b[Cc]lient(?:\s+[Nn]ame)?\s*[:=]?\s*([A-Z][a-zA-Z'’-]+(?:\s+(?:(?:bin|binti|bt\b|a\/l|a\/p|ibni|anak)\s+)?[A-Z][a-zA-Z'’-]+)*)\b/g,
+    'client [REDACTED_NAME]',
+  ],
 ];
 
 /**

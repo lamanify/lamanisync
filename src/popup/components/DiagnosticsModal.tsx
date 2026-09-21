@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import type { FormattedDiagnosticBundle } from '../../core/redaction.js';
 
 export interface DiagnosticsModalProps {
@@ -9,12 +9,35 @@ export interface DiagnosticsModalProps {
 
 export function DiagnosticsModal({ isOpen, onClose, bundle }: DiagnosticsModalProps) {
   const [copied, setCopied] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         e.preventDefault();
         onClose();
+        return;
+      }
+      if (e.key === 'Tab' && cardRef.current) {
+        const focusable = cardRef.current.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        );
+        if (focusable.length === 0) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+
+        if (e.shiftKey) {
+          if (document.activeElement === first) {
+            e.preventDefault();
+            last.focus();
+          }
+        } else {
+          if (document.activeElement === last) {
+            e.preventDefault();
+            first.focus();
+          }
+        }
       }
     },
     [onClose]
@@ -24,7 +47,19 @@ export function DiagnosticsModal({ isOpen, onClose, bundle }: DiagnosticsModalPr
     if (!isOpen) return;
 
     window.addEventListener('keydown', handleKeyDown);
+
+    const timer = setTimeout(() => {
+      const focusable = cardRef.current?.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+      if (focusable && focusable.length > 0) {
+        focusable[0].focus();
+      }
+    }, 0);
+
     return () => {
+      clearTimeout(timer);
+      if (timerRef.current) clearTimeout(timerRef.current);
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, [isOpen, handleKeyDown]);
@@ -39,11 +74,13 @@ export function DiagnosticsModal({ isOpen, onClose, bundle }: DiagnosticsModalPr
         await navigator.clipboard.writeText(jsonString);
       }
       setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      if (timerRef.current) clearTimeout(timerRef.current);
+      timerRef.current = setTimeout(() => setCopied(false), 2000);
     } catch {
       // Fallback
       setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      if (timerRef.current) clearTimeout(timerRef.current);
+      timerRef.current = setTimeout(() => setCopied(false), 2000);
     }
   };
 
@@ -60,7 +97,7 @@ export function DiagnosticsModal({ isOpen, onClose, bundle }: DiagnosticsModalPr
         }
       }}
     >
-      <div className="modal-card">
+      <div className="modal-card" ref={cardRef}>
         <div className="modal-header">
           <h2 id="diag-modal-title" className="modal-title">
             Redacted Diagnostics

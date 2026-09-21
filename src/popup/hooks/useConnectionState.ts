@@ -80,6 +80,7 @@ export function useConnectionState(): UseConnectionStateReturn {
       const meta = rec.metadata as Record<string, unknown>;
       if (typeof meta.lastReadAt === 'string') setLastReadAt(meta.lastReadAt);
       if (typeof meta.lastWriteAt === 'string') setLastWriteAt(meta.lastWriteAt);
+      else if (typeof meta.verifiedAt === 'string') setLastWriteAt(meta.verifiedAt);
       if (typeof meta.syncProgress === 'number') setSyncProgress(meta.syncProgress);
       if (typeof meta.pauseReason === 'string') setPauseReason(meta.pauseReason);
       if (typeof meta.errorSummary === 'string') setErrorSummary(meta.errorSummary);
@@ -303,14 +304,32 @@ export function useConnectionState(): UseConnectionStateReturn {
       const granted = await requestOriginPermission(session.targetOrigin, session.targetOrigin);
       if (granted) {
         if (typeof chrome !== 'undefined' && chrome.runtime?.sendMessage) {
-          await new Promise<void>((resolve) => {
+          const res = await new Promise<{
+            success?: boolean;
+            error?: string;
+            record?: ConnectionStateRecord;
+          }>((resolve) => {
             chrome.runtime.sendMessage(
               { type: 'GRANT_PERMISSION_RESULT', granted: true, targetOrigin: session.targetOrigin },
-              () => resolve()
+              (r) => {
+                if (chrome.runtime.lastError) {
+                  resolve({ success: false, error: chrome.runtime.lastError.message });
+                } else {
+                  resolve(r || { success: true });
+                }
+              }
             );
           });
+          if (res?.record) {
+            setRecord(res.record);
+            setConnectionState(res.record.state);
+            applyRecordMetadata(res.record);
+          } else {
+            setConnectionState('PROBING');
+          }
+        } else {
+          setConnectionState('PROBING');
         }
-        setConnectionState('PROBING');
       } else {
         setErrorMessage('Host permission was declined by the user');
       }
@@ -376,31 +395,55 @@ export function useConnectionState(): UseConnectionStateReturn {
     setErrorMessage(null);
     try {
       if (typeof chrome !== 'undefined' && chrome.runtime?.sendMessage) {
-        if (connectionState === 'PROBING') {
-          setProbingSteps({
-            versionCheck: 'in_progress',
-            tenantValidation: 'pending',
-            capabilityProbe: 'pending',
-          });
-          const res = await new Promise<{ success: boolean; error?: string }>((resolve) => {
+        if (
+          connectionState === 'PROBING' ||
+          connectionState === 'DEGRADED' ||
+          connectionState === 'REAUTH_REQUIRED'
+        ) {
+          if (connectionState === 'PROBING') {
+            setProbingSteps({
+              versionCheck: 'in_progress',
+              tenantValidation: 'pending',
+              capabilityProbe: 'pending',
+            });
+          }
+          const res = await new Promise<{
+            success: boolean;
+            error?: string;
+            record?: ConnectionStateRecord;
+          }>((resolve) => {
             chrome.runtime.sendMessage({ type: 'RUN_PROBE' }, (r) => {
-              resolve(r || { success: false, error: 'Probe response timeout' });
+              if (chrome.runtime.lastError) {
+                resolve({ success: false, error: chrome.runtime.lastError.message });
+              } else {
+                resolve(r || { success: false, error: 'Probe response timeout' });
+              }
             });
           });
           if (res.success) {
-            setProbingSteps({
-              versionCheck: 'completed',
-              tenantValidation: 'completed',
-              capabilityProbe: 'completed',
-            });
+            if (connectionState === 'PROBING') {
+              setProbingSteps({
+                versionCheck: 'completed',
+                tenantValidation: 'completed',
+                capabilityProbe: 'completed',
+              });
+            }
+            if (res.record) {
+              setRecord(res.record);
+              setConnectionState(res.record.state);
+              applyRecordMetadata(res.record);
+            }
             await refreshState();
           } else {
-            setProbingSteps({
-              versionCheck: 'completed',
-              tenantValidation: 'failed',
-              capabilityProbe: 'pending',
-            });
-            setErrorMessage(res.error || 'Probe failed');
+            if (connectionState === 'PROBING') {
+              setProbingSteps({
+                versionCheck: 'completed',
+                tenantValidation: 'failed',
+                capabilityProbe: 'pending',
+              });
+            }
+            setErrorMessage(res.error || 'Connection retry failed');
+            await refreshState();
           }
         } else {
           await refreshState();
@@ -416,11 +459,32 @@ export function useConnectionState(): UseConnectionStateReturn {
   };
 
   const openCmsTab = async () => {
-    const url = session?.targetOrigin;
+    const url = session?.targetOrigin || record?.targetOrigin;
     if (!url) return;
+
+    if (typeof chrome !== 'undefined' && chrome.tabs?.query) {
+      try {
+        const tabs = await chrome.tabs.query({});
+        const existingTab = tabs.find(
+          (t) => t.url && (t.url === url || t.url.startsWith(`${url}/`) || t.url.startsWith(url))
+        );
+        if (existingTab && existingTab.id !== undefined) {
+          if (chrome.tabs.update) {
+            await chrome.tabs.update(existingTab.id, { active: true });
+          }
+          if (existingTab.windowId !== undefined && chrome.windows?.update) {
+            await chrome.windows.update(existingTab.windowId, { focused: true });
+          }
+          return;
+        }
+      } catch {
+        // Fallback to create
+      }
+    }
+
     if (typeof chrome !== 'undefined' && chrome.tabs?.create) {
       try {
-        chrome.tabs.create({ url });
+        await chrome.tabs.create({ url });
         return;
       } catch {
         // Fallback
