@@ -84,22 +84,25 @@ export const commandExecutor = new CommandExecutor({
   fsm,
   echoSuppressor,
 });
+export const updateManager = new UpdateManager({
+  commandExecutor,
+  leaseCoordinator,
+});
+
 export const outboxPoller = new OutboxPoller({
   apiClient,
   leaseCoordinator,
   commandExecutor,
   fsm,
   connectionId: '',
+  onCommandSettled: async () => {
+    await updateManager.onCommandSettled().catch(() => {});
+  },
   killSwitches: {
     isGlobalPaused: () => killSwitch.isGlobalPaused(),
     isAdapterPaused: (id?: string) => (id ? killSwitch.isAdapterPaused(id) : false),
     isConnectionPaused: (id?: string) => (id ? killSwitch.isConnectionPaused(id) : false),
   },
-});
-
-export const updateManager = new UpdateManager({
-  commandExecutor,
-  leaseCoordinator,
 });
 
 if (typeof chrome !== 'undefined' && chrome.runtime?.onUpdateAvailable) {

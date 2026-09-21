@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { spawnSync } from 'node:child_process';
 
-console.log('Running contract, state machine & error taxonomy runtime tests (Phase 3)...');
+console.log('Running contract, state machine, error taxonomy & capability tests (Phase 3 & Phase 11)...');
 const res = spawnSync(
   'npx',
   [

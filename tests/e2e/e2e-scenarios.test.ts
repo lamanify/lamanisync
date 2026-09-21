@@ -13,6 +13,7 @@ import { ProbeRunner } from '../../src/background/probe.js';
 import { BackfillEngine } from '../../src/background/backfill.js';
 import { BatchUploader } from '../../src/background/batch-uploader.js';
 import { DeduplicationCache } from '../../src/background/dedupe.js';
+import { EchoSuppressor } from '../../src/background/echo-suppressor.js';
 import { UpdateManager } from '../../src/background/update-manager.js';
 import { setIndexedDbFactory, getOrCreateDeviceKey } from '../../src/storage/device-key.js';
 import { createMockIDBFactory } from '../mocks/mock-idb.js';
@@ -23,7 +24,7 @@ import {
 } from '../../src/adapters/lifecycle.js';
 import { normalizeAppointment } from '../../src/core/contracts/appointment.js';
 import { normalizeExactOrigin, toExactOriginPattern } from '../../src/background/permissions.js';
-import { LamaniError } from '../../src/core/errors.js';
+import { LamaniError, classifyError } from '../../src/core/errors.js';
 import type { SyncCommand } from '../../src/core/contracts/commands.js';
 
 class MemoryStorage implements StorageAdapter {
@@ -197,8 +198,20 @@ describe('Phase 11: 15 Required Browser & Runtime E2E Scenarios', () => {
       registerContentScripts: async (scripts: Array<{ id: string }>) => {
         registeredScripts.push(...scripts.map((s) => s.id));
       },
-      unregisterContentScripts: async () => {
-        registeredScripts.length = 0;
+      getRegisteredContentScripts: async (filter?: { ids?: string[] }) => {
+        const ids = filter?.ids;
+        if (!ids) return registeredScripts.map((id) => ({ id }));
+        return registeredScripts.filter((id) => ids.includes(id)).map((id) => ({ id }));
+      },
+      unregisterContentScripts: async (filter?: { ids?: string[] }) => {
+        if (!filter?.ids) {
+          registeredScripts.length = 0;
+        } else {
+          const toRemove = new Set(filter.ids);
+          const remaining = registeredScripts.filter((id) => !toRemove.has(id));
+          registeredScripts.length = 0;
+          registeredScripts.push(...remaining);
+        }
       },
     };
 
@@ -381,7 +394,7 @@ describe('Phase 11: 15 Required Browser & Runtime E2E Scenarios', () => {
   // --------------------------------------------------------------------------
   // Scenario 7: CMS tab or Chrome window closes mid-backfill or mid-write
   // --------------------------------------------------------------------------
-  it('Scenario 7: CMS tab closure mid-backfill persists checkpoint and prevents duplicate writes upon resumption', async () => {
+  it('Scenario 7: CMS tab closure mid-backfill persists checkpoint and mid-write tab closure recovers idempotently without duplicate writes', async () => {
     const fsm = new ConnectionFSM();
     advanceFsmToActive(fsm, 'conn_backfill_crash', CMS_URL);
 
@@ -399,6 +412,7 @@ describe('Phase 11: 15 Required Browser & Runtime E2E Scenarios', () => {
 
     await leaseCoordinator.acquire('conn_backfill_crash', 'inst_backfill_crash', 30);
 
+    // --- Part A: Mid-Backfill Tab Closure & Resumption ---
     const backfill = new BackfillEngine({
       leaseCoordinator,
       fsm,
@@ -436,6 +450,75 @@ describe('Phase 11: 15 Required Browser & Runtime E2E Scenarios', () => {
     const restoredCp = await resumedBackfill.restoreCheckpoint();
     expect(restoredCp?.cursor).toBe(2);
     expect(restoredCp?.processedCount).toBe(2);
+
+    // --- Part B: Mid-Write Tab Closure & Resumption ---
+    const writeCommand: SyncCommand = {
+      commandId: 'CMD-CRASH-WRITE-01',
+      connectionId: 'conn_backfill_crash',
+      fencingToken: 1,
+      idempotencyKey: 'IDEMP-CRASH-WRITE-001',
+      action: 'ACTION_APPOINTMENT_CREATE',
+      parameters: {
+        patientId: 'ZZTEST-P01',
+        providerId: 'DOC-01',
+        serviceId: 'SRV-01',
+        locationId: 'LOC-01',
+        startTime: '2026-10-25T14:00:00+08:00',
+        endTime: '2026-10-25T14:15:00+08:00',
+      },
+    };
+
+    // Pre-seed CMS with the appointment as if tab closed right after CMS POST succeeded
+    const seedRes = await fetch(`${CMS_URL}/api/appointments`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        patientId: 'ZZTEST-P01',
+        providerId: 'DOC-01',
+        serviceId: 'SRV-01',
+        locationId: 'LOC-01',
+        startTime: '2026-10-25T14:00:00+08:00',
+        endTime: '2026-10-25T14:15:00+08:00',
+        idempotencyKey: 'IDEMP-CRASH-WRITE-001',
+        status: 'booked',
+        notes: 'Pre-crash write in CMS',
+      }),
+    });
+    const seedJson = (await seedRes.json()) as { data: { id: string } };
+    const existingId = seedJson.data.id;
+
+    // In-flight command record was persisted in storage before tab crashed
+    await storage.set({
+      lamanisync_in_flight_command: {
+        commandId: 'CMD-CRASH-WRITE-01',
+        fencingToken: 1,
+        step: 'EXECUTING',
+        lastUpdatedAt: new Date().toISOString(),
+      },
+    });
+
+    // Resumption on new CommandExecutor instance after tab reconnect
+    const resumedExecutor = new CommandExecutor({
+      apiClient,
+      leaseCoordinator,
+      fsm,
+      targetOrigin: CMS_URL,
+      storage,
+    });
+
+    // Verify stored in-flight command is detected
+    const inFlightSnapshot = await resumedExecutor.getInFlightCommand();
+    expect(inFlightSnapshot?.commandId).toBe('CMD-CRASH-WRITE-01');
+
+    // Executing the command discovers existing appointment via idempotency resolver,
+    // verifies read-back, and generates write receipt without creating duplicate write
+    const recoveryResult = await resumedExecutor.executeCommand(writeCommand);
+    expect(recoveryResult.status).toBe('VERIFIED');
+    expect(recoveryResult.writeReceipt).toBeDefined();
+    expect(recoveryResult.writeReceipt?.externalId).toBe(existingId);
+
+    // Storage is cleared of in-flight command
+    expect(await resumedExecutor.getInFlightCommand()).toBeNull();
   });
 
   // --------------------------------------------------------------------------
@@ -475,11 +558,21 @@ describe('Phase 11: 15 Required Browser & Runtime E2E Scenarios', () => {
       },
     });
 
+    // Outbound write recorded in EchoSuppressor before SW suspension
+    const suppressorBefore = new EchoSuppressor({ storage });
+    suppressorBefore.recordOutboundWrite({
+      entityType: 'appointment',
+      entityId: 'APT-SW-SUSPEND-999',
+      revision: 1,
+    });
+    await suppressorBefore.saveToStorage();
+
     // Simulated complete suspension: all memory state is wiped
     let fsm: ConnectionFSM | null = new ConnectionFSM();
     let apiClient: SyncApiClient | null = new SyncApiClient({ baseUrl: SYNC_URL, idbFactory: idb });
     let coordinator: PairingCoordinator | null = new PairingCoordinator({ fsm, apiClient, storage, idbFactory: idb });
     let leaseCoordinator: LeaseCoordinator | null = new LeaseCoordinator({ apiClient, storage });
+    let suppressorAfter: EchoSuppressor | null = new EchoSuppressor({ storage });
 
     // Wake-up event triggers restoration routine (AGENTS.md Rule 7)
     const restoredRecord = await coordinator.restoreState();
@@ -490,10 +583,21 @@ describe('Phase 11: 15 Required Browser & Runtime E2E Scenarios', () => {
     expect(restoredLease?.leaseId).toBe('lease_sw_001');
     expect(restoredLease?.fencingToken).toBe(5);
 
+    // EchoSuppressor restores fingerprints from storage and continues suppressing echo reads
+    await suppressorAfter.restoreFromStorage();
+    expect(
+      suppressorAfter.shouldSuppressObservation({
+        entityType: 'appointment',
+        entityId: 'APT-SW-SUSPEND-999',
+        revision: 1,
+      })
+    ).toBe(true);
+
     fsm = null;
     apiClient = null;
     coordinator = null;
     leaseCoordinator = null;
+    suppressorAfter = null;
   });
 
   // --------------------------------------------------------------------------
@@ -624,6 +728,28 @@ describe('Phase 11: 15 Required Browser & Runtime E2E Scenarios', () => {
     cmsServer.setFault('500', 0, '/api/reference/services', 'GET');
     const res500 = await fetch(`${CMS_URL}/api/reference/services`);
     expect(res500.status).toBe(500);
+
+    // 6. Error taxonomy domain classification for all 5 HTTP fault categories
+    const err401 = classifyError(401, { endpoint: '/api/session' });
+    expect(err401.code).toBe('AUTH_ERROR');
+    expect(err401.statusCode).toBe(401);
+
+    const err403 = classifyError(403, { endpoint: '/api/patients' });
+    expect(err403.code).toBe('AUTH_ERROR');
+    expect(err403.statusCode).toBe(403);
+
+    const err409 = classifyError(409, { endpoint: '/api/appointments' });
+    expect(err409.code).toBe('CONFLICT');
+    expect(err409.statusCode).toBe(409);
+
+    const err429 = classifyError(429, { endpoint: '/api/reference/providers', retryAfterSeconds: 30 });
+    expect(err429.code).toBe('RATE_LIMITED');
+    expect(err429.statusCode).toBe(429);
+    expect((err429 as { retryAfterSeconds?: number }).retryAfterSeconds).toBe(30);
+
+    const err500 = classifyError(500, { endpoint: '/api/reference/services' });
+    expect(err500.code).toBe('TRANSIENT_NETWORK_ERROR');
+    expect(err500.statusCode).toBe(500);
   });
 
   // --------------------------------------------------------------------------
@@ -664,6 +790,15 @@ describe('Phase 11: 15 Required Browser & Runtime E2E Scenarios', () => {
     killSwitch.triggerPause('connection', 'conn_scope_test', 'Tenant subscription hold');
     expect(killSwitch.isConnectionPaused('conn_scope_test')).toBe(true);
     expect(killSwitch.isConnectionPaused('conn_other')).toBe(false);
+
+    // 4. Remote signal payload handling from Sync API
+    killSwitch.processRemoteSignal({
+      status: 'PAUSED',
+      killSwitchLevel: 'connection',
+      targetId: 'conn_scope_test',
+      message: 'Remote connection freeze',
+    });
+    expect(killSwitch.isConnectionPaused('conn_scope_test')).toBe(true);
   });
 
   // --------------------------------------------------------------------------
@@ -724,10 +859,10 @@ describe('Phase 11: 15 Required Browser & Runtime E2E Scenarios', () => {
     expect(updateManager.hasDeferredUpdate()).toBe(true);
     expect(reloadDispatched).toBe(false); // Reload was NOT called yet
 
-    // Once command execution finishes and lease is released
-    await leaseCoordinator.release();
+    // Once command execution finishes, onCommandSettled releases active lease and safely dispatches reload
     const settled = await updateManager.onCommandSettled();
     expect(settled).toBe(true);
     expect(reloadDispatched).toBe(true); // Reload safely dispatched after work completed
+    expect(leaseCoordinator.hasActiveLease()).toBe(false); // Lease voluntarily dropped before reload
   });
 });

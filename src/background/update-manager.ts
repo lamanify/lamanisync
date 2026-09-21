@@ -68,7 +68,14 @@ export class UpdateManager {
     if (!this.deferredUpdate) return false;
 
     const inFlight = await this.commandExecutor.getInFlightCommand();
-    if (!inFlight && !this.leaseCoordinator.hasActiveLease()) {
+    if (!inFlight) {
+      if (this.leaseCoordinator.hasActiveLease()) {
+        try {
+          await this.leaseCoordinator.release();
+        } catch {
+          // ignore release errors during reload
+        }
+      }
       this.deferredUpdate = null;
       this.applyUpdate();
       return true;

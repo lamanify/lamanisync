@@ -34,6 +34,7 @@ export interface OutboxPollerOptions {
   pollIntervalMs?: number;
   adapterManifest?: AdapterManifest;
   killSwitches?: KillSwitchOptions;
+  onCommandSettled?: (result: CommandResult) => Promise<void> | void;
 }
 
 export class OutboxPoller {
@@ -45,6 +46,7 @@ export class OutboxPoller {
   private pollIntervalMs: number;
   private adapterManifest?: AdapterManifest;
   private killSwitches?: KillSwitchOptions;
+  private onCommandSettled?: (result: CommandResult) => Promise<void> | void;
 
   private isRunning: boolean = false;
   private pollTimer: ReturnType<typeof setTimeout> | null = null;
@@ -56,9 +58,10 @@ export class OutboxPoller {
     this.commandExecutor = options.commandExecutor;
     this.fsm = options.fsm;
     this.connectionId = options.connectionId;
-    this.pollIntervalMs = options.pollIntervalMs || 5000;
+    this.pollIntervalMs = options.pollIntervalMs || 2000;
     this.adapterManifest = options.adapterManifest;
     this.killSwitches = options.killSwitches;
+    this.onCommandSettled = options.onCommandSettled;
   }
 
   setConnectionId(connectionId: string): void {
@@ -216,6 +219,13 @@ export class OutboxPoller {
 
       // 6. Execute safe 10-step command lifecycle
       const result = await this.commandExecutor.executeCommand(command);
+      if (this.onCommandSettled) {
+        try {
+          await this.onCommandSettled(result);
+        } catch {
+          // ignore callback error
+        }
+      }
       return result;
     } finally {
       this.isCurrentlyPolling = false;

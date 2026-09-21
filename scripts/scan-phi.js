@@ -14,8 +14,8 @@ const ROOT_DIR = process.cwd();
 
 // Directories strictly requiring zero PHI and zero secrets
 const PRODUCTION_DIRS = ['src', 'dist'];
-// Harness and test directories checked for production secrets and unredacted production patient data
-const SUPPORT_DIRS = ['scripts', 'test-harness', 'tests'];
+// Harness, doc, and test directories checked for production secrets and unredacted production patient data
+const SUPPORT_DIRS = ['scripts', 'test-harness', 'tests', 'docs'];
 
 // Allowed file extensions
 const VALID_EXTS = new Set(['.ts', '.tsx', '.js', '.jsx', '.json', '.html', '.css', '.md']);
@@ -28,6 +28,7 @@ const SYNTHETIC_ALLOWLIST = new Set([
   '950404-08-5004',
   '950101-14-1234',
   '990101-14-9999',
+  '960505-14-5005',
   '821021-14-5566',
   '000000-00-0000',
   '012-999 8877',
@@ -72,21 +73,32 @@ function walk(dir) {
   return files;
 }
 
+function getRootFiles() {
+  const entries = fs.readdirSync(ROOT_DIR, { withFileTypes: true });
+  const files = [];
+  for (const entry of entries) {
+    if (entry.isFile() && VALID_EXTS.has(path.extname(entry.name))) {
+      files.push(path.join(ROOT_DIR, entry.name));
+    }
+  }
+  return files;
+}
+
 const allDirs = [...PRODUCTION_DIRS, ...SUPPORT_DIRS];
-const allFiles = allDirs.flatMap((d) => walk(path.join(ROOT_DIR, d)));
+const allFiles = [...allDirs.flatMap((d) => walk(path.join(ROOT_DIR, d))), ...getRootFiles()];
 
 for (const filePath of allFiles) {
   totalFilesScanned += 1;
   const content = fs.readFileSync(filePath, 'utf-8');
   const relPath = path.relative(ROOT_DIR, filePath);
-  const isTestOrFixture = relPath.startsWith('tests/') || relPath.startsWith('test-harness/');
+  const isTestOrDoc = relPath.startsWith('tests/') || relPath.startsWith('test-harness/') || relPath.startsWith('docs/');
 
   // 1. Check Secret Patterns
   for (const { name, regex } of SECRET_PATTERNS) {
     let match;
     while ((match = regex.exec(content)) !== null) {
       // In test harness only, synthetic test signing keys and redaction test fixtures are permitted
-      if (isTestOrFixture && (content.includes('TEST_PRIVATE_KEY') || content.includes('TEST KEY') || content.includes('dummy_key') || content.includes('redactSensitiveData'))) {
+      if (isTestOrDoc && (content.includes('TEST_PRIVATE_KEY') || content.includes('TEST KEY') || content.includes('dummy_key') || content.includes('redactSensitiveData'))) {
         continue;
       }
       violations.push({
@@ -101,7 +113,7 @@ for (const filePath of allFiles) {
   let icMatch;
   while ((icMatch = MALAYSIAN_IC_REGEX.exec(content)) !== null) {
     const matchedIc = icMatch[0];
-    if (isTestOrFixture && SYNTHETIC_ALLOWLIST.has(matchedIc)) {
+    if (isTestOrDoc && SYNTHETIC_ALLOWLIST.has(matchedIc)) {
       // Allowed synthetic test fixture
       continue;
     }
@@ -109,7 +121,7 @@ for (const filePath of allFiles) {
     const lineStart = content.lastIndexOf('\n', icMatch.index);
     const lineEnd = content.indexOf('\n', icMatch.index);
     const line = content.substring(lineStart === -1 ? 0 : lineStart, lineEnd === -1 ? content.length : lineEnd);
-    if (isTestOrFixture && (line.includes('ZZTEST') || line.includes('synthetic') || line.includes('tainted'))) {
+    if (isTestOrDoc && (line.includes('ZZTEST') || line.includes('synthetic') || line.includes('tainted'))) {
       continue;
     }
 
