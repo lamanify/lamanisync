@@ -65,6 +65,7 @@ export interface PairingCoordinatorOptions {
   permissionsApi?: ChromePermissionsApi;
   scriptingApi?: ChromeScriptingApi;
   idbFactory?: IDBFactory;
+  tokenManager?: { renewToken(): Promise<ConnectionSession> };
 }
 
 export interface ActiveLeaseRecord {
@@ -83,6 +84,7 @@ export class PairingCoordinator {
   private isPairingInFlight: boolean = false;
   private isUnpairingInFlight: boolean = false;
   private activeLease: ActiveLeaseRecord | null = null;
+  private tokenManager?: { renewToken(): Promise<ConnectionSession> };
 
   constructor(options: PairingCoordinatorOptions) {
     this.fsm = options.fsm;
@@ -94,6 +96,11 @@ export class PairingCoordinator {
     this.permissionsApi = options.permissionsApi;
     this.scriptingApi = options.scriptingApi;
     this.idbFactory = options.idbFactory;
+    this.tokenManager = options.tokenManager;
+  }
+
+  setTokenManager(tokenManager: { renewToken(): Promise<ConnectionSession> }): void {
+    this.tokenManager = tokenManager;
   }
 
   setStorage(storage: StorageAdapter): void {
@@ -379,17 +386,44 @@ export class PairingCoordinator {
    * Handles bidirectional transitions if permissions were granted or revoked externally.
    */
   async restoreState(): Promise<ConnectionStateRecord> {
-    const session = await this.getSession();
+    let session = await this.getSession();
 
-    if (!session || this.isSessionExpired(session)) {
-      if (session) {
-        // Purge expired session
-        await this.storage.remove(SESSION_STORAGE_KEY);
-      }
+    if (!session) {
       if (this.fsm.getState() !== 'UNPAIRED' && this.fsm.canTransition('UNPAIRED')) {
-        this.fsm.transition('UNPAIRED', { reason: 'No valid session or session expired on startup' });
+        this.fsm.transition('UNPAIRED', { reason: 'No valid session on startup' });
       }
       return this.fsm.getRecord();
+    }
+
+    if (this.isSessionExpired(session)) {
+      let renewed = false;
+      try {
+        if (this.tokenManager) {
+          session = await this.tokenManager.renewToken();
+          renewed = Boolean(session?.sessionToken && session?.expiresAt);
+        } else {
+          const renewal = await this.apiClient.renewSessionToken(session.installationId);
+          if (renewal?.sessionToken && renewal?.expiresAt) {
+            session = {
+              ...session,
+              sessionToken: renewal.sessionToken,
+              expiresAt: renewal.expiresAt,
+            };
+            await this.storage.set({ [SESSION_STORAGE_KEY]: session });
+            renewed = true;
+          }
+        }
+      } catch (err) {
+        console.warn('[PairingCoordinator] Failed to renew expired session token on restore:', err);
+      }
+
+      if (!renewed) {
+        await this.storage.remove(SESSION_STORAGE_KEY);
+        if (this.fsm.getState() !== 'UNPAIRED' && this.fsm.canTransition('UNPAIRED')) {
+          this.fsm.transition('UNPAIRED', { reason: 'Session token expired and cannot be renewed on startup' });
+        }
+        return this.fsm.getRecord();
+      }
     }
 
     // Configure API client with restored session token

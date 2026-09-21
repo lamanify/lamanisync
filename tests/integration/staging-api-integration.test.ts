@@ -117,8 +117,8 @@ describe('Phase 10: Staging API Integration & Security Tests', () => {
       connectionId: 'conn_mock_67890',
       killSwitches: {
         isGlobalPaused: () => killSwitch.isGlobalPaused(),
-        isAdapterPaused: () => false,
-        isConnectionPaused: () => false,
+        isAdapterPaused: (id?: string) => (id ? killSwitch.isAdapterPaused(id) : false),
+        isConnectionPaused: (id?: string) => (id ? killSwitch.isConnectionPaused(id) : false),
       },
     });
   });
@@ -312,6 +312,22 @@ describe('Phase 10: Staging API Integration & Security Tests', () => {
     const adapterBody = await adapterRes.json();
     expect(adapterBody.error).toBe('PAUSED');
     expect(adapterBody.killSwitchLevel).toBe('adapter');
+
+    killSwitch.triggerPause('adapter', 'acme-cloud-v1', 'Adapter revoked');
+    expect(killSwitch.isAdapterPaused('acme-cloud-v1')).toBe(true);
+
+    poller.setAdapterManifest({
+      adapterId: 'acme-cloud-v1',
+      version: '1.0.0',
+      name: 'Acme Cloud',
+      capabilities: ['APPOINTMENT_WRITE'],
+      endpoints: {},
+      targetOrigin: 'http://localhost:4001',
+    });
+    expect(poller.isPaused()).toBe(true);
+
+    killSwitch.resume('adapter', 'acme-cloud-v1');
+    expect(killSwitch.isAdapterPaused('acme-cloud-v1')).toBe(false);
   });
 
   it('guarantees idempotency of event batches and write receipts', async () => {

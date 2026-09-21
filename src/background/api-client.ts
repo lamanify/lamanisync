@@ -43,6 +43,7 @@ export interface RequestOptions {
   body?: unknown;
   correlationId?: string;
   skipSigning?: boolean;
+  skipAuthHeader?: boolean;
 }
 
 export class SyncApiClient {
@@ -138,7 +139,7 @@ export class SyncApiClient {
       headers['x-device-nonce'] = crypto.randomUUID();
     }
 
-    if (this.sessionToken) {
+    if (this.sessionToken && !options.skipAuthHeader) {
       headers['Authorization'] = `Bearer ${this.sessionToken}`;
     }
 
@@ -183,8 +184,9 @@ export class SyncApiClient {
         this.killSwitchHandler?.(responseBody || { status: 'PAUSED' });
       }
 
-      // Expired token auto-recovery (401 Unauthorized)
-      if (response.status === 401 && !isRetry && this.tokenRecoveryHandler) {
+      // Expired token auto-recovery (401 Unauthorized), avoiding recursive renewal loops
+      const isRenewalEndpoint = path.includes('/tokens/renew') || path.includes('/session/renew');
+      if (response.status === 401 && !isRetry && this.tokenRecoveryHandler && !isRenewalEndpoint) {
         const recovered = await this.tokenRecoveryHandler();
         if (recovered) {
           // Retry original request once with new token
@@ -227,6 +229,7 @@ export class SyncApiClient {
     const res = await this.request<{ sessionToken: string; expiresAt: string }>('/v1/sync/tokens/renew', {
       method: 'POST',
       body: { installationId },
+      skipAuthHeader: true,
     });
     if (res?.sessionToken) {
       this.sessionToken = res.sessionToken;

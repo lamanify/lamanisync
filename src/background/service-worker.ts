@@ -22,35 +22,42 @@ import { OutboxPoller, OUTBOX_ALARM_NAME } from './outbox-poller.js';
 import { KillSwitchCoordinator } from './kill-switch.js';
 import { TokenManager } from './token-manager.js';
 
+export const TOKEN_RENEWAL_ALARM_NAME = 'lamanisync_token_renewal';
+
+export const defaultStorage = {
+  get: (keys: string | string[]) =>
+    typeof chrome !== 'undefined' && chrome.storage?.local
+      ? chrome.storage.local.get(keys)
+      : Promise.resolve({}),
+  set: (items: Record<string, unknown>) =>
+    typeof chrome !== 'undefined' && chrome.storage?.local
+      ? chrome.storage.local.set(items)
+      : Promise.resolve(),
+  remove: (keys: string | string[]) =>
+    typeof chrome !== 'undefined' && chrome.storage?.local
+      ? chrome.storage.local.remove(keys)
+      : Promise.resolve(),
+};
+
 export const fsm = new ConnectionFSM();
 export const apiClient = new SyncApiClient();
-export const coordinator = new PairingCoordinator({ fsm, apiClient });
+export const coordinator = new PairingCoordinator({ fsm, apiClient, storage: defaultStorage });
 
 export const killSwitch = new KillSwitchCoordinator({
   fsm,
+  storage: defaultStorage,
   onPauseTriggered: () => {
-    outboxPoller.stop();
+    outboxPoller?.stop();
   },
 });
 
 export const tokenManager = new TokenManager({
   apiClient,
-  storage: {
-    get: (keys) =>
-      typeof chrome !== 'undefined' && chrome.storage?.local
-        ? chrome.storage.local.get(keys)
-        : Promise.resolve({}),
-    set: (items) =>
-      typeof chrome !== 'undefined' && chrome.storage?.local
-        ? chrome.storage.local.set(items)
-        : Promise.resolve(),
-    remove: (keys) =>
-      typeof chrome !== 'undefined' && chrome.storage?.local
-        ? chrome.storage.local.remove(keys)
-        : Promise.resolve(),
-  },
+  storage: defaultStorage,
   fsm,
 });
+
+coordinator.setTokenManager(tokenManager);
 
 apiClient.setKillSwitchHandler((payload) => {
   killSwitch.processRemoteSignal(payload);
@@ -84,8 +91,8 @@ export const outboxPoller = new OutboxPoller({
   connectionId: '',
   killSwitches: {
     isGlobalPaused: () => killSwitch.isGlobalPaused(),
-    isAdapterPaused: () => false,
-    isConnectionPaused: () => false,
+    isAdapterPaused: (id?: string) => (id ? killSwitch.isAdapterPaused(id) : false),
+    isConnectionPaused: (id?: string) => (id ? killSwitch.isConnectionPaused(id) : false),
   },
 });
 
@@ -164,6 +171,7 @@ export function clearObservations(): void {
 
 export async function ensureServiceWorkerRestored(): Promise<void> {
   try {
+    await killSwitch.restore();
     const activeLease = await leaseCoordinator.restore();
     await echoSuppressor.restoreFromStorage();
     const record = await coordinator.restoreState();
@@ -174,6 +182,26 @@ export async function ensureServiceWorkerRestored(): Promise<void> {
       commandExecutor.setTargetOrigin(session.targetOrigin);
       outboxPoller.setConnectionId(session.connectionId);
       await referenceSync.restore();
+      await tokenManager.checkAndRenew();
+
+      if (typeof chrome !== 'undefined' && chrome.alarms?.create) {
+        try {
+          chrome.alarms.create(TOKEN_RENEWAL_ALARM_NAME, {
+            periodInMinutes: 1,
+          });
+        } catch {
+          // Ignore
+        }
+      }
+    }
+    if (killSwitch.isPaused({ connectionId: session?.connectionId })) {
+      if (fsm.canTransition('PAUSED')) {
+        fsm.transition('PAUSED', {
+          reason: `Kill-switch active on startup: ${killSwitch.getPauseReason({ connectionId: session?.connectionId })}`,
+        });
+      }
+      outboxPoller.stop();
+      return record as unknown as void;
     }
     if (activeLease) {
       coordinator.setActiveLease({
@@ -227,7 +255,18 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   if (message?.type === 'PAIR') {
     coordinator
       .pair(message.pairingCode, message.deviceName)
-      .then((result) => sendResponse({ success: true, result, record: fsm.getRecord() }))
+      .then((result) => {
+        if (typeof chrome !== 'undefined' && chrome.alarms?.create) {
+          try {
+            chrome.alarms.create(TOKEN_RENEWAL_ALARM_NAME, {
+              periodInMinutes: 1,
+            });
+          } catch {
+            // Ignore
+          }
+        }
+        sendResponse({ success: true, result, record: fsm.getRecord() });
+      })
       .catch((err) => sendResponse({ success: false, error: err.message, code: err.code }));
     return true; // async response
   }
@@ -247,7 +286,16 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   if (message?.type === 'UNPAIR') {
     coordinator
       .unpair(message.reason)
-      .then(() => sendResponse({ success: true, record: fsm.getRecord() }))
+      .then(() => {
+        if (typeof chrome !== 'undefined' && chrome.alarms?.clear) {
+          try {
+            chrome.alarms.clear(TOKEN_RENEWAL_ALARM_NAME);
+          } catch {
+            // Ignore
+          }
+        }
+        sendResponse({ success: true, record: fsm.getRecord() });
+      })
       .catch((err) => sendResponse({ success: false, error: err.message }));
     return true; // async response
   }
@@ -443,6 +491,12 @@ if (typeof chrome !== 'undefined' && chrome.alarms?.onAlarm) {
         }
       } catch (err) {
         console.warn('[LamaniSync SW] Outbox poll alarm error:', err);
+      }
+    } else if (alarm.name === TOKEN_RENEWAL_ALARM_NAME) {
+      try {
+        await tokenManager.checkAndRenew();
+      } catch (err) {
+        console.warn('[LamaniSync SW] Token renewal alarm error:', err);
       }
     }
   });

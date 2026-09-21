@@ -20,6 +20,8 @@ describe('Environment Configuration & Production Domain Guard (Phase 10)', () =>
       expect(isProductionDomain('lamanihub.com')).toBe(true);
       expect(isProductionDomain('https://app.lamani.my/v1/sync')).toBe(true);
       expect(isProductionDomain('https://api.lamanihub.com')).toBe(true);
+      expect(isProductionDomain('app.lamani.my:443')).toBe(true);
+      expect(isProductionDomain('api.lamanihub.com:8443')).toBe(true);
     });
 
     it('permits staging, dev, demo, and localhost domains', () => {

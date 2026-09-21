@@ -360,5 +360,47 @@ describe('PairingCoordinator', () => {
       await coordinator.handlePermissionsRemoved({ origins: ['http://localhost:4001/*'] });
       expect(fsm.getState()).toBe('PAIRED_NO_PERMISSION');
     });
+
+    it('auto-recovers expired session token on restoreState and preserves pairing', async () => {
+      await coordinator.pair('PAIR-TEST-123');
+
+      // Expire session token in storage
+      const session = await coordinator.getSession();
+      expect(session).not.toBeNull();
+      const expiredSession = {
+        ...session!,
+        expiresAt: new Date(Date.now() - 60000).toISOString(),
+      };
+      await memoryStorage.set({ [SESSION_STORAGE_KEY]: expiredSession });
+
+      // Mock successful renewal response
+      mockFetch.mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            status: 'ok',
+            sessionToken: 'stk_renewed_on_startup',
+            expiresAt: new Date(Date.now() + 86400000).toISOString(),
+          }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } }
+        )
+      );
+
+      // Reset FSM to UNPAIRED simulating fresh SW startup
+      const freshFsm = new ConnectionFSM();
+      const freshCoordinator = new PairingCoordinator({
+        fsm: freshFsm,
+        apiClient,
+        storage: memoryStorage,
+        permissionsApi: mockPermissionsApi,
+      });
+
+      const restoredRecord = await freshCoordinator.restoreState();
+
+      // State is restored to PAIRED_NO_PERMISSION (or PROBING) without dropping pairing!
+      expect(restoredRecord.state).not.toBe('UNPAIRED');
+      const updatedSession = await freshCoordinator.getSession();
+      expect(updatedSession?.sessionToken).toBe('stk_renewed_on_startup');
+      expect(freshCoordinator.apiClient.getSessionToken()).toBe('stk_renewed_on_startup');
+    });
   });
 });

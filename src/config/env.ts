@@ -28,9 +28,8 @@ const KNOWN_PRODUCTION_HOSTS = new Set([
 export function isProductionDomain(urlOrHost: string): boolean {
   let hostname = urlOrHost.trim();
   try {
-    if (hostname.includes('://')) {
-      hostname = new URL(hostname).hostname;
-    }
+    const parsed = hostname.includes('://') ? new URL(hostname) : new URL(`http://${hostname}`);
+    hostname = parsed.hostname;
   } catch {
     // If URL parsing fails, inspect raw string
   }

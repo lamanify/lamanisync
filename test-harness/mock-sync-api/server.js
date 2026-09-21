@@ -32,7 +32,7 @@ function createInitialSyncState() {
     ],
     /** @type {any[]} */
     receipts: [],
-    seenNonces: new Set(),
+    seenNonces: new Map(),
     killSwitch: {
       global: { paused: false, reason: '' },
       adapters: new Map(),
@@ -167,13 +167,21 @@ export class MockSyncApiServer {
         }
 
         if (nonceHeader) {
+          const nowMs = Date.now();
           if (this.state.seenNonces.has(nonceHeader)) {
             return this.sendJson(res, 401, {
               error: 'NONCE_REPLAY_DETECTED',
               message: `Nonce '${nonceHeader}' has already been processed (replay attack detected)`,
             });
           }
-          this.state.seenNonces.add(nonceHeader);
+          // Prune nonces older than 120 seconds
+          const cutoff = nowMs - 120_000;
+          for (const [key, seenAt] of this.state.seenNonces.entries()) {
+            if (seenAt < cutoff) {
+              this.state.seenNonces.delete(key);
+            }
+          }
+          this.state.seenNonces.set(nonceHeader, nowMs);
         }
       }
 

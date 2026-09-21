@@ -21,8 +21,8 @@ export const OUTBOX_ALARM_NAME = 'lamanisync_outbox_poll';
 
 export interface KillSwitchOptions {
   isGlobalPaused?: () => boolean;
-  isAdapterPaused?: () => boolean;
-  isConnectionPaused?: () => boolean;
+  isAdapterPaused?: (adapterId?: string) => boolean;
+  isConnectionPaused?: (connectionId?: string) => boolean;
 }
 
 export interface OutboxPollerOptions {
@@ -118,8 +118,8 @@ export class OutboxPoller {
    */
   isPaused(): boolean {
     if (this.killSwitches?.isGlobalPaused?.()) return true;
-    if (this.killSwitches?.isAdapterPaused?.()) return true;
-    if (this.killSwitches?.isConnectionPaused?.()) return true;
+    if (this.killSwitches?.isAdapterPaused?.(this.adapterManifest?.adapterId)) return true;
+    if (this.killSwitches?.isConnectionPaused?.(this.connectionId)) return true;
     if (this.fsm.getState() === 'PAUSED') return true;
     return false;
   }

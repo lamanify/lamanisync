@@ -179,4 +179,24 @@ describe('Session Token Manager (Phase 10)', () => {
     await mockStorage.remove(SESSION_STORAGE_KEY);
     await expect(tokenManager.renewToken()).rejects.toThrow(LamaniError);
   });
+
+  it('omits Bearer Authorization header when calling renewSessionToken', async () => {
+    let capturedAuth: string | null = null;
+    const mockFetch = vi.fn().mockImplementation(async (_url, init) => {
+      const headers = new Headers(init.headers);
+      capturedAuth = headers.get('authorization');
+      return new Response(
+        JSON.stringify({
+          status: 'ok',
+          sessionToken: 'stk_renewed_clean',
+          expiresAt: new Date(Date.now() + 3600_000).toISOString(),
+        }),
+        { status: 200, headers: { 'Content-Type': 'application/json' } }
+      );
+    });
+    apiClient.setFetchFn(mockFetch as unknown as typeof fetch);
+
+    await tokenManager.renewToken();
+    expect(capturedAuth).toBeNull();
+  });
 });

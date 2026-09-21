@@ -118,4 +118,55 @@ describe('Remote Kill-Switch Coordinator (Phase 10)', () => {
       expect(fsm.getState()).toBe('ACTIVE');
     });
   });
+
+  describe('Parameterless Resume & State Persistence', () => {
+    it('clears all pauses across global, adapter, and connection levels when resume() is called without arguments', () => {
+      coordinator.triggerPause('global', undefined, 'Global pause');
+      coordinator.triggerPause('adapter', 'adapter-1', 'Adapter pause');
+      coordinator.triggerPause('connection', 'conn-1', 'Connection pause');
+
+      expect(coordinator.isGlobalPaused()).toBe(true);
+      expect(coordinator.isAdapterPaused('adapter-1')).toBe(true);
+      expect(coordinator.isConnectionPaused('conn-1')).toBe(true);
+
+      coordinator.resume();
+
+      expect(coordinator.isGlobalPaused()).toBe(false);
+      expect(coordinator.isAdapterPaused('adapter-1')).toBe(false);
+      expect(coordinator.isConnectionPaused('conn-1')).toBe(false);
+      expect(fsm.getState()).toBe('ACTIVE');
+    });
+
+    it('persists pause state to storage and restores correctly', async () => {
+      const storageMap = new Map<string, unknown>();
+      const mockStorage = {
+        get: async (keys: string | string[]) => {
+          const res: Record<string, unknown> = {};
+          const list = Array.isArray(keys) ? keys : [keys];
+          for (const k of list) {
+            if (storageMap.has(k)) res[k] = storageMap.get(k);
+          }
+          return res;
+        },
+        set: async (items: Record<string, unknown>) => {
+          for (const [k, v] of Object.entries(items)) storageMap.set(k, v);
+        },
+        remove: async (keys: string | string[]) => {
+          const list = Array.isArray(keys) ? keys : [keys];
+          for (const k of list) storageMap.delete(k);
+        },
+      };
+
+      const coord1 = new KillSwitchCoordinator({ fsm, storage: mockStorage });
+      coord1.triggerPause('adapter', 'acme-cloud-v1', 'Persistent maintenance');
+
+      // Create new coordinator instance simulating SW restart
+      const coord2 = new KillSwitchCoordinator({ fsm, storage: mockStorage });
+      expect(coord2.isAdapterPaused('acme-cloud-v1')).toBe(false);
+
+      await coord2.restore();
+      expect(coord2.isAdapterPaused('acme-cloud-v1')).toBe(true);
+      expect(coord2.getPauseReason({ adapterId: 'acme-cloud-v1' })).toBe('Persistent maintenance');
+    });
+  });
 });
