@@ -22,6 +22,12 @@ export class MockCmsServer {
     this.targetedFaults.clear();
   }
 
+  /**
+   * @param {string} fault
+   * @param {number} [delayMs=1000]
+   * @param {string|null} [targetPath=null]
+   * @param {string|null} [method=null]
+   */
   setFault(fault, delayMs = 1000, targetPath = null, method = null) {
     if (targetPath) {
       const key = `${(method || 'ALL').toUpperCase()}:${targetPath}`;

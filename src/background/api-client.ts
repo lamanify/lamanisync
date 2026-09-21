@@ -9,6 +9,12 @@
 import { z } from 'zod';
 import { TargetOriginSchema } from '../core/contracts/primitives.js';
 import { type SyncEvent, BatchSyncEventsSchema } from '../core/contracts/events.js';
+import {
+  type SyncCommand,
+  SyncCommandSchema,
+  type CommandResultStatus,
+  type WriteReceipt,
+} from '../core/contracts/commands.js';
 import { LamaniError, classifyError } from '../core/errors.js';
 import { signPayload } from '../storage/device-key.js';
 
@@ -364,6 +370,40 @@ export class SyncApiClient {
   }> {
     return this.request(`/v1/sync/connections/${encodeURIComponent(connectionId)}/reconcile-summary`, {
       method: 'GET',
+    });
+  }
+
+  /**
+   * Fetches next pending command from outbox via GET /v1/sync/outbox/next.
+   */
+  async fetchNextCommand(connectionId: string): Promise<SyncCommand | null> {
+    const path = `/v1/sync/outbox/next?connectionId=${encodeURIComponent(connectionId)}`;
+    const data = await this.request<{ command: unknown | null }>(path, { method: 'GET' });
+    if (!data || !data.command) {
+      return null;
+    }
+    return SyncCommandSchema.parse(data.command);
+  }
+
+  /**
+   * Reports command execution result via POST /v1/sync/outbox/:commandId/result.
+   */
+  async reportCommandResult(
+    commandId: string,
+    result: {
+      status: CommandResultStatus;
+      writeReceipt?: WriteReceipt;
+      error?: unknown;
+    }
+  ): Promise<{ acknowledged: boolean; commandId: string; status: string }> {
+    const path = `/v1/sync/outbox/${encodeURIComponent(commandId)}/result`;
+    return this.request(path, {
+      method: 'POST',
+      body: {
+        status: result.status,
+        writeReceipt: result.writeReceipt,
+        error: result.error,
+      },
     });
   }
 }

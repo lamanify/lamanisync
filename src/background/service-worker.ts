@@ -16,6 +16,9 @@ import { ReferenceSyncManager } from './reference-sync.js';
 import { ProbeRunner } from './probe.js';
 import { BackfillEngine } from './backfill.js';
 import { ReconcileWorker } from './reconcile.js';
+import { EchoSuppressor } from './echo-suppressor.js';
+import { CommandExecutor } from './command-executor.js';
+import { OutboxPoller, OUTBOX_ALARM_NAME } from './outbox-poller.js';
 
 export const fsm = new ConnectionFSM();
 export const apiClient = new SyncApiClient();
@@ -30,6 +33,21 @@ export const batchUploader = new BatchUploader({
 });
 export const referenceSync = new ReferenceSyncManager({ targetOrigin: '' });
 
+export const echoSuppressor = new EchoSuppressor();
+export const commandExecutor = new CommandExecutor({
+  apiClient,
+  leaseCoordinator,
+  fsm,
+  echoSuppressor,
+});
+export const outboxPoller = new OutboxPoller({
+  apiClient,
+  leaseCoordinator,
+  commandExecutor,
+  fsm,
+  connectionId: '',
+});
+
 // Forward lease changes to pairing coordinator and schedule/clear alarms
 leaseCoordinator.onLeaseAcquired((lease) => {
   coordinator.setActiveLease({
@@ -38,23 +56,31 @@ leaseCoordinator.onLeaseAcquired((lease) => {
     fencingToken: lease.fencingToken,
   });
 
+  outboxPoller.setConnectionId(lease.connectionId);
+  outboxPoller.start();
+
   if (typeof chrome !== 'undefined' && chrome.alarms?.create) {
     try {
       chrome.alarms.create('reconcile_check', {
         periodInMinutes: 5,
       });
+      chrome.alarms.create(OUTBOX_ALARM_NAME, {
+        periodInMinutes: 1,
+      });
     } catch (err) {
-      console.warn('[LamaniSync SW] Failed to schedule reconcile alarm:', err);
+      console.warn('[LamaniSync SW] Failed to schedule alarms:', err);
     }
   }
 });
 
 leaseCoordinator.onLeaseLost(() => {
   coordinator.setActiveLease(null);
+  outboxPoller.stop();
 
   if (typeof chrome !== 'undefined' && chrome.alarms?.clear) {
     try {
       chrome.alarms.clear('reconcile_check');
+      chrome.alarms.clear(OUTBOX_ALARM_NAME);
     } catch {
       // ignore
     }
@@ -65,6 +91,9 @@ export const recentObservations: unknown[] = [];
 export const MAX_RECENT_OBSERVATIONS = 50;
 
 export function recordObservation(obs: unknown): void {
+  if (obs && typeof obs === 'object' && echoSuppressor.shouldSuppressObservation(obs as Record<string, unknown>)) {
+    return; // Echo suppressed (AGENTS.md write-loop prevention)
+  }
   recentObservations.unshift(obs);
   if (recentObservations.length > MAX_RECENT_OBSERVATIONS) {
     recentObservations.pop();
@@ -78,11 +107,14 @@ export function clearObservations(): void {
 export async function ensureServiceWorkerRestored(): Promise<void> {
   try {
     await leaseCoordinator.restore();
+    await echoSuppressor.restoreFromStorage();
     const record = await coordinator.restoreState();
     const session = await coordinator.getSession();
     if (session) {
       batchUploader.setInstallationId(session.installationId);
       referenceSync.setTargetOrigin(session.targetOrigin);
+      commandExecutor.setTargetOrigin(session.targetOrigin);
+      outboxPoller.setConnectionId(session.connectionId);
       await referenceSync.restore();
     }
     return record as unknown as void;
@@ -274,10 +306,40 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     return true;
   }
 
+  // --- Phase 8 Outbox & Command Message Handlers ---
+  if (message?.type === 'POLL_OUTBOX') {
+    outboxPoller
+      .pollOnce()
+      .then((result) => sendResponse({ success: true, result }))
+      .catch((err) => sendResponse({ success: false, error: err.message }));
+    return true;
+  }
+
+  if (message?.type === 'EXECUTE_COMMAND') {
+    commandExecutor
+      .executeCommand(message.command)
+      .then((result) => sendResponse({ success: true, result }))
+      .catch((err) => sendResponse({ success: false, error: err.message }));
+    return true;
+  }
+
+  if (message?.type === 'GET_OUTBOX_STATE') {
+    commandExecutor
+      .getInFlightCommand()
+      .then((inFlight) => {
+        sendResponse({
+          isPolling: outboxPoller.isActive(),
+          inFlight,
+        });
+      })
+      .catch((err) => sendResponse({ error: err.message }));
+    return true;
+  }
+
   return false;
 });
 
-// Alarm listener for MV3 background lease renewal & periodic reconciliation
+// Alarm listener for MV3 background lease renewal, periodic reconciliation & outbox polling
 if (typeof chrome !== 'undefined' && chrome.alarms?.onAlarm) {
   chrome.alarms.onAlarm.addListener(async (alarm) => {
     await ensureServiceWorkerRestored();
@@ -306,6 +368,14 @@ if (typeof chrome !== 'undefined' && chrome.alarms?.onAlarm) {
         }
       } catch (err) {
         console.warn('[LamaniSync SW] Reconcile alarm error:', err);
+      }
+    } else if (alarm.name === OUTBOX_ALARM_NAME) {
+      try {
+        if (leaseCoordinator.hasActiveLease()) {
+          await outboxPoller.pollOnce();
+        }
+      } catch (err) {
+        console.warn('[LamaniSync SW] Outbox poll alarm error:', err);
       }
     }
   });
