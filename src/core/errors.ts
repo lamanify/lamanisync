@@ -102,140 +102,15 @@ export class FencingTokenError extends LamaniError {
   }
 }
 
-// Words that always trigger redaction when present in key name
-const SENSITIVE_KEY_SUBSTRINGS = [
-  'password',
-  'passwd',
-  'token',
-  'cookie',
-  'session',
-  'secret',
-  'authorization',
-  'bearer',
-  'csrf',
-  'xsrf',
-  'jwt',
-  'credential',
-  'privatekey',
-  'apikey',
-  'pairingcode',
-  'fullname',
-  'firstname',
-  'lastname',
-  'patientname',
-  'icorpassport',
-  'nric',
-  'passport',
-  'mykad',
-  'nationalid',
-  'phone',
-  'telephone',
-  'mobile',
-  'email',
-  'dateofbirth',
-  'birthdate',
-  'dob',
-  'notes',
-  'medical',
-  'clinical',
-  'diagnosis',
-  'prescription',
-  'treatment',
-  'complaint',
-  'address',
-  'street',
-  'postcode',
-  'postalcode',
-  'zipcode',
-];
-
-// Specific non-sensitive metadata keys that should remain unredacted
-const ALLOWLISTED_KEYS = new Set([
-  'id',
-  'patientid',
-  'providerid',
-  'serviceid',
-  'locationid',
-  'connectionid',
-  'installationid',
-  'commandid',
-  'batchid',
-  'eventid',
-  'adapterid',
-  'actionid',
-  'statuscode',
-  'errortype',
-  'revision',
-  'timestamp',
-  'occurredat',
-  'verifiedat',
-  'status',
-  'endpoint',
-  'method',
-  'isretryable',
-  'devicename',
-  'adaptername',
-  'servicename',
-]);
-
-function isSensitiveKey(key: string): boolean {
-  const clean = key.toLowerCase().replace(/[-_\s]/g, '');
-  if (ALLOWLISTED_KEYS.has(clean)) return false;
-  if (clean === 'name' || clean.endsWith('name')) {
-    return true;
-  }
-  return SENSITIVE_KEY_SUBSTRINGS.some((substr) => clean.includes(substr));
-}
-
-// Regex patterns to scrub sensitive data embedded in strings/error messages
-const SENSITIVE_STRING_PATTERNS: Array<[RegExp, string]> = [
-  [/Bearer\s+[A-Za-z0-9._~+/-]+=*/gi, 'Bearer [REDACTED]'],
-  [/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/g, '[REDACTED_EMAIL]'],
-  [/\b\d{6}-\d{2}-\d{4}\b/g, '[REDACTED_NRIC]'],
-  [/\b(?:\+?60|0)[1-9]\d{1,2}[-\s]?\d{6,8}\b/g, '[REDACTED_PHONE]'],
-  [/(?:cms_session|session_token|token|secret)=[^;,\s&]+/gi, '$1=[REDACTED]'],
-];
-
-export function redactSensitiveString(str: string): string {
-  let result = str;
-  for (const [pattern, replacement] of SENSITIVE_STRING_PATTERNS) {
-    result = result.replace(pattern, replacement);
-  }
-  return result;
-}
-
-/**
- * Recursively redacts sensitive auth secrets and patient health information (PHI).
- */
-export function redactSensitiveData(obj: unknown): unknown {
-  if (obj === null || obj === undefined) return obj;
-
-  if (typeof obj === 'string') {
-    return redactSensitiveString(obj);
-  }
-
-  if (typeof obj !== 'object') {
-    return obj;
-  }
-
-  if (Array.isArray(obj)) {
-    return obj.map((item) => redactSensitiveData(item));
-  }
-
-  const redacted: Record<string, unknown> = {};
-  for (const [key, val] of Object.entries(obj as Record<string, unknown>)) {
-    if (isSensitiveKey(key)) {
-      redacted[key] = '[REDACTED]';
-    } else if (typeof val === 'object' && val !== null) {
-      redacted[key] = redactSensitiveData(val);
-    } else if (typeof val === 'string') {
-      redacted[key] = redactSensitiveString(val);
-    } else {
-      redacted[key] = val;
-    }
-  }
-  return redacted;
-}
+export {
+  redactSensitiveString,
+  redactSensitiveData,
+  isSensitiveKey,
+  SENSITIVE_KEY_SUBSTRINGS,
+  ALLOWLISTED_KEYS,
+  SENSITIVE_STRING_PATTERNS,
+} from './redaction.js';
+import { redactSensitiveString, redactSensitiveData } from './redaction.js';
 
 export interface ClassifyErrorContext {
   statusCode?: number;

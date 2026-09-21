@@ -1,230 +1,65 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import './App.css';
-import { PairingView } from './states/PairingView.js';
-import {
-  SESSION_STORAGE_KEY,
-  ConnectionSessionSchema,
-  type ConnectionSession,
-} from '../background/pairing.js';
-import {
-  requestOriginPermission,
-  hasOriginPermission,
-  removeOriginPermission,
-} from '../background/permissions.js';
-import { SyncApiClient } from '../background/api-client.js';
-import { getOrCreateDeviceKey, purgeDeviceKey } from '../storage/device-key.js';
+import { useConnectionState } from './hooks/useConnectionState.js';
+import { UnpairedView } from './states/UnpairedView.js';
+import { PermissionPromptView } from './states/PermissionPromptView.js';
+import { ProbingView } from './states/ProbingView.js';
+import { ShadowView } from './states/ShadowView.js';
+import { ActiveView } from './states/ActiveView.js';
+import { ReauthView } from './states/ReauthView.js';
+import { DegradedView } from './states/DegradedView.js';
+import { PausedView } from './states/PausedView.js';
+import { RevokedView } from './states/RevokedView.js';
+import { DiagnosticsModal } from './components/DiagnosticsModal.js';
+import { ConfirmDialog } from './components/ConfirmDialog.js';
 
 export function App() {
-  const [version, setVersion] = useState<string>('');
-  const [connectionState, setConnectionState] = useState<string>('UNPAIRED');
-  const [session, setSession] = useState<ConnectionSession | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const {
+    connectionState,
+    extensionVersion,
+    adapterVersion,
+    clinicId,
+    clinicName,
+    targetOrigin,
+    isLoading,
+    errorMessage,
+    lastReadAt,
+    lastWriteAt,
+    syncProgress,
+    pauseReason,
+    errorSummary,
+    probingSteps,
+    pair,
+    grantPermission,
+    unpair,
+    retry,
+    openCmsTab,
+    clearLocalState,
+    refreshState,
+    getDiagnosticBundle,
+  } = useConnectionState();
 
-  useEffect(() => {
-    if (typeof chrome !== 'undefined' && chrome.runtime?.getManifest) {
-      const manifest = chrome.runtime.getManifest();
-      setVersion(manifest.version || 'unknown');
-    } else {
-      setVersion('dev');
-    }
-
-    loadInitialSession();
-  }, []);
-
-  const loadInitialSession = async () => {
-    try {
-      if (typeof chrome !== 'undefined' && chrome.runtime?.sendMessage) {
-        chrome.runtime.sendMessage({ type: 'GET_CONNECTION_STATE' }, async (response) => {
-          if (chrome.runtime.lastError || !response?.record) {
-            await loadFromStorageFallback();
-            return;
-          }
-          const record = response.record;
-          setConnectionState(record.state);
-          if (record.state === 'UNPAIRED') {
-            setSession(null);
-          } else {
-            await loadFromStorageFallback();
-          }
-        });
-      } else {
-        await loadFromStorageFallback();
-      }
-    } catch {
-      await loadFromStorageFallback();
-    }
-  };
-
-  const loadFromStorageFallback = async () => {
-    try {
-      if (typeof chrome !== 'undefined' && chrome.storage?.local) {
-        const stored = await chrome.storage.local.get(SESSION_STORAGE_KEY);
-        const raw = stored[SESSION_STORAGE_KEY];
-        if (raw) {
-          const parsed = ConnectionSessionSchema.safeParse(raw);
-          if (parsed.success) {
-            const sess = parsed.data;
-            setSession(sess);
-
-            const hasPerm = await hasOriginPermission(sess.targetOrigin).catch(() => false);
-            if (hasPerm) {
-              setConnectionState('PROBING');
-            } else {
-              setConnectionState('PAIRED_NO_PERMISSION');
-            }
-            return;
-          }
-        }
-      }
-      setSession(null);
-      setConnectionState('UNPAIRED');
-    } catch {
-      setSession(null);
-      setConnectionState('UNPAIRED');
-    }
-  };
-
-  const handlePair = async (code: string) => {
-    setIsLoading(true);
-    setErrorMessage(null);
-    try {
-      if (typeof chrome !== 'undefined' && chrome.runtime?.sendMessage) {
-        const response = await new Promise<{
-          success: boolean;
-          result?: {
-            installationId: string;
-            connectionId: string;
-            clinicId: string;
-            sessionToken: string;
-            expiresAt: string;
-            targetOrigin: string;
-          };
-          error?: string;
-        }>((resolve) => {
-          chrome.runtime.sendMessage(
-            { type: 'PAIR', pairingCode: code, deviceName: 'Popup Profile' },
-            (res) => {
-              if (chrome.runtime.lastError) {
-                resolve({ success: false, error: chrome.runtime.lastError.message });
-              } else {
-                resolve(res || { success: false, error: 'No response from background' });
-              }
-            }
-          );
-        });
-
-        if (!response.success || !response.result) {
-          throw new Error(response.error || 'Pairing failed');
-        }
-
-        const res = response.result;
-        setSession({
-          installationId: res.installationId,
-          connectionId: res.connectionId,
-          clinicId: res.clinicId,
-          sessionToken: res.sessionToken,
-          expiresAt: res.expiresAt,
-          targetOrigin: res.targetOrigin,
-          pairedAt: new Date().toISOString(),
-        });
-        setConnectionState('PAIRED_NO_PERMISSION');
-      } else {
-        // Fallback for standalone/mocked contexts without chrome.runtime.sendMessage
-        const { publicKeySpki } = await getOrCreateDeviceKey();
-        const client = new SyncApiClient();
-        const result = await client.pair(code, publicKeySpki, 'Popup Web Profile');
-
-        const newSession: ConnectionSession = {
-          installationId: result.installationId,
-          connectionId: result.connectionId,
-          clinicId: result.clinicId,
-          sessionToken: result.sessionToken,
-          expiresAt: result.expiresAt,
-          targetOrigin: result.targetOrigin,
-          pairedAt: new Date().toISOString(),
-        };
-
-        if (typeof chrome !== 'undefined' && chrome.storage?.local) {
-          await chrome.storage.local.set({ [SESSION_STORAGE_KEY]: newSession });
-        }
-
-        setSession(newSession);
-        setConnectionState('PAIRED_NO_PERMISSION');
-      }
-    } catch (err) {
-      setErrorMessage((err as Error).message || 'Pairing failed');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleGrantPermission = async () => {
-    if (!session?.targetOrigin) return;
-    setIsLoading(true);
-    setErrorMessage(null);
-    try {
-      // Must be triggered by explicit user gesture in the popup
-      const granted = await requestOriginPermission(session.targetOrigin, session.targetOrigin);
-      if (granted) {
-        if (typeof chrome !== 'undefined' && chrome.runtime?.sendMessage) {
-          await new Promise<void>((resolve) => {
-            chrome.runtime.sendMessage(
-              { type: 'GRANT_PERMISSION_RESULT', granted: true, targetOrigin: session.targetOrigin },
-              () => resolve()
-            );
-          });
-        }
-        setConnectionState('PROBING');
-      } else {
-        setErrorMessage('Permission was declined by the user');
-      }
-    } catch (err) {
-      setErrorMessage((err as Error).message || 'Permission request failed');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleUnpair = async () => {
-    setIsLoading(true);
-    setErrorMessage(null);
-    try {
-      if (session?.targetOrigin) {
-        await removeOriginPermission(session.targetOrigin).catch(() => {});
-      }
-
-      if (typeof chrome !== 'undefined' && chrome.runtime?.sendMessage) {
-        await new Promise<void>((resolve) => {
-          chrome.runtime.sendMessage({ type: 'UNPAIR' }, () => resolve());
-        });
-      } else {
-        if (session?.installationId) {
-          const client = new SyncApiClient();
-          await client.revoke(session.installationId).catch(() => {});
-        }
-        await purgeDeviceKey().catch(() => {});
-        if (typeof chrome !== 'undefined' && chrome.storage?.local) {
-          await chrome.storage.local.remove(SESSION_STORAGE_KEY);
-        }
-      }
-
-      setSession(null);
-      setConnectionState('UNPAIRED');
-    } catch (err) {
-      setErrorMessage((err as Error).message || 'Unpair failed');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const [isDiagOpen, setIsDiagOpen] = useState(false);
+  const [isUnpairConfirmOpen, setIsUnpairConfirmOpen] = useState(false);
 
   const formatStatus = (state: string) => {
     switch (state) {
       case 'PAIRED_NO_PERMISSION':
         return 'Paired (Permission Needed)';
       case 'PROBING':
+        return 'Connected';
+      case 'SHADOW':
+        return 'Shadow Mode';
       case 'ACTIVE':
         return 'Connected';
+      case 'REAUTH_REQUIRED':
+        return 'Reauth Required';
+      case 'DEGRADED':
+        return 'Degraded';
+      case 'PAUSED':
+        return 'Paused';
+      case 'REVOKED':
+        return 'Revoked';
       case 'PAIRING':
         return 'Pairing...';
       default:
@@ -232,37 +67,172 @@ export function App() {
     }
   };
 
+  const renderStateView = () => {
+    switch (connectionState) {
+      case 'PAIRING':
+        return <UnpairedView isLoading={true} errorMessage={errorMessage} onPair={pair} />;
+      case 'PAIRED_NO_PERMISSION':
+        return (
+          <PermissionPromptView
+            targetOrigin={targetOrigin}
+            clinicId={clinicId}
+            isLoading={isLoading}
+            errorMessage={errorMessage}
+            onGrantPermission={grantPermission}
+            onUnpair={() => setIsUnpairConfirmOpen(true)}
+          />
+        );
+      case 'PROBING':
+        return (
+          <ProbingView
+            targetOrigin={targetOrigin}
+            isLoading={isLoading}
+            errorMessage={errorMessage}
+            stepStatus={probingSteps}
+            onRetryProbe={retry}
+            onUnpair={() => setIsUnpairConfirmOpen(true)}
+          />
+        );
+      case 'SHADOW':
+        return (
+          <ShadowView
+            clinicName={clinicName}
+            clinicId={clinicId}
+            targetOrigin={targetOrigin}
+            syncProgress={syncProgress}
+            lastReadAt={lastReadAt}
+            isLoading={isLoading}
+            onUnpair={() => setIsUnpairConfirmOpen(true)}
+          />
+        );
+      case 'ACTIVE':
+        return (
+          <ActiveView
+            clinicName={clinicName}
+            clinicId={clinicId}
+            targetOrigin={targetOrigin}
+            adapterVersion={adapterVersion}
+            lastReadAt={lastReadAt}
+            lastWriteAt={lastWriteAt}
+            isLoading={isLoading}
+            onOpenDiagnostics={() => setIsDiagOpen(true)}
+            onUnpair={() => setIsUnpairConfirmOpen(true)}
+          />
+        );
+      case 'REAUTH_REQUIRED':
+        return (
+          <ReauthView
+            targetOrigin={targetOrigin}
+            isLoading={isLoading}
+            onOpenCmsTab={openCmsTab}
+            onRetry={retry}
+            onUnpair={() => setIsUnpairConfirmOpen(true)}
+          />
+        );
+      case 'DEGRADED':
+        return (
+          <DegradedView
+            errorSummary={errorSummary || errorMessage}
+            targetOrigin={targetOrigin}
+            isLoading={isLoading}
+            onRetry={retry}
+            onOpenDiagnostics={() => setIsDiagOpen(true)}
+            onUnpair={() => setIsUnpairConfirmOpen(true)}
+          />
+        );
+      case 'PAUSED':
+        return (
+          <PausedView
+            pauseReason={pauseReason}
+            targetOrigin={targetOrigin}
+            isLoading={isLoading}
+            onRefresh={refreshState}
+            onUnpair={() => setIsUnpairConfirmOpen(true)}
+          />
+        );
+      case 'REVOKED':
+        return (
+          <RevokedView
+            isLoading={isLoading}
+            onClearState={() => setIsUnpairConfirmOpen(true)}
+          />
+        );
+      case 'UNPAIRED':
+      default:
+        return <UnpairedView isLoading={isLoading} errorMessage={errorMessage} onPair={pair} />;
+    }
+  };
+
   return (
     <div className="popup-container">
       <header className="popup-header">
-        <h1 className="popup-title">LamaniSync Dev</h1>
-        <span className="popup-version" data-testid="extension-version">
-          v{version}
-        </span>
+        <div className="header-left">
+          <h1 className="popup-title">LamaniSync Dev</h1>
+          <span className="popup-version" data-testid="extension-version">
+            v{extensionVersion}
+          </span>
+        </div>
+        <div className="header-actions">
+          <button
+            type="button"
+            className="btn-header-action"
+            data-testid="header-diagnostics-button"
+            onClick={() => setIsDiagOpen(true)}
+            aria-label="Open Diagnostics Modal"
+          >
+            Diagnostics
+          </button>
+        </div>
       </header>
 
-      <div className="status-badge" data-testid="connection-status">
+      <div className="status-badge" data-testid="connection-status" aria-live="polite">
         <span
           className={`status-indicator ${
-            connectionState === 'PROBING' || connectionState === 'ACTIVE'
+            connectionState === 'ACTIVE'
               ? 'status-indicator-active'
-              : connectionState === 'PAIRED_NO_PERMISSION'
+              : connectionState === 'SHADOW'
+              ? 'status-indicator-purple'
+              : connectionState === 'PROBING'
+              ? 'status-indicator-info'
+              : connectionState === 'PAIRED_NO_PERMISSION' || connectionState === 'REAUTH_REQUIRED'
               ? 'status-indicator-warning'
+              : connectionState === 'DEGRADED' || connectionState === 'REVOKED'
+              ? 'status-indicator-danger'
               : ''
           }`}
-        ></span>
+        />
         <span>{formatStatus(connectionState)}</span>
       </div>
 
-      <PairingView
-        connectionState={connectionState}
-        targetOrigin={session?.targetOrigin}
-        clinicId={session?.clinicId}
+      {renderStateView()}
+
+      <DiagnosticsModal
+        isOpen={isDiagOpen}
+        onClose={() => setIsDiagOpen(false)}
+        bundle={getDiagnosticBundle()}
+      />
+
+      <ConfirmDialog
+        isOpen={isUnpairConfirmOpen}
+        title={connectionState === 'REVOKED' ? 'Clear Local State' : 'Confirm Device Unpair'}
+        message={
+          connectionState === 'REVOKED'
+            ? 'This will purge local keys and sessions from this browser so you can connect a new device.'
+            : 'Are you sure you want to unpair this device? Data synchronization will cease immediately.'
+        }
+        confirmLabel={connectionState === 'REVOKED' ? 'Clear Local State' : 'Unpair Device'}
+        cancelLabel="Cancel"
         isLoading={isLoading}
-        errorMessage={errorMessage}
-        onPair={handlePair}
-        onGrantPermission={handleGrantPermission}
-        onUnpair={handleUnpair}
+        onConfirm={async () => {
+          if (connectionState === 'REVOKED') {
+            await clearLocalState();
+          } else {
+            await unpair();
+          }
+          setIsUnpairConfirmOpen(false);
+        }}
+        onCancel={() => setIsUnpairConfirmOpen(false)}
+        testId="unpair-confirm-dialog"
       />
     </div>
   );
