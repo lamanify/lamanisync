@@ -15,8 +15,8 @@ export class MockCmsServer {
     this.indexPath = path.resolve('test-harness/mock-cms/index.html');
   }
 
-  reset() {
-    this.state = createInitialCmsState();
+  reset(customState = null) {
+    this.state = customState ? JSON.parse(JSON.stringify(customState)) : createInitialCmsState();
     this.globalFault = 'none';
     this.faultDelayMs = 1000;
     this.targetedFaults.clear();
@@ -171,7 +171,7 @@ export class MockCmsServer {
       }
 
       if (pathname === '/__admin/reset' && req.method === 'POST') {
-        this.reset();
+        this.reset(body.state || null);
         return this.sendJson(res, 200, { status: 'ok', message: 'Fixtures and faults reset to initial state' });
       }
 

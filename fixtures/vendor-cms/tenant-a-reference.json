@@ -1,0 +1,42 @@
+{
+  "providers": [
+    {
+      "id": "DOC-01",
+      "fullName": "Dr. Siti Aminah",
+      "specialty": "General Practitioner",
+      "active": true
+    },
+    {
+      "id": "DOC-02",
+      "fullName": "Dr. Tan Wei Lun",
+      "specialty": "Dental Surgeon",
+      "active": true
+    }
+  ],
+  "services": [
+    {
+      "id": "SRV-01",
+      "name": "General Consultation",
+      "durationMinutes": 15,
+      "defaultPrice": 60.0
+    },
+    {
+      "id": "SRV-02",
+      "name": "Dental Scaling & Polish",
+      "durationMinutes": 30,
+      "defaultPrice": 150.0
+    }
+  ],
+  "locations": [
+    {
+      "id": "LOC-01",
+      "name": "Consultation Room 1",
+      "roomType": "clinical"
+    },
+    {
+      "id": "LOC-02",
+      "name": "Dental Suite A",
+      "roomType": "dental"
+    }
+  ]
+}

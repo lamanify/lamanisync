@@ -1,0 +1,22 @@
+[
+  {
+    "id": "ZZTEST-TB-P01",
+    "mrn": "MRN-TB-001",
+    "clientName": "ZZTEST Patient B1",
+    "nric": "900101-14-5001",
+    "mobile_no": "+60123456701",
+    "email": "zztest.tb1@example.test",
+    "gender": "female",
+    "registeredAt": "2026-01-01T08:00:00+08:00"
+  },
+  {
+    "id": "ZZTEST-TB-P02",
+    "mrn": "MRN-TB-002",
+    "clientName": "ZZTEST Patient B2",
+    "nric": "920202-10-5002",
+    "mobile_no": "+60123456702",
+    "email": "zztest.tb2@example.test",
+    "gender": "male",
+    "registeredAt": "2026-01-02T08:00:00+08:00"
+  }
+]

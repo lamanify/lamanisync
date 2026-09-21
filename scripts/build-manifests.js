@@ -216,8 +216,382 @@ const manifest = {
   },
 };
 
+const vendorCms1Manifest = {
+  adapterId: 'vendor-cms-1',
+  name: 'Vendor CMS #1 Certified Adapter',
+  version: '1.0.0',
+  minExtensionVersion: '0.1.0',
+  targetOrigin: 'http://localhost:4001',
+  capabilities: [
+    'PATIENT_READ',
+    'PATIENT_WRITE',
+    'APPOINTMENT_READ',
+    'APPOINTMENT_WRITE',
+    'REFERENCE_DATA_READ',
+    'patients.read',
+    'patients.create',
+    'patients.update',
+    'appointments.read',
+    'appointments.availability',
+    'appointments.create',
+    'appointments.reschedule',
+    'appointments.cancel',
+    'reference.read',
+  ],
+  endpoints: {
+    patients: {
+      list: '/api/patients',
+      get: '/api/patients/:id',
+      create: '/api/patients',
+      update: '/api/patients/:id',
+    },
+    appointments: {
+      list: '/api/appointments',
+      availability: '/api/appointments/availability',
+      create: '/api/appointments',
+      reschedule: '/api/appointments/:id',
+      cancel: '/api/appointments/:id',
+    },
+    reference: {
+      providers: '/api/reference/providers',
+      services: '/api/reference/services',
+      locations: '/api/reference/locations',
+    },
+  },
+  recipes: {
+    'patients.read': {
+      recipeId: 'patients.read',
+      type: 'read',
+      capability: 'patients.read',
+      method: 'GET',
+      path: '/api/patients',
+      extractor: 'data',
+    },
+    patients_list: {
+      recipeId: 'patients_list',
+      type: 'read',
+      capability: 'PATIENT_READ',
+      method: 'GET',
+      path: '/api/patients',
+      extractor: 'data',
+    },
+    patients_get: {
+      recipeId: 'patients_get',
+      type: 'read',
+      capability: 'PATIENT_READ',
+      method: 'GET',
+      path: '/api/patients/:id',
+      extractor: 'data',
+    },
+    'patients.create': {
+      recipeId: 'patients.create',
+      type: 'write',
+      capability: 'patients.create',
+      method: 'POST',
+      path: '/api/patients',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      hook: 'vendor-cms-1-extract-csrf',
+      transforms: [
+        { field: 'phone', transform: 'phone_my' },
+        { field: 'fullName', transform: 'trim' },
+      ],
+      bodyTemplate: {
+        fullName: '$params.fullName',
+        phone: '$params.phone',
+        email: '$params.email',
+        icOrPassport: '$params.icOrPassport',
+      },
+      verification: {
+        path: '/api/patients/:id',
+        method: 'GET',
+        idParam: 'id',
+        expectedFields: {
+          fullName: '$params.fullName',
+          phone: '$params.phone',
+        },
+      },
+    },
+    patient_create: {
+      recipeId: 'patient_create',
+      type: 'write',
+      capability: 'PATIENT_WRITE',
+      method: 'POST',
+      path: '/api/patients',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      hook: 'vendor-cms-1-extract-csrf',
+      transforms: [
+        { field: 'phone', transform: 'phone_my' },
+        { field: 'fullName', transform: 'trim' },
+      ],
+      bodyTemplate: {
+        fullName: '$params.fullName',
+        phone: '$params.phone',
+        email: '$params.email',
+        icOrPassport: '$params.icOrPassport',
+      },
+      verification: {
+        path: '/api/patients/:id',
+        method: 'GET',
+        idParam: 'id',
+        expectedFields: {
+          fullName: '$params.fullName',
+          phone: '$params.phone',
+        },
+      },
+    },
+    'appointments.read': {
+      recipeId: 'appointments.read',
+      type: 'read',
+      capability: 'appointments.read',
+      method: 'GET',
+      path: '/api/appointments',
+      extractor: 'data',
+    },
+    appointments_list: {
+      recipeId: 'appointments_list',
+      type: 'read',
+      capability: 'APPOINTMENT_READ',
+      method: 'GET',
+      path: '/api/appointments',
+      extractor: 'data',
+    },
+    appointments_get: {
+      recipeId: 'appointments_get',
+      type: 'read',
+      capability: 'APPOINTMENT_READ',
+      method: 'GET',
+      path: '/api/appointments/:id',
+      extractor: 'data',
+    },
+    'appointments.availability': {
+      recipeId: 'appointments.availability',
+      type: 'read',
+      capability: 'appointments.availability',
+      method: 'GET',
+      path: '/api/appointments/availability',
+      extractor: 'slots',
+    },
+    appointments_availability: {
+      recipeId: 'appointments_availability',
+      type: 'read',
+      capability: 'APPOINTMENT_READ',
+      method: 'GET',
+      path: '/api/appointments/availability',
+      extractor: 'slots',
+    },
+    'appointments.create': {
+      recipeId: 'appointments.create',
+      type: 'write',
+      capability: 'appointments.create',
+      method: 'POST',
+      path: '/api/appointments',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      hook: 'vendor-cms-1-extract-csrf',
+      preconditions: [
+        {
+          type: 'slot_availability',
+          endpoint: '/api/appointments/availability',
+          providerIdParam: 'providerId',
+          startTimeParam: 'startTime',
+        },
+      ],
+      bodyTemplate: {
+        patientId: '$params.patientId',
+        providerId: '$params.providerId',
+        serviceId: '$params.serviceId',
+        locationId: '$params.locationId',
+        startTime: '$params.startTime',
+        endTime: '$params.endTime',
+        notes: '$params.notes',
+      },
+      verification: {
+        path: '/api/appointments/:id',
+        method: 'GET',
+        idParam: 'id',
+        expectedFields: {
+          patientId: '$params.patientId',
+          providerId: '$params.providerId',
+          status: 'booked',
+        },
+        revisionPath: 'rev',
+      },
+    },
+    appointment_create: {
+      recipeId: 'appointment_create',
+      type: 'write',
+      capability: 'APPOINTMENT_WRITE',
+      method: 'POST',
+      path: '/api/appointments',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      hook: 'vendor-cms-1-extract-csrf',
+      preconditions: [
+        {
+          type: 'slot_availability',
+          endpoint: '/api/appointments/availability',
+          providerIdParam: 'providerId',
+          startTimeParam: 'startTime',
+        },
+      ],
+      bodyTemplate: {
+        patientId: '$params.patientId',
+        providerId: '$params.providerId',
+        serviceId: '$params.serviceId',
+        locationId: '$params.locationId',
+        startTime: '$params.startTime',
+        endTime: '$params.endTime',
+        notes: '$params.notes',
+      },
+      verification: {
+        path: '/api/appointments/:id',
+        method: 'GET',
+        idParam: 'id',
+        expectedFields: {
+          patientId: '$params.patientId',
+          providerId: '$params.providerId',
+          status: 'booked',
+        },
+        revisionPath: 'rev',
+      },
+    },
+    'appointments.reschedule': {
+      recipeId: 'appointments.reschedule',
+      type: 'write',
+      capability: 'appointments.reschedule',
+      method: 'PUT',
+      path: '/api/appointments/:id',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      hook: 'vendor-cms-1-extract-csrf',
+      bodyTemplate: {
+        startTime: '$params.startTime',
+        endTime: '$params.endTime',
+        expectedRev: '$params.expectedRev',
+        notes: '$params.notes',
+      },
+      verification: {
+        path: '/api/appointments/:id',
+        method: 'GET',
+        idParam: 'id',
+        expectedFields: {
+          startTime: '$params.startTime',
+        },
+        revisionPath: 'rev',
+      },
+    },
+    appointment_reschedule: {
+      recipeId: 'appointment_reschedule',
+      type: 'write',
+      capability: 'APPOINTMENT_WRITE',
+      method: 'PUT',
+      path: '/api/appointments/:id',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      hook: 'vendor-cms-1-extract-csrf',
+      bodyTemplate: {
+        startTime: '$params.startTime',
+        endTime: '$params.endTime',
+        expectedRev: '$params.expectedRev',
+        notes: '$params.notes',
+      },
+      verification: {
+        path: '/api/appointments/:id',
+        method: 'GET',
+        idParam: 'id',
+        expectedFields: {
+          startTime: '$params.startTime',
+        },
+        revisionPath: 'rev',
+      },
+    },
+    'appointments.cancel': {
+      recipeId: 'appointments.cancel',
+      type: 'write',
+      capability: 'appointments.cancel',
+      method: 'DELETE',
+      path: '/api/appointments/:id',
+      hook: 'vendor-cms-1-extract-csrf',
+      verification: {
+        path: '/api/appointments/:id',
+        method: 'GET',
+        idParam: 'id',
+        expectedFields: {
+          status: 'cancelled',
+        },
+        revisionPath: 'rev',
+      },
+    },
+    appointment_cancel: {
+      recipeId: 'appointment_cancel',
+      type: 'write',
+      capability: 'APPOINTMENT_WRITE',
+      method: 'DELETE',
+      path: '/api/appointments/:id',
+      hook: 'vendor-cms-1-extract-csrf',
+      verification: {
+        path: '/api/appointments/:id',
+        method: 'GET',
+        idParam: 'id',
+        expectedFields: {
+          status: 'cancelled',
+        },
+        revisionPath: 'rev',
+      },
+    },
+    reference_providers: {
+      recipeId: 'reference_providers',
+      type: 'read',
+      capability: 'REFERENCE_DATA_READ',
+      method: 'GET',
+      path: '/api/reference/providers',
+      extractor: 'data',
+    },
+    reference_services: {
+      recipeId: 'reference_services',
+      type: 'read',
+      capability: 'REFERENCE_DATA_READ',
+      method: 'GET',
+      path: '/api/reference/services',
+      extractor: 'data',
+    },
+    reference_locations: {
+      recipeId: 'reference_locations',
+      type: 'read',
+      capability: 'REFERENCE_DATA_READ',
+      method: 'GET',
+      path: '/api/reference/locations',
+      extractor: 'data',
+    },
+    'reference.read': {
+      recipeId: 'reference.read',
+      type: 'read',
+      capability: 'reference.read',
+      method: 'GET',
+      path: '/api/reference/providers',
+      extractor: 'data',
+    },
+  },
+  hooks: ['vendor-cms-1-extract-csrf', 'vendor-cms-1-format-display-time', 'vendor-cms-1-tenant-b-transform'],
+  polling: {
+    intervalSeconds: 60,
+    deltaField: 'updatedAt',
+  },
+};
+
 const signature = signManifest(manifest);
 manifest.signature = signature;
+
+const vendorSignature = signManifest(vendorCms1Manifest);
+vendorCms1Manifest.signature = vendorSignature;
 
 const manifestDir = path.resolve('src/adapters/manifests');
 if (!fs.existsSync(manifestDir)) fs.mkdirSync(manifestDir, { recursive: true });
@@ -225,4 +599,9 @@ if (!fs.existsSync(manifestDir)) fs.mkdirSync(manifestDir, { recursive: true });
 const manifestContent = JSON.stringify(manifest, null, 2);
 fs.writeFileSync(path.join(manifestDir, 'acme-cloud.json'), manifestContent);
 fs.writeFileSync(path.resolve('test-harness/fixtures/adapter-manifest.json'), manifestContent);
+
+const vendorManifestContent = JSON.stringify(vendorCms1Manifest, null, 2);
+fs.writeFileSync(path.join(manifestDir, 'vendor-cms-1.json'), vendorManifestContent);
+
 console.log('Manifests successfully built, canonically signed, and saved.');
+

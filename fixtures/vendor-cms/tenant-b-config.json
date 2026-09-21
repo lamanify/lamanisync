@@ -1,0 +1,54 @@
+{
+  "tenantId": "TENANT-B-VARIANT",
+  "tenantName": "Tenant B (Customized Private Clinic)",
+  "environment": "sandbox",
+  "origin": "http://localhost:4002",
+  "fieldMappings": {
+    "patient": {
+      "id": "id",
+      "fullName": "clientName",
+      "phone": "mobile_no",
+      "icOrPassport": "nric",
+      "email": "email"
+    },
+    "appointment": {
+      "id": "id",
+      "patientId": "client_id",
+      "providerId": "doctor_id",
+      "serviceId": "treatment_id",
+      "locationId": "branch_id",
+      "startTime": "start_time",
+      "endTime": "end_time",
+      "status": "booking_status",
+      "rev": "version",
+      "notes": "remarks"
+    },
+    "reference": {
+      "providers": {
+        "root": "practitioners",
+        "id": "code",
+        "fullName": "doctor_name",
+        "specialty": "discipline",
+        "active": "is_active"
+      },
+      "services": {
+        "root": "treatments",
+        "id": "code",
+        "name": "description",
+        "durationMinutes": "duration",
+        "defaultPrice": "fee"
+      },
+      "locations": {
+        "root": "branches",
+        "id": "code",
+        "name": "branch_title",
+        "roomType": "type"
+      }
+    }
+  },
+  "auth": {
+    "cookieName": "cms_session_tb",
+    "csrfTokenHeader": "X-CSRF-Token",
+    "csrfMetaSelector": "meta[name=\"csrf-token\"]"
+  }
+}

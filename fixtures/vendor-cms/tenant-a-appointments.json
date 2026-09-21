@@ -1,0 +1,36 @@
+[
+  {
+    "id": "APT-001",
+    "patientId": "ZZTEST-P01",
+    "providerId": "DOC-01",
+    "serviceId": "SRV-01",
+    "locationId": "LOC-01",
+    "startTime": "2026-10-01T09:00:00+08:00",
+    "endTime": "2026-10-01T09:15:00+08:00",
+    "slotDate": "2026-10-01",
+    "slotTimeNaive": "09:00:00",
+    "displayTime": "01/10/2026 09:00 AM",
+    "status": "booked",
+    "notes": "Initial checkup",
+    "rev": 1,
+    "createdAt": "2026-09-01T10:00:00+08:00",
+    "updatedAt": "2026-09-01T10:00:00+08:00"
+  },
+  {
+    "id": "APT-002",
+    "patientId": "ZZTEST-P02",
+    "providerId": "DOC-02",
+    "serviceId": "SRV-02",
+    "locationId": "LOC-02",
+    "startTime": "2026-10-01T10:00:00+08:00",
+    "endTime": "2026-10-01T10:30:00+08:00",
+    "slotDate": "2026-10-01",
+    "slotTimeNaive": "10:00:00",
+    "displayTime": "01/10/2026 10:00 AM",
+    "status": "booked",
+    "notes": "Routine scaling",
+    "rev": 1,
+    "createdAt": "2026-09-01T11:00:00+08:00",
+    "updatedAt": "2026-09-01T11:00:00+08:00"
+  }
+]

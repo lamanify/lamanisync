@@ -1,0 +1,29 @@
+{
+  "tenantId": "TENANT-A-CLOUD",
+  "tenantName": "Tenant A (Standard Cloud Clinic)",
+  "environment": "sandbox",
+  "origin": "http://localhost:4001",
+  "fieldMappings": {
+    "patient": {
+      "id": "id",
+      "fullName": "fullName",
+      "phone": "phone",
+      "icOrPassport": "icOrPassport",
+      "email": "email"
+    },
+    "appointment": {
+      "id": "id",
+      "patientId": "patientId",
+      "providerId": "providerId",
+      "startTime": "startTime",
+      "endTime": "endTime",
+      "status": "status",
+      "rev": "rev"
+    }
+  },
+  "auth": {
+    "cookieName": "cms_session",
+    "csrfTokenHeader": "X-CSRF-Token",
+    "csrfMetaSelector": "meta[name=\"csrf-token\"]"
+  }
+}

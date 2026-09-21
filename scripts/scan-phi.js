@@ -15,7 +15,7 @@ const ROOT_DIR = process.cwd();
 // Directories strictly requiring zero PHI and zero secrets
 const PRODUCTION_DIRS = ['src', 'dist'];
 // Harness, doc, and test directories checked for production secrets and unredacted production patient data
-const SUPPORT_DIRS = ['scripts', 'test-harness', 'tests', 'docs'];
+const SUPPORT_DIRS = ['scripts', 'test-harness', 'tests', 'docs', 'fixtures'];
 
 // Allowed file extensions
 const VALID_EXTS = new Set(['.ts', '.tsx', '.js', '.jsx', '.json', '.html', '.css', '.md']);
@@ -91,7 +91,7 @@ for (const filePath of allFiles) {
   totalFilesScanned += 1;
   const content = fs.readFileSync(filePath, 'utf-8');
   const relPath = path.relative(ROOT_DIR, filePath);
-  const isTestOrDoc = relPath.startsWith('tests/') || relPath.startsWith('test-harness/') || relPath.startsWith('docs/');
+  const isTestOrDoc = relPath.startsWith('tests/') || relPath.startsWith('test-harness/') || relPath.startsWith('docs/') || relPath.startsWith('fixtures/');
 
   // 1. Check Secret Patterns
   for (const { name, regex } of SECRET_PATTERNS) {
