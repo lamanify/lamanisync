@@ -447,4 +447,96 @@ describe('Phase 8 Write Pipeline & Read-After-Write Verification Integration Tes
     // Check Sync API: zero receipts submitted, appointment remains unconfirmed
     expect(syncServer.state.receipts).toHaveLength(0);
   });
+
+  it('resumes safely following service worker termination mid-execution without creating duplicate records', async () => {
+    const patientId = 'ZZTEST-P02';
+    const providerId = 'DOC-01';
+    const startTime = '2026-10-06T14:00:00+08:00';
+    const endTime = '2026-10-06T14:15:00+08:00';
+
+    // 1. Enqueue create command in Sync API outbox
+    const cmdRes = await fetch(`${SYNC_URL}/__admin/outbox`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        connectionId,
+        actionId: 'CREATE_APPOINTMENT',
+        payload: {
+          patientId,
+          providerId,
+          startTime,
+          endTime,
+          notes: 'Pre-crash booking',
+        },
+      }),
+    });
+    const { command } = (await cmdRes.json()) as { command: { commandId: string } };
+
+    // 2. Simulate worker crash after writing mutation to CMS and saving in-flight snapshot
+    const writeRes = await fetch(`${CMS_URL}/api/appointments`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        patientId,
+        providerId,
+        startTime,
+        endTime,
+      }),
+    });
+    const writtenData = ((await writeRes.json()) as { data: Record<string, unknown> }).data;
+
+    // Snapshot in-flight state in storage as if worker terminated before read-back and result reporting
+    await storage.set({
+      lamanisync_in_flight_command: {
+        commandId: command.commandId,
+        action: 'CREATE_APPOINTMENT',
+        state: 'EXECUTING',
+        fencingToken: 10,
+        retryCount: 0,
+        lastUpdatedAt: new Date().toISOString(),
+      },
+    });
+
+    // 3. New service worker instance spins up sharing persistent storage
+    const newExecutor = new CommandExecutor({
+      apiClient,
+      leaseCoordinator,
+      fsm,
+      echoSuppressor,
+      targetOrigin: CMS_URL,
+      storage,
+    });
+
+    // In-flight command is detected
+    const inFlight = await newExecutor.getInFlightCommand();
+    expect(inFlight).not.toBeNull();
+    expect(inFlight?.commandId).toBe(command.commandId);
+
+    // 4. Poller pulls command again upon restart/retry
+    const newPoller = new OutboxPoller({
+      apiClient,
+      leaseCoordinator,
+      commandExecutor: newExecutor,
+      fsm,
+      connectionId,
+      adapterManifest,
+      pollIntervalMs: 500,
+    });
+
+    // Execute recovery cycle
+    const result = await newPoller.pollOnce();
+    expect(result).not.toBeNull();
+    expect(result?.status).toBe('VERIFIED');
+    expect(result?.writeReceipt?.externalId).toBe(writtenData.id);
+
+    // In-flight transient state cleared
+    const inFlightAfter = await newExecutor.getInFlightCommand();
+    expect(inFlightAfter).toBeNull();
+
+    // Verify on CMS: EXACTLY 1 appointment created on this slot, zero duplicate
+    const cmsCheck = await fetch(`${CMS_URL}/api/appointments?providerId=${providerId}`);
+    const cmsList = ((await cmsCheck.json()) as { data: Array<Record<string, unknown>> }).data;
+    const matching = cmsList.filter((a) => a.startTime === startTime && a.patientId === patientId);
+    expect(matching).toHaveLength(1);
+  });
 });

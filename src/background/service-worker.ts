@@ -106,7 +106,7 @@ export function clearObservations(): void {
 
 export async function ensureServiceWorkerRestored(): Promise<void> {
   try {
-    await leaseCoordinator.restore();
+    const activeLease = await leaseCoordinator.restore();
     await echoSuppressor.restoreFromStorage();
     const record = await coordinator.restoreState();
     const session = await coordinator.getSession();
@@ -116,6 +116,15 @@ export async function ensureServiceWorkerRestored(): Promise<void> {
       commandExecutor.setTargetOrigin(session.targetOrigin);
       outboxPoller.setConnectionId(session.connectionId);
       await referenceSync.restore();
+    }
+    if (activeLease) {
+      coordinator.setActiveLease({
+        connectionId: activeLease.connectionId,
+        leaseId: activeLease.leaseId,
+        fencingToken: activeLease.fencingToken,
+      });
+      outboxPoller.setConnectionId(activeLease.connectionId);
+      outboxPoller.start();
     }
     return record as unknown as void;
   } catch (err) {

@@ -306,4 +306,91 @@ describe('Command Execution Coordinator (Phase 8)', () => {
     // Action was not re-executed! Zero duplicate booking
     expect(actionExecutionCount).toBe(0);
   });
+
+  it('executes command successfully when command already bears matching active lease fencingToken', async () => {
+    const mockFetch = vi.fn(async (url: string | URL | Request) => {
+      const urlStr = String(url);
+      if (urlStr.includes('/api/appointments/availability')) {
+        return new Response(JSON.stringify({ slots: [{ startTime: '2026-10-01T15:00:00+08:00', available: true }] }), { status: 200 });
+      }
+      if (urlStr.includes('/api/appointments?providerId=')) {
+        return new Response(JSON.stringify({ data: [] }), { status: 200 });
+      }
+      if (urlStr.includes('/api/appointments/APT-TOKEN-10')) {
+        return new Response(
+          JSON.stringify({
+            data: {
+              id: 'APT-TOKEN-10',
+              patientId: 'ZZTEST-P01',
+              providerId: 'DOC-01',
+              startTime: '2026-10-01T15:00:00+08:00',
+              status: 'booked',
+              rev: 1,
+            },
+          }),
+          { status: 200 }
+        );
+      }
+      return new Response(JSON.stringify({}), { status: 404 });
+    });
+
+    executor.setFetchFn(mockFetch as unknown as typeof fetch);
+    executor.setActionDispatcher(async () => {
+      return { status: 'SUCCESS', data: { id: 'APT-TOKEN-10', rev: 1 } };
+    });
+
+    // Active lease fencingToken is 10 (from beforeEach)
+    const cmd = {
+      commandId: 'CMD-TOKEN-10',
+      action: 'CREATE_APPOINTMENT',
+      fencingToken: 10, // already tagged with current lease token
+      status: 'LEASED' as const,
+      parameters: {
+        patientId: 'ZZTEST-P01',
+        providerId: 'DOC-01',
+        startTime: '2026-10-01T15:00:00+08:00',
+        endTime: '2026-10-01T15:15:00+08:00',
+      },
+    };
+
+    const result = await executor.executeCommand(cmd);
+    expect(result.status).toBe('VERIFIED');
+    expect(result.writeReceipt?.externalId).toBe('APT-TOKEN-10');
+  });
+
+  it('rejects command execution when command carries higher fencingToken than client lease', async () => {
+    const cmd = {
+      commandId: 'CMD-STALE-TOKEN',
+      action: 'CREATE_APPOINTMENT',
+      fencingToken: 99, // newer lease exists elsewhere
+      parameters: {
+        patientId: 'ZZTEST-P01',
+        providerId: 'DOC-01',
+        startTime: '2026-10-01T16:00:00+08:00',
+      },
+    };
+
+    await expect(executor.executeCommand(cmd)).rejects.toThrow();
+  });
+
+  it('expires stale in-flight command snapshot older than 5 minutes', async () => {
+    // Manually store an old in-flight command snapshot
+    await storage.set({
+      lamanisync_in_flight_command: {
+        commandId: 'CMD-OLD',
+        action: 'CREATE_APPOINTMENT',
+        state: 'EXECUTING',
+        fencingToken: 10,
+        retryCount: 0,
+        lastUpdatedAt: new Date(Date.now() - 10 * 60 * 1000).toISOString(), // 10 minutes ago
+      },
+    });
+
+    const inFlight = await executor.getInFlightCommand();
+    expect(inFlight).toBeNull();
+
+    // Storage should be cleared
+    const stored = await storage.get('lamanisync_in_flight_command');
+    expect(stored.lamanisync_in_flight_command).toBeUndefined();
+  });
 });

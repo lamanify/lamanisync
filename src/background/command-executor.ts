@@ -227,12 +227,19 @@ export class CommandExecutor {
     }
 
     // --- Step 2: Initialize CommandFSM and Lease Command ---
+    const commandAlreadyLeased =
+      (command.status === 'LEASED' || command.fencingToken === activeLease.fencingToken) &&
+      (command.fencingToken === undefined || command.fencingToken === activeLease.fencingToken);
+
     const fsm = new CommandFSM(command, {
-      initialState: 'PENDING',
-      fencingToken: command.fencingToken ?? 0,
+      initialState: commandAlreadyLeased ? 'LEASED' : 'PENDING',
+      fencingToken: commandAlreadyLeased ? activeLease.fencingToken : (command.fencingToken ?? 0),
       maxRetries: this.maxRetries,
     });
-    fsm.lease(activeLease.fencingToken);
+
+    if (!commandAlreadyLeased) {
+      fsm.lease(activeLease.fencingToken);
+    }
     await this.saveInFlightCommand(fsm);
 
     const actionId = this.mapActionToPredefinedId(command.action);
@@ -517,8 +524,12 @@ export class CommandExecutor {
     }
   }
 
-  private async clearInFlightCommand(commandId: string): Promise<void> {
+  async clearInFlightCommand(commandId?: string): Promise<void> {
     try {
+      if (!commandId) {
+        await this.storage.remove(IN_FLIGHT_COMMAND_KEY);
+        return;
+      }
       const res = await this.storage.get(IN_FLIGHT_COMMAND_KEY);
       const cur = res[IN_FLIGHT_COMMAND_KEY] as { commandId?: string } | undefined;
       if (!cur || cur.commandId === commandId) {
@@ -532,7 +543,17 @@ export class CommandExecutor {
   async getInFlightCommand(): Promise<Record<string, unknown> | null> {
     try {
       const res = await this.storage.get(IN_FLIGHT_COMMAND_KEY);
-      return (res[IN_FLIGHT_COMMAND_KEY] as Record<string, unknown>) ?? null;
+      const snapshot = (res[IN_FLIGHT_COMMAND_KEY] as Record<string, unknown>) ?? null;
+      if (!snapshot) return null;
+
+      // Timeout check: clear stale in-flight commands older than 5 minutes
+      const lastUpdated = typeof snapshot.lastUpdatedAt === 'string' ? new Date(snapshot.lastUpdatedAt).getTime() : 0;
+      if (lastUpdated > 0 && Date.now() - lastUpdated > 5 * 60 * 1000) {
+        await this.storage.remove(IN_FLIGHT_COMMAND_KEY);
+        return null;
+      }
+
+      return snapshot;
     } catch {
       return null;
     }
