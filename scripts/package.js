@@ -41,6 +41,26 @@ const REQUIRED_FILES = [
   'icons/icon-128.png',
 ];
 
+// Standard CRC32 fallback for environments where zlib.crc32 is not available
+function calculateCrc32(buf) {
+  if (typeof zlib.crc32 === 'function') {
+    return zlib.crc32(buf);
+  }
+  let table = new Int32Array(256);
+  for (let i = 0; i < 256; i++) {
+    let c = i;
+    for (let k = 0; k < 8; k++) {
+      c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
+    }
+    table[i] = c;
+  }
+  let crc = -1;
+  for (let i = 0; i < buf.length; i++) {
+    crc = table[(crc ^ buf[i]) & 0xff] ^ (crc >>> 8);
+  }
+  return (crc ^ -1) >>> 0;
+}
+
 /**
  * Creates a deterministic ZIP archive from an array of file entries.
  * Sets fixed DOS timestamps and sorts entries lexicographically.
@@ -64,7 +84,7 @@ export function createDeterministicZip(fileEntries) {
     const nameBuf = Buffer.from(file.path.replace(/\\/g, '/'), 'utf8');
     const uncompressed = file.data;
     const compressed = zlib.deflateRawSync(uncompressed, { level: 9 });
-    const crc = zlib.crc32(uncompressed);
+    const crc = calculateCrc32(uncompressed);
 
     // Local file header (30 bytes + nameBuf.length)
     const lh = Buffer.alloc(30);
@@ -85,7 +105,7 @@ export function createDeterministicZip(fileEntries) {
     // Central directory header (46 bytes + nameBuf.length)
     const ch = Buffer.alloc(46);
     ch.writeUInt32LE(0x02014b50, 0); // central directory signature
-    ch.writeUInt16LE(20, 4); // version made by (2.0)
+    ch.writeUInt16LE((3 << 8) | 20, 4); // version made by (UNIX 3.0, PKZIP 2.0)
     ch.writeUInt16LE(20, 6); // version needed (2.0)
     ch.writeUInt16LE(0x0800, 8); // flags (UTF-8)
     ch.writeUInt16LE(8, 10); // compression method (Deflate)
@@ -163,6 +183,69 @@ export function readZipEntries(zipBuffer) {
     cur += 46 + nameLen + extraLen + commentLen;
   }
   return entries;
+}
+
+/**
+ * Reads and extracts a specific file's content directly from a ZIP archive buffer.
+ *
+ * @param {Buffer} zipBuffer
+ * @param {string} targetPath
+ * @returns {Buffer}
+ */
+export function readZipFileContent(zipBuffer, targetPath) {
+  const normTarget = targetPath.replace(/\\/g, '/');
+  let eocdOffset = -1;
+  for (let i = zipBuffer.length - 22; i >= 0; i--) {
+    if (zipBuffer.readUInt32LE(i) === 0x06054b50) {
+      eocdOffset = i;
+      break;
+    }
+  }
+  if (eocdOffset === -1) {
+    throw new Error('EOCD record not found: invalid ZIP buffer');
+  }
+
+  const totalEntries = zipBuffer.readUInt16LE(eocdOffset + 10);
+  const cdOffset = zipBuffer.readUInt32LE(eocdOffset + 16);
+
+  let cur = cdOffset;
+  for (let i = 0; i < totalEntries; i++) {
+    const sig = zipBuffer.readUInt32LE(cur);
+    if (sig !== 0x02014b50) {
+      throw new Error(`Invalid central directory header signature at offset ${cur}`);
+    }
+    const method = zipBuffer.readUInt16LE(cur + 10);
+    const compressedSize = zipBuffer.readUInt32LE(cur + 20);
+    const uncompressedSize = zipBuffer.readUInt32LE(cur + 24);
+    const nameLen = zipBuffer.readUInt16LE(cur + 28);
+    const extraLen = zipBuffer.readUInt16LE(cur + 30);
+    const commentLen = zipBuffer.readUInt16LE(cur + 32);
+    const localOffset = zipBuffer.readUInt32LE(cur + 42);
+    const name = zipBuffer.toString('utf8', cur + 46, cur + 46 + nameLen);
+
+    if (name === normTarget) {
+      const localSig = zipBuffer.readUInt32LE(localOffset);
+      if (localSig !== 0x04034b50) {
+        throw new Error(`Invalid local header signature at offset ${localOffset}`);
+      }
+      const localNameLen = zipBuffer.readUInt16LE(localOffset + 26);
+      const localExtraLen = zipBuffer.readUInt16LE(localOffset + 28);
+      const dataStart = localOffset + 30 + localNameLen + localExtraLen;
+      const rawData = zipBuffer.subarray(dataStart, dataStart + compressedSize);
+
+      if (method === 8) {
+        return zlib.inflateRawSync(rawData);
+      } else if (method === 0) {
+        return rawData.subarray(0, uncompressedSize);
+      } else {
+        throw new Error(`Unsupported compression method in ZIP: ${method}`);
+      }
+    }
+
+    cur += 46 + nameLen + extraLen + commentLen;
+  }
+
+  throw new Error(`File '${targetPath}' not found in ZIP archive`);
 }
 
 /**

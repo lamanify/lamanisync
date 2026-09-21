@@ -79,13 +79,25 @@ In strict compliance with Chrome Web Store policy and AGENTS.md Rule 2:
 
 ---
 
-## 5. Development Dependencies Justification (AGENTS.md Rule 13)
+## 5. Dependencies Justification Matrix (AGENTS.md Rule 13)
 
-### `@playwright/test` (v1.63.0)
+### Runtime Dependencies (`dependencies`)
+
+#### `zod` (v3.24.2)
+- **Why it is needed**: Strict runtime schema validation across all communication channels: inter-world postMessage payloads, background service worker messages, signed adapter manifest JSON structures, and storage keys (enforcing AGENTS.md Rule 9).
+- **Security & Privacy Boundary**: Operates entirely in-memory with zero external network access. Does not log, serialize, or transmit validated payloads.
+
+#### `react` (v19.0.0) & `react-dom` (v19.0.0)
+- **Why it is needed**: Component framework for rendering the extension popup interface (onboarding wizard, connection state indicators, paired origin status, and user-initiated diagnostics modal).
+- **Security & Privacy Boundary**: Bundled into isolated popup HTML context (`popup.html`). Operates only when popup is opened by user. Zero execution in background service worker or page world.
+
+### Development & Build Tooling (`devDependencies`)
+
+#### `@playwright/test` (v1.63.0)
 - **Why it is needed**: Development-only test runner used to automate end-to-end browser scenarios (`playwright.config.ts`, `tests/e2e/`) in headless Chromium.
 - **Distribution Boundary**: Excluded completely from production bundles; zero footprint in release ZIP.
 
-### `@crxjs/vite-plugin` (v2.7.1) & `vite` (v6.2.0)
+#### `@crxjs/vite-plugin` (v2.7.1) & `vite` (v6.2.0)
 - **Why it is needed**: Build tooling to compile TypeScript, bundle React popup UI, and package Manifest V3 assets into `dist/`.
 - **Distribution Boundary**: Runs strictly at build time. No development server or HMR code is included in production artifacts.
 

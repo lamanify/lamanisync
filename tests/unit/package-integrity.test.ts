@@ -6,6 +6,7 @@ import crypto from 'crypto';
 import {
   createDeterministicZip,
   readZipEntries,
+  readZipFileContent,
   packageExtension,
 } from '../../scripts/package.js';
 
@@ -52,9 +53,11 @@ describe('Package Integrity & Chrome Web Store Bundle Verification (Phase 13)', 
     expect(fileNames).toContain('icons/icon-48.png');
     expect(fileNames).toContain('icons/icon-128.png');
 
-    // Verify background worker file is present
-    const manifestEntry = entries.find((e) => e.name === 'manifest.json');
-    expect(manifestEntry).toBeDefined();
+    // Parse manifest directly from ZIP archive and verify background service worker exists in package
+    const manifestBuf = readZipFileContent(zipBuffer, 'manifest.json');
+    const manifestFromZip = JSON.parse(manifestBuf.toString('utf8'));
+    expect(manifestFromZip.background?.service_worker).toBeTruthy();
+    expect(fileNames).toContain(manifestFromZip.background.service_worker);
 
     // Verify at least one compiled JS chunk exists in assets/
     const assetScripts = fileNames.filter((f) => f.startsWith('assets/') && f.endsWith('.js'));
@@ -62,8 +65,9 @@ describe('Package Integrity & Chrome Web Store Bundle Verification (Phase 13)', 
   });
 
   it('verifies manifest.json inside the bundle conforms strictly to Chrome Web Store MV3 rules', () => {
-    const manifestPath = path.join(distDir, 'manifest.json');
-    const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+    const zipBuffer = fs.readFileSync(zipPath);
+    const manifestBuf = readZipFileContent(zipBuffer, 'manifest.json');
+    const manifest = JSON.parse(manifestBuf.toString('utf8'));
 
     expect(manifest.manifest_version).toBe(3);
     expect(manifest.version).toBe(version);
@@ -89,8 +93,8 @@ describe('Package Integrity & Chrome Web Store Bundle Verification (Phase 13)', 
 
     // Service worker
     expect(manifest.background?.service_worker).toBeTruthy();
-    const swPath = path.join(distDir, manifest.background.service_worker);
-    expect(fs.existsSync(swPath)).toBe(true);
+    const swContent = readZipFileContent(zipBuffer, manifest.background.service_worker);
+    expect(swContent.length).toBeGreaterThan(0);
 
     // Strict permissions: storage, scripting, alarms
     expect(manifest.permissions).toEqual(['storage', 'scripting', 'alarms']);
@@ -127,15 +131,14 @@ describe('Package Integrity & Chrome Web Store Bundle Verification (Phase 13)', 
     }
   });
 
-  it('validates bundled PNG icon magic bytes and non-zero dimensions', () => {
+  it('validates bundled PNG icon magic bytes and non-zero dimensions directly from ZIP archive', () => {
+    const zipBuffer = fs.readFileSync(zipPath);
     const iconSizes = [16, 32, 48, 128];
     const pngMagic = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
 
     for (const size of iconSizes) {
-      const iconPath = path.join(distDir, `icons/icon-${size}.png`);
-      expect(fs.existsSync(iconPath)).toBe(true);
-
-      const buf = fs.readFileSync(iconPath);
+      const iconPath = `icons/icon-${size}.png`;
+      const buf = readZipFileContent(zipBuffer, iconPath);
       expect(buf.subarray(0, 8)).toEqual(pngMagic);
 
       // Verify IHDR width and height
@@ -144,6 +147,17 @@ describe('Package Integrity & Chrome Web Store Bundle Verification (Phase 13)', 
       expect(width).toBe(size);
       expect(height).toBe(size);
     }
+  });
+
+  it('executes packageExtension and returns comprehensive package summary', () => {
+    const summary = packageExtension({ skipBuild: true });
+    expect(summary.version).toBe(version);
+    expect(summary.versionedZipName).toBe(`lamanisync-extension-v${version}.zip`);
+    expect(summary.canonicalZipName).toBe('lamanisync-extension.zip');
+    expect(summary.sizeBytes).toBeGreaterThan(10 * 1024);
+    expect(summary.sha256).toMatch(/^[a-f0-9]{64}$/);
+    expect(summary.fileCount).toBeGreaterThanOrEqual(13);
+    expect(summary.files).toContain('manifest.json');
   });
 
   it('guarantees byte-for-byte deterministic ZIP generation', () => {
