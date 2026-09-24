@@ -5,7 +5,7 @@ import CtaBanner from '../components/CtaBanner.astro';
 
 <Layout
   title="Features & Capabilities | LamaniSync Healthcare Bridge"
-  description="Explore the comprehensive features of LamaniSync: Sub-second sync, multi-operatory chair routing, Sara AI WhatsApp triage, verified writes, Manifest V3 security, and multi-branch support."
+  description="Explore the comprehensive features of LamaniSync: Sub-second sync, multi-operatory chair routing, LamaniHub WhatsApp triage, verified writes, Manifest V3 security, and multi-branch support."
 >
   <!-- Hero Section -->
   <section class="features-hero">
@@ -87,15 +87,15 @@ import CtaBanner from '../components/CtaBanner.astro';
           </ul>
         </div>
 
-        <!-- Feature 3: Sara AI WhatsApp Triage -->
+        <!-- Feature 3: LamaniHub WhatsApp Triage -->
         <div class="feature-card">
           <div class="feature-icon-wrapper green">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
           </div>
-          <div class="feature-badge">AI Conversational</div>
-          <h3 class="feature-title">Sara AI WhatsApp Triage & Booking</h3>
+          <div class="feature-badge">Conversational</div>
+          <h3 class="feature-title">LamaniHub WhatsApp Triage & Booking</h3>
           <p class="feature-desc">
-            Integrated natively with Sara AI on LamaniHub. Sara engages incoming WhatsApp patients 24/7, triages clinical chief complaints, matches appropriate appointment lengths, and inserts bookings directly into your CMS.
+            Integrated natively with LamaniHub. LamaniHub engages incoming WhatsApp patients 24/7, triages clinical chief complaints, matches appropriate appointment lengths, and inserts bookings directly into your CMS.
           </p>
           <ul class="feature-bullets">
             <li>Multilingual fluency: English, BM, Chinese, Tamil</li>
@@ -210,7 +210,7 @@ import CtaBanner from '../components/CtaBanner.astro';
               <td><strong>WhatsApp AI Integration</strong></td>
               <td>Disconnected</td>
               <td>Custom Webhooks Needed</td>
-              <td class="col-highlight"><strong>Native Sara AI Coordination</strong></td>
+              <td class="col-highlight"><strong>Native LamaniHub Coordination</strong></td>
             </tr>
             <tr>
               <td><strong>Local PHI Footprint</strong></td>
@@ -332,12 +332,12 @@ import CtaBanner from '../components/CtaBanner.astro';
   "action": "APPOINTMENT_WRITE_AND_VERIFY",
   "payload": {
     "patientId": "pt_98231",
-    "providerId": "dr_sarah_lim",
+    "providerId": "dr_maya_lim",
     "operatoryId": "chair_ortho_02",
     "startTime": "2026-09-25T14:30:00+08:00",
     "durationMinutes": 45,
     "treatmentCategory": "BRACE_ADJUSTMENT",
-    "channel": "WHATSAPP_SARA_AI"
+    "channel": "WHATSAPP_LAMANIHUB"
   },
   "readbackStatus": {
     "verified": true,

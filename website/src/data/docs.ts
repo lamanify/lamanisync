@@ -65,7 +65,7 @@ export const docArticles: DocArticle[] = [
     content: `
 ## Overview
 
-The **LamaniSync Workstation Synchronizer** connects your authenticated web-based Clinic Management System (CMS) to **LamaniHub** and **Sara AI WhatsApp Automation** in real-time.
+The **LamaniSync Workstation Synchronizer** connects your authenticated web-based Clinic Management System (CMS) to **LamaniHub** and **WhatsApp Automation** in real-time.
 
 Unlike legacy healthcare synchronizers that require intrusive Windows background services, database drivers, or open inbound firewall ports, LamaniSync executes as a secure **Manifest V3 Chrome Extension** directly within the front-desk browser user-space.
 
@@ -73,7 +73,7 @@ Unlike legacy healthcare synchronizers that require intrusive Windows background
 [Patient on WhatsApp] 
          │
          ▼
-[Sara AI / LamaniHub Cloud] 
+[LamaniHub Cloud Engine] 
          │ (TLS 1.3 Outbound Encrypted Stream)
          ▼
 [Front-Desk Workstation (LamaniSync Chrome MV3)]
@@ -185,7 +185,7 @@ To verify end-to-end functionality without affecting real patient schedules:
    - **Readback Verification**: State hash confirmed.
    - **Active Write Capability**: Verified.
 
-Your workstation is now fully operational. Appointments booked via Sara AI on WhatsApp will now synchronize automatically into your clinic calendar.
+Your workstation is now fully operational. Appointments booked via LamaniHub on WhatsApp will now synchronize automatically into your clinic calendar.
     `,
   },
 
@@ -310,11 +310,11 @@ Before configuring the bridge, ensure you have:
 
 ## Step 2: Configure Dedicated Sync User (Recommended)
 
-To guarantee that automatic Sara AI bookings do not conflict with front-desk staff manual scheduling:
+To guarantee that automatic LamaniHub bookings do not conflict with front-desk staff manual scheduling:
 
 1. In Dentrix Ascend, log in as an **Administrator**.
 2. Go to **Settings → Users → Add New User**.
-3. Name the user \`LamaniSync Service\` or \`Sara AI Bridge\`.
+3. Name the user \`LamaniSync Service\` or \`LamaniHub Bridge\`.
 4. Assign the role **Receptionist** or **Front Desk Specialist**.
 5. Enable permissions for:
    - **Appointments**: View, Create, Reschedule, Cancel.
@@ -339,7 +339,7 @@ To guarantee that automatic Sara AI bookings do not conflict with front-desk sta
 
 ## Step 4: Verify Readback Verification & Operatory Mapping
 
-When Sara AI books an appointment:
+When LamaniHub books an appointment:
 1. LamaniSync queries the open Dentrix Ascend tab to check operatory and provider chair availability.
 2. The appointment insertion modal is populated using predefined UI actions.
 3. The appointment write is submitted.
@@ -399,7 +399,7 @@ Create or configure a user account for the synchronizer with the following attri
    - \`Create New Patient Profile\`
    - \`Appointment Booking & Schedule Grid\`
    - \`Resource & Provider Allocation\`
-3. Verify that the user has access to all provider schedules for which Sara AI will manage online bookings.
+3. Verify that the user has access to all provider schedules for which LamaniHub will manage online bookings.
 
 ---
 
@@ -450,7 +450,7 @@ Because LamaniPulse is built on modern web standards, the LamaniSync integration
          │
          │ (Sub-100ms WebCrypto Ed25519 Payload Signing)
          ▼
-[LamaniHub Cloud Engine & Sara AI]
+[LamaniHub Cloud Engine]
 \`\`\`
 
 ---
@@ -507,7 +507,7 @@ Staff do **not** need to stay anchored to the \`/appointments\` screen. You can 
 #### How Multi-Route Sync Functions:
 
 1. **Hub → CMS Writes (Create, Reschedule, Cancel)**:
-   - When a patient books or modifies an appointment on WhatsApp with Sara AI, LamaniSync executes the write via the PostgREST data layer directly inside the open page context.
+   - When a patient books or modifies an appointment on WhatsApp via LamaniHub, LamaniSync executes the write via the PostgREST data layer directly inside the open page context.
    - This executes seamlessly in the background regardless of whether staff is on \`/patients\`, \`/queue\`, or \`/dashboard\`.
    - When staff later navigates to or refreshes \`/appointments\`, the newly confirmed appointment is already rendered on the calendar.
 
@@ -616,7 +616,7 @@ In a busy healthcare practice, front-desk computers are subject to routine opera
 - Windows updates trigger an unexpected system restart.
 - An ethernet cable is bumped or Wi-Fi experiences temporary signal loss.
 
-If your clinic synchronizer relies on a single computer, any of these events immediately pauses Sara AI online booking.
+If your clinic synchronizer relies on a single computer, any of these events immediately pauses LamaniHub online booking.
 
 ---
 
@@ -661,7 +661,7 @@ For maximum clinic uptime, we recommend installing LamaniSync on:
 ## Double-Booking Shield & Mutex Locks
 
 When multiple workstations are connected to the same clinic CMS:
-- **Idempotency Keys**: Every Sara AI booking intent contains a unique UUIDv4 token.
+- **Idempotency Keys**: Every LamaniHub booking intent contains a unique UUIDv4 token.
 - **Atomic Mutex**: Before executing a calendar write, the active workstation acquires a distributed mutex lock in memory.
 - Even if two patients click "Confirm" on WhatsApp at the exact same millisecond, LamaniHub serializes the dispatches, guaranteeing **zero double bookings**.
     `,
@@ -775,7 +775,7 @@ If the LamaniSync extension status badge is not displaying green, check these fo
 | \`ERR_HOST_PERMISSION_DENIED\` | The user clicked "Block" or cancelled the origin permission prompt. | Right-click the extension icon → **Manage Extension** → **Site Access** → Select **On specific sites** and add your CMS URL. |
 | \`ERR_MUTEX_TIMEOUT\` | Another workstation currently holds the active write lease. | This is normal multi-workstation behavior. The current workstation will remain in standby until needed. |
 | \`ERR_CMS_SESSION_EXPIRED\` | The front-desk user was logged out of the CMS portal. | Re-authenticate into your clinic CMS in the open browser tab. |
-| \`ERR_READBACK_FAILED\` | The appointment was written, but verification failed to find it in the calendar. | Check if the selected time slot was manually blocked in the CMS. Sara AI automatically alerts front desk. |
+| \`ERR_READBACK_FAILED\` | The appointment was written, but verification failed to find it in the calendar. | Check if the selected time slot was manually blocked in the CMS. LamaniHub automatically alerts front desk. |
 | \`ERR_WEBSOCKET_DISCONNECT\` | Temporary internet drop or network proxy interruption. | LamaniSync automatically reconnects with exponential backoff (1s, 2s, 4s, 8s). |
 
 ---
@@ -828,7 +828,7 @@ If your connection drops repeatedly:
 
 ### What happens if our clinic internet goes down?
 If your clinic experiences a power outage or internet disconnection:
-1. Sara AI on WhatsApp detects the lease expiration and informs inquiring patients: *"Our clinic calendar is momentarily updating. Let me record your booking request and our front desk will confirm your slot within 10 minutes."*
+1. LamaniHub on WhatsApp detects the lease expiration and informs inquiring patients: *"Our clinic calendar is momentarily updating. Let me record your booking request and our front desk will confirm your slot within 10 minutes."*
 2. Booking requests are securely queued in LamaniHub cloud.
 3. As soon as your clinic internet restores, LamaniSync automatically reconnects, ingests the queue, and writes the appointments into your CMS. Zero patient bookings are lost.
 
@@ -853,14 +853,14 @@ If your clinic experiences a power outage or internet disconnection:
 ## Clinic Operations
 
 ### What if a patient cancels or reschedules on WhatsApp?
-When a patient requests a cancellation or reschedule with Sara AI:
-1. Sara AI checks clinic policy (e.g. minimum 24-hour notice).
-2. If approved, Sara AI dispatches an update action to LamaniSync.
+When a patient requests a cancellation or reschedule via LamaniHub:
+1. LamaniHub checks clinic policy (e.g. minimum 24-hour notice).
+2. If approved, LamaniHub dispatches an update action to LamaniSync.
 3. LamaniSync modifies the appointment status in your CMS calendar and verifies the cancellation.
 4. The cancelled slot is immediately restored as available for other patients to book.
 
 ### Can we manually override or block times in the CMS?
-**Yes.** When doctors block time off for surgery, personal leave, or lunch breaks directly in the CMS calendar, LamaniSync detects the block in real-time. Sara AI will never offer a blocked slot to a patient.
+**Yes.** When doctors block time off for surgery, personal leave, or lunch breaks directly in the CMS calendar, LamaniSync detects the block in real-time. LamaniHub will never offer a blocked slot to a patient.
 
 ### Do we always need to keep a CMS tab open in Chrome?
 **Yes, during clinic operating hours.**

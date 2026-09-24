@@ -35,7 +35,7 @@ export const blogPosts: BlogPost[] = [
     content: `
 ## The Hostage Negotiation of Healthcare Data
 
-Every month, thousands of clinic owners across Southeast Asia and the US face the exact same frustrating barrier. You invest tens of thousands of dollars into modernizing your clinic: you deploy **Sara AI** on WhatsApp to answer patient inquiries 24/7, you launch automated follow-up campaigns, and you establish online booking portals.
+Every month, thousands of clinic owners across Southeast Asia and the US face the exact same frustrating barrier. You invest tens of thousands of dollars into modernizing your clinic: you deploy **LamaniHub** on WhatsApp to answer patient inquiries 24/7, you launch automated follow-up campaigns, and you establish online booking portals.
 
 Yet, when you attempt to connect these modern patient-facing tools to your existing Clinic Management System (CMS) or Electronic Health Record (EHR) — whether it is Dentrix, eClinicalWorks, or a regional legacy web portal — you hit a brick wall.
 
@@ -83,7 +83,7 @@ Instead of attacking the vendor's database or begging for proprietary API keys, 
 [Patient on WhatsApp] 
          │
          ▼
-[Sara AI on LamaniHub] 
+[LamaniHub Cloud] 
          │ (Encrypted Outbound WebCrypto)
          ▼
 [Front-Desk Chrome Extension (LamaniSync)]
@@ -193,9 +193,9 @@ Stage 3: Independent Readback Probe (Query CMS Calendar Grid)
 
 ### 1. Step-by-Step Execution Lifecycle
 
-Let us trace how LamaniSync handles a booking request from Sara AI:
+Let us trace how LamaniSync handles a booking request from LamaniHub:
 
-1. **Pre-Flight Slot Lease**: Before Sara AI presents 10:30 AM to the patient, LamaniSync performs an active read of the CMS calendar matrix. It verifies that Doctor Lim and Chair 2 have zero conflicting appointments or blocked time intervals.
+1. **Pre-Flight Slot Lease**: Before LamaniHub presents 10:30 AM to the patient, LamaniSync performs an active read of the CMS calendar matrix. It verifies that Doctor Lim and Chair 2 have zero conflicting appointments or blocked time intervals.
 2. **Intent Execution**: When the patient confirms, LamaniSync triggers the verified adapter action recipe inside the staff-authenticated CMS tab.
 3. **The Active Readback Probe**: Rather than inspecting the submission response, LamaniSync waits for DOM reconciliation and executes an **independent readback query** against the primary CMS calendar view for that date and operatory.
 4. **Fuzzy & Exact Identity Assertion**: The readback parser searches for the specific appointment record, verifying:
@@ -203,7 +203,7 @@ Let us trace how LamaniSync handles a booking request from Sara AI:
    - Start Time and Duration within exact slot boundaries
    - Assigned Practitioner ID
    - Target Operatory / Chair
-5. **Cryptographic Receipt Generation**: Only when the appointment is confirmed present in the CMS calendar does LamaniSync generate a signed write receipt. LamaniHub receives this receipt and Sara AI delivers the final confirmation message on WhatsApp.
+5. **Cryptographic Receipt Generation**: Only when the appointment is confirmed present in the CMS calendar does LamaniSync generate a signed write receipt. LamaniHub receives this receipt and delivers the final confirmation message to the patient on WhatsApp.
 
 ---
 
@@ -211,7 +211,7 @@ Let us trace how LamaniSync handles a booking request from Sara AI:
 
 If the readback probe does not detect the appointment within 3 seconds, LamaniSync enters an automated fail-safe state:
 - **No False Confirmation**: The patient is never told their appointment is locked in.
-- **Automated Fallback**: Sara AI politely notifies the patient: *"One moment while I double-check Dr. Lim's schedule..."*
+- **Automated Fallback**: LamaniHub politely notifies the patient: *"One moment while I double-check Dr. Lim's schedule..."*
 - **Front-Desk Escalation**: An instant alert appears in the LamaniHub Front-Desk Queue, highlighting the specific conflict so staff can review or accept with a single click.
 
 ---
@@ -336,17 +336,17 @@ By transitioning clinic connectivity to the browser sandbox, LamaniSync provides
   },
   {
     slug: "connecting-whatsapp-ai-to-legacy-ehrs",
-    title: "Connecting WhatsApp AI to Legacy EHRs: How Sara AI Books Without CMS Webhooks",
-    excerpt: "Front-desk teams spend 4+ hours a day answering repetitive WhatsApp messages. Discover how LamaniSync connects Sara AI directly to your CMS chair roster without needing vendor webhooks.",
-    description: "Front-desk teams spend 4+ hours a day answering repetitive WhatsApp messages. Discover how LamaniSync connects Sara AI directly to your CMS chair roster without needing vendor webhooks.",
+    title: "Connecting WhatsApp AI to Legacy EHRs: How LamaniHub Books Without CMS Webhooks",
+    excerpt: "Front-desk teams spend 4+ hours a day answering repetitive WhatsApp messages. Discover how LamaniSync connects LamaniHub directly to your CMS chair roster without needing vendor webhooks.",
+    description: "Front-desk teams spend 4+ hours a day answering repetitive WhatsApp messages. Discover how LamaniSync connects LamaniHub directly to your CMS chair roster without needing vendor webhooks.",
     date: "August 15, 2026",
     publishedAt: "August 15, 2026",
     readTime: "6 min read",
     category: "Clinical AI & Operations",
-    tags: ["WhatsApp AI","Sara AI","EHR Integration","Clinic Automation"],
+    tags: ["WhatsApp AI","LamaniHub","EHR Integration","Clinic Automation"],
     author: {
       name: "Nadia Karim",
-      role: "Head of Product, Sara AI & LamaniHub",
+      role: "Head of Product, LamaniHub",
       avatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80",
     },
     content: `
@@ -355,7 +355,7 @@ By transitioning clinic connectivity to the browser sandbox, LamaniSync provides
 If you walk into any thriving aesthetic, dental, or general practice clinic in Southeast Asia, you will observe the exact same scene at the front desk:
 
 The phone rings continuously. Meanwhile, two receptionists sit with WhatsApp Web open on their screens, frantically answering hundreds of incoming patient inquiries:
-- *"Hi, does Dr. Sarah have any slots for scaling this Thursday afternoon?"*
+- *"Hi, does Dr. Maya have any slots for scaling this Thursday afternoon?"*
 - *"How much is a teeth whitening consultation?"*
 - *"Can I move my appointment from 2 PM to 5 PM tomorrow?"*
 
@@ -365,16 +365,16 @@ This manual bottleneck caps clinic revenue, creates long response times (average
 
 ---
 
-## Enter Sara AI: Autonomous Patient Triage
+## Enter LamaniHub: Autonomous Patient Triage
 
-**Sara AI** is LamaniHub's dedicated clinical conversational intelligence. Operating 24/7 on your clinic's verified WhatsApp Business number, Sara AI:
+**LamaniHub** provides dedicated clinical conversational intelligence. Operating 24/7 on your clinic's verified WhatsApp Business number, LamaniHub:
 - Understands complex, colloquial multilingual inquiries (English, Bahasa Malaysia, Chinese, Singlish).
 - Provides clinically accurate pre-consultation information for procedures and treatments.
 - Tunnels conversational patient intake into structured clinical metadata (patient full name, national ID hash, insurance eligibility, chief complaint).
 
-However, an AI agent is only as powerful as its ability to take action. If Sara AI cannot see real-time calendar availability or write bookings directly into the clinic's software, staff still have to do the manual data entry.
+However, an AI agent is only as powerful as its ability to take action. If LamaniHub cannot see real-time calendar availability or write bookings directly into the clinic's software, staff still have to do the manual data entry.
 
-> **Ambient Bridge Mandate**: Sara AI connects directly to authenticated clinic CMS tabs through LamaniSync, discovering real-time chair availability and booking appointments without requiring vendor API keys or webhooks.
+> **Ambient Bridge Mandate**: LamaniHub connects directly to authenticated clinic CMS tabs through LamaniSync, discovering real-time chair availability and booking appointments without requiring vendor API keys or webhooks.
 
 ---
 
@@ -388,7 +388,7 @@ Most legacy EHRs lack webhooks. They do not notify outside systems when a doctor
 [Patient on WhatsApp] 
          │ 
          ▼
-[Sara AI Conversation Engine]
+[LamaniHub Conversation Engine]
          │ (Queries Real-Time Availability)
          ▼
 [LamaniHub Cloud Coordinator]
@@ -401,9 +401,9 @@ Most legacy EHRs lack webhooks. They do not notify outside systems when a doctor
 \`\`\`
 
 ### 1. Real-Time Slot Discovery
-When a patient asks Sara AI: *"Can I book a dental cleaning this Thursday at 3 PM?"*, Sara AI does not guess from a static spreadsheet. 
+When a patient asks LamaniHub: *"Can I book a dental cleaning this Thursday at 3 PM?"*, LamaniHub does not guess from a static spreadsheet. 
 
-Through LamaniSync, Sara queries the live schedule directly from the clinic's active CMS tab in under 300 milliseconds. If Dr. Sarah just took a sick leave or Operatory 2 is scheduled for maintenance, Sara immediately knows and offers the next available optimal slot.
+Through LamaniSync, LamaniHub queries the live schedule directly from the clinic's active CMS tab in under 300 milliseconds. If Dr. Maya just took a sick leave or Operatory 2 is scheduled for maintenance, LamaniHub immediately knows and offers the next available optimal slot.
 
 ### 2. Multi-Chair and Operatory Allocation
 Medical and dental practices are constrained not just by doctor availability, but by physical infrastructure. A clinic might have 3 doctors on shift but only 2 surgical chairs equipped with specialized suction or laser tools.
@@ -414,7 +414,7 @@ LamaniSync maps every booking to specific **operatory rules**:
 - Sanitization buffer intervals (automatically inserting 15-minute cleaning buffers between surgical appointments)
 
 ### 3. Instant Calendar Insertion with Zero Staff Input
-When the patient selects their preferred time, Sara AI compiles the booking payload. LamaniSync executes the write inside the staff-authenticated CMS tab, verifies the insertion with readback verification, and delivers the WhatsApp confirmation in seconds.
+When the patient selects their preferred time, LamaniHub compiles the booking payload. LamaniSync executes the write inside the staff-authenticated CMS tab, verifies the insertion with readback verification, and delivers the WhatsApp confirmation in seconds.
 
 The front desk staff simply watches the new appointment populate on their calendar screen in real time.
 
@@ -422,7 +422,7 @@ The front desk staff simply watches the new appointment populate on their calend
 
 ## Operational Comparison
 
-| Operational Metric | Manual Front-Desk Admin | Sara AI + LamaniSync |
+| Operational Metric | Manual Front-Desk Admin | LamaniHub + LamaniSync |
 | :--- | :--- | :--- |
 | **Average Response Time** | 47 minutes | Under 4 seconds |
 | **Front-Desk Time on WhatsApp** | 4+ hours per day | Reduced by 70% |
@@ -433,7 +433,7 @@ The front desk staff simply watches the new appointment populate on their calend
 
 ## The Clinical Impact
 
-Clinics deploying Sara AI powered by LamaniSync consistently report:
+Clinics deploying LamaniHub powered by LamaniSync consistently report:
 - **Instant Response Times**: Median inquiry response drops from 47 minutes to under 4 seconds.
 - **70% Reduction in Front-Desk Admin**: Receptionists spend their time greeting patients in person rather than typing on WhatsApp.
 - **32% Surge in After-Hours Bookings**: Capturing patients who search for treatments at 10:00 PM or on Sunday mornings when the clinic is closed.
@@ -466,7 +466,7 @@ No photocopy is taken. No scan is saved to a folder. Nothing is tucked into a de
 
 In the world of healthcare IT, **LamaniSync operates on this exact cleanroom glass plate principle**.
 
-When patient appointment requests flow between your patient-facing communication tools (such as Sara AI on WhatsApp) and your Clinic Management System (CMS), LamaniSync facilitates the interaction entirely in volatile Random Access Memory (RAM). The moment the appointment verification completes, the data dissolves. It never touches your physical solid-state drive (SSD) or magnetic hard disk.
+When patient appointment requests flow between your patient-facing communication tools (such as LamaniHub WhatsApp messaging) and your Clinic Management System (CMS), LamaniSync facilitates the interaction entirely in volatile Random Access Memory (RAM). The moment the appointment verification completes, the data dissolves. It never touches your physical solid-state drive (SSD) or magnetic hard disk.
 
 ---
 
@@ -662,7 +662,7 @@ During Phase 2, LamaniSync's readback observer scans the primary calendar matrix
 3. **Provider Attribution**: It verifies that the appointment is locked to the designated doctor's column or schedule track, rather than being dumped into an unassigned overflow queue.
 4. **Physical Operatory Allocation**: It checks that the treatment chair or procedure room meets the clinical requirements of the treatment.
 
-Only when all four checks evaluate to \`true\` does LamaniSync generate a signed write receipt. That receipt is sent to LamaniHub, which finally triggers Sara AI's WhatsApp confirmation to the patient.
+Only when all four checks evaluate to \`true\` does LamaniSync generate a signed write receipt. That receipt is sent to LamaniHub, which finally triggers LamaniHub's WhatsApp confirmation to the patient.
 
 ---
 
@@ -670,7 +670,7 @@ Only when all four checks evaluate to \`true\` does LamaniSync generate a signed
 
 If the readback probe fails to locate the verified appointment card within a strict 3.0-second assertion window, the system enters an immediate fail-closed state:
 - **No False Assurances**: The patient is never told they are booked.
-- **Graceful Conversational Handling**: Sara AI updates the patient: *"I am verifying the doctor's immediate schedule. Please give me one moment while our team confirms your chair."*
+- **Graceful Conversational Handling**: LamaniHub updates the patient: *"I am verifying the doctor's immediate schedule. Please give me one moment while our team confirms your chair."*
 - **Front-Desk Triage Escalation**: An urgent notification flashes on the LamaniHub clinic dashboard, highlighting the exact slot conflict so reception staff can resolve it with a single click.
 
 ---
@@ -1055,14 +1055,14 @@ In computer science, this is known as **mutual exclusion (mutex locking)**. And 
 ## The Chaos of Concurrent Medical Bookings
 
 Imagine this common clinic scenario on a busy Monday morning:
-- **10:00:00 AM**: Dr. Sarah has exactly one open 30-minute slot left for the day: 3:00 PM in Dental Operatory 1.
-- **10:00:02 AM**: Patient A on WhatsApp asks Sara AI: *"Can I book 3:00 PM today with Dr. Sarah?"*
+- **10:00:00 AM**: Dr. Maya has exactly one open 30-minute slot left for the day: 3:00 PM in Dental Operatory 1.
+- **10:00:02 AM**: Patient A on WhatsApp asks LamaniHub: *"Can I book 3:00 PM today with Dr. Maya?"*
 - **10:00:03 AM**: At the exact same second, Patient B calls the front desk on the landline phone. The receptionist opens the calendar and prepares to click 3:00 PM.
 - **10:00:04 AM**: Patient A taps "Confirm" on WhatsApp.
 
 In naive integration systems with unmanaged concurrency, a **race condition** occurs. Both systems submit the booking at virtually the same instant. Both bookings succeed, or the second one overwrites the first.
 
-At 3:00 PM, two patients arrive at the reception desk at the same time for the same dental chair. The receptionist is left apologizing, Dr. Sarah's schedule is thrown into turmoil, and one patient must be turned away.
+At 3:00 PM, two patients arrive at the reception desk at the same time for the same dental chair. The receptionist is left apologizing, Dr. Maya's schedule is thrown into turmoil, and one patient must be turned away.
 
 ---
 
@@ -1082,7 +1082,7 @@ To prevent race conditions before they can occur, LamaniSync implements a **dist
 ┌────────────────────────────────────────────────────────┐
 │               Lease Coordinator Matrix                 │
 │                                                        │
-│  Slot: Dr. Sarah | 2026-09-22 15:00-15:30 | Chair 1    │
+│  Slot: Dr. Maya | 2026-09-22 15:00-15:30 | Chair 1    │
 │  State: HELD (Lease TTL: 90 Seconds)                   │
 │  Holder: Conversation UUID-7841                        │
 │                                                        │
@@ -1092,7 +1092,7 @@ To prevent race conditions before they can occur, LamaniSync implements a **dist
 \`\`\`
 
 Here is how the lease lifecycle works:
-1. **Pre-Emptive Lease Hold**: When Sara AI presents a recommended time slot to a patient, LamaniHub places a temporary, cryptographic mutex lease on that specific doctor, chair, and time block.
+1. **Pre-Emptive Lease Hold**: When LamaniHub presents a recommended time slot to a patient, LamaniHub places a temporary, cryptographic mutex lease on that specific doctor, chair, and time block.
 2. **Time-To-Live (TTL) Safety Window**: The lease is held for exactly 90 seconds. During this window, no other automated conversation on WhatsApp, web booking, or SMS can claim or be offered that slot.
 3. **Automatic Expiration**: If the patient changes their mind, asks about a different treatment, or abandons the chat, the 90-second lease expires automatically, returning the slot to the general availability pool without any manual cleanup required.
 
@@ -1133,7 +1133,7 @@ What if the receptionist at the front desk manually types a walk-in patient into
 LamaniSync actively handles this scenario via its pre-flight validation probe:
 - Before executing the write inside the CMS tab, LamaniSync performs a sub-second DOM inspection of the target cell.
 - If it detects that a staff member just added a patient to that slot, LamaniSync immediately aborts the pending write.
-- It releases the mutex lease, logs the conflict, and triggers Sara AI to smoothly respond on WhatsApp: *"Dr. Sarah just accepted an urgent in-clinic patient for 3:00 PM. Would 3:45 PM or 4:30 PM work better for you?"*
+- It releases the mutex lease, logs the conflict, and triggers LamaniHub to smoothly respond on WhatsApp: *"Dr. Maya just accepted an urgent in-clinic patient for 3:00 PM. Would 3:45 PM or 4:30 PM work better for you?"*
 
 ---
 
@@ -1316,7 +1316,7 @@ Two landmark privacy frameworks govern healthcare data today:
 1. **The Malaysian Personal Data Protection Act (PDPA 2010) & the Landmark 2024 Amendments**: The recent 2024 amendments introduced mandatory appointment of Data Protection Officers (DPOs), mandatory 72-hour data breach reporting to the Department of Personal Data Protection (JPDP), direct statutory liability for data processors, and stringent conditions on cross-border personal data transfers under Section 129.
 2. **The US Health Insurance Portability and Accountability Act (HIPAA)**: Specifically the **HIPAA Security Rule (45 CFR Part 160 and Part 164, Subparts A and C)**, which mandates technical, physical, and administrative safeguards to ensure the confidentiality, integrity, and availability of Electronic Protected Health Information (ePHI).
 
-Clinics often fear that adopting modern AI tools like Sara AI on WhatsApp will violate these stringent statutes. With LamaniSync, our architecture was built specifically to ensure full, effortless compliance.
+Clinics often fear that adopting modern AI tools like LamaniHub WhatsApp automation will violate these stringent statutes. With LamaniSync, our architecture was built specifically to ensure full, effortless compliance.
 
 ---
 
@@ -1479,7 +1479,7 @@ export const ALLOWED_ACTION_IDS = [
 ] as const;
 \`\`\`
 
-When LamaniHub coordinates an appointment with Sara AI, it cannot send arbitrary URLs, HTTP request bodies, or JavaScript snippets to the extension. It can only transmit an enumerated **Action ID** accompanied by strongly typed, strictly validated parameters.
+When LamaniHub coordinates an appointment write, it cannot send arbitrary URLs, HTTP request bodies, or JavaScript snippets to the extension. It can only transmit an enumerated **Action ID** accompanied by strongly typed, strictly validated parameters.
 
 \`\`\`plain text
 [LamaniHub Cloud Coordinator]
@@ -1550,7 +1550,7 @@ By enforcing strict action whitelisting and eliminating dynamic remote code, Lam
     tags: ["SHA-256 Hashing","Cryptographic Receipt","State Verification","Audit Trail","Data Integrity"],
     author: {
       name: "Nadia Karim",
-      role: "Head of Product, Sara AI & LamaniHub",
+      role: "Head of Product, LamaniHub",
       avatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80",
     },
     content: `
@@ -1589,7 +1589,7 @@ A cryptographic hash function is a mathematical one-way function that takes any 
 
 \`\`\`plain text
 Input Canonical State:
-"patient:NORMAN_LIM|phone:60123456789|slot:2026-09-24T14:30:00Z|doc:DR_SARAH|chair:CHAIR_2"
+"patient:NORMAN_LIM|phone:60123456789|slot:2026-09-24T14:30:00Z|doc:DR_MAYA|chair:CHAIR_2"
                                 │
                                 ▼ (SHA-256 Engine)
 Output State Digest:
@@ -1607,7 +1607,7 @@ SHA-256 possesses two extraordinary mathematical properties that make it perfect
 Here is how LamaniSync verifies every appointment write with mathematical certainty:
 
 \`\`\`plain text
-[Sara AI on LamaniHub]
+[LamaniHub Cloud]
          │
          ├── 1. Compute Intent State Hash (Hash_Expected)
          ├── 2. Send booking request with hash expectation
