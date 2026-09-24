@@ -76,6 +76,7 @@ const BASE_PAGES = [
   '/why-we-dont-partner',
   '/features',
   '/blog',
+  '/docs',
 ];
 
 const FOOTER_PAGES = [
@@ -114,7 +115,34 @@ if (discoveredBlogRoutes.length < 14) {
   process.exit(1);
 }
 
-const PAGES = [...BASE_PAGES, ...discoveredBlogRoutes, ...FOOTER_PAGES];
+// Dynamically discover all docs routes from dist/docs
+const ALL_10_DOCS_ROUTES = [
+  '/docs/installation-guide',
+  '/docs/quickstart-lamanihub',
+  '/docs/dentrix-ascend-setup',
+  '/docs/eclinicalworks-setup',
+  '/docs/lamanipulse-setup',
+  '/docs/custom-web-cms',
+  '/docs/multi-workstation-redundancy',
+  '/docs/security-and-firewall',
+  '/docs/troubleshooting-pairing',
+  '/docs/faq',
+];
+
+const docsDistDir = path.join(DIST_DIR, 'docs');
+const discoveredDocsRoutes = fs.existsSync(docsDistDir)
+  ? fs.readdirSync(docsDistDir, { withFileTypes: true })
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => `/docs/${entry.name}`)
+      .sort()
+  : ALL_10_DOCS_ROUTES;
+
+if (discoveredDocsRoutes.length < 10) {
+  console.error(`ERROR: Expected at least 10 docs routes in dist/docs, found ${discoveredDocsRoutes.length}. Please run "npm run build" in website/ first.`);
+  process.exit(1);
+}
+
+const PAGES = [...BASE_PAGES, ...discoveredBlogRoutes, ...discoveredDocsRoutes, ...FOOTER_PAGES];
 
 async function runAudit() {
   await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
@@ -297,6 +325,36 @@ async function runAudit() {
           // Close drawer
           await toggleBtn.click();
           await page.waitForTimeout(50);
+        }
+      }
+
+      if (route === '/docs') {
+        const searchInput = await page.$('#docs-search');
+        if (searchInput) {
+          await searchInput.fill('Dentrix');
+          await page.waitForTimeout(50);
+          const searchOverflow = await page.evaluate(() => {
+            return document.documentElement.scrollWidth > window.innerWidth + 1;
+          });
+          if (searchOverflow) {
+            interactiveIssues.push('Docs live search causes horizontal overflow');
+          }
+        }
+      }
+
+      if (route.startsWith('/docs/') && vp.width <= 768) {
+        const sidebarBtn = await page.$('#docs-sidebar-toggle');
+        if (sidebarBtn) {
+          await sidebarBtn.click();
+          await page.waitForTimeout(50);
+          const sidebarOverflow = await page.evaluate(() => {
+            return document.documentElement.scrollWidth > window.innerWidth + 1;
+          });
+          if (sidebarOverflow) {
+            interactiveIssues.push('Docs mobile sidebar causes horizontal overflow when opened');
+          }
+          await sidebarBtn.click();
+          await page.waitForTimeout(30);
         }
       }
 

@@ -1,0 +1,819 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import CtaBanner from '../../components/CtaBanner.astro';
+import { docCategories, docArticles } from '../../data/docs';
+
+const popularArticles = docArticles.filter((art) => art.popular);
+---
+
+<Layout
+  title="Documentation Hub & Knowledge Base | LamaniSync"
+  description="Official guides, CMS connection walkthroughs, and operational deployment documentation for the LamaniSync Workstation Synchronizer."
+>
+  <!-- Hero Section -->
+  <section class="docs-hero">
+    <div class="bg-grid-pattern"></div>
+    <div class="hero-glow"></div>
+    <div class="container hero-content">
+      <div class="attio-badge crimson">
+        <svg style="width:12px; height:12px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+        </svg>
+        <span>Knowledge Base & Technical Guides</span>
+      </div>
+
+      <h1 class="hero-title">
+        <span class="heading-dark">LamaniSync Documentation</span>
+        <span class="heading-muted">Installation, CMS bridging, and workstation topology.</span>
+      </h1>
+
+      <p class="hero-subtitle">
+        Everything your clinic administrators and IT team need to pair front-desk workstations with Dentrix, eClinicalWorks, and LamaniHub.
+      </p>
+
+      <!-- Interactive Search Input -->
+      <div class="search-wrapper">
+        <div class="search-input-box">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input
+            type="search"
+            id="docs-search"
+            placeholder="Search guides (e.g., Dentrix, eCW, WebCrypto, Leases, Error codes)..."
+            aria-label="Search documentation"
+            class="search-field"
+            autocomplete="off"
+          />
+          <span class="search-shortcut" id="search-shortcut">⌘K</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Live Search Results Container (Hidden by default) -->
+  <section id="search-results-section" class="search-results-section" style="display: none;">
+    <div class="container">
+      <div class="results-header">
+        <h2 class="results-title">Search Results</h2>
+        <span id="results-count" class="results-count">0 articles found</span>
+      </div>
+      <div id="results-grid" class="results-grid"></div>
+    </div>
+  </section>
+
+  <!-- Popular Guides Section -->
+  <section class="section popular-section" id="popular-guides">
+    <div class="container">
+      <div class="section-header">
+        <div class="header-left">
+          <span class="section-tag">Quick Start</span>
+          <h2 class="section-title">Popular Guides</h2>
+        </div>
+        <a href="/docs/installation-guide" class="view-all-link">
+          <span>Read Full Installation Walkthrough</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+      </div>
+
+      <div class="popular-grid">
+        {popularArticles.map((article) => (
+          <a href={`/docs/${article.slug}`} class="popular-card">
+            <div class="popular-cat-row">
+              <span class="popular-cat">{article.category}</span>
+              <span class="popular-time">{article.readTime}</span>
+            </div>
+            <h3 class="popular-card-title">{article.title}</h3>
+            <p class="popular-card-desc">{article.description}</p>
+            <div class="popular-card-footer">
+              <span class="read-link">Read Guide →</span>
+            </div>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Documentation Categories Section -->
+  <section class="section categories-section" id="all-categories">
+    <div class="container">
+      <div class="section-header">
+        <div class="header-left">
+          <span class="section-tag">Browse by Category</span>
+          <h2 class="section-title">Documentation Hub</h2>
+        </div>
+        <span class="total-badge">{docArticles.length} Total Articles</span>
+      </div>
+
+      <div class="categories-grid">
+        {docCategories.map((cat) => (
+          <div class="category-block" id={cat.slug}>
+            <div class="cat-header">
+              <div class="cat-icon-wrap">
+                {cat.icon === 'rocket' && (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/>
+                    <path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/>
+                    <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/>
+                    <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/>
+                  </svg>
+                )}
+                {cat.icon === 'server' && (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="2" y="2" width="20" height="8" rx="2" ry="2"/>
+                    <rect x="2" y="14" width="20" height="8" rx="2" ry="2"/>
+                    <line x1="6" y1="6" x2="6.01" y2="6"/>
+                    <line x1="6" y1="18" x2="6.01" y2="18"/>
+                  </svg>
+                )}
+                {cat.icon === 'shield' && (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                  </svg>
+                )}
+                {cat.icon === 'lifebuoy' && (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <circle cx="12" cy="12" r="4"/>
+                    <line x1="4.93" y1="4.93" x2="9.17" y2="9.17"/>
+                    <line x1="14.83" y1="14.83" x2="19.07" y2="19.07"/>
+                    <line x1="14.83" y1="9.17" x2="19.07" y2="4.93"/>
+                    <line x1="14.83" y1="9.17" x2="18.36" y2="5.64"/>
+                    <line x1="4.93" y1="19.07" x2="9.17" y2="14.83"/>
+                  </svg>
+                )}
+              </div>
+              <div class="cat-titles">
+                <h3 class="cat-title">{cat.title}</h3>
+                <p class="cat-desc">{cat.description}</p>
+              </div>
+            </div>
+
+            <ul class="cat-article-list">
+              {cat.articles.map((article) => (
+                <li class="cat-article-item">
+                  <a href={`/docs/${article.slug}`} class="cat-article-link">
+                    <span class="article-bullet"></span>
+                    <span class="article-item-title">{article.title}</span>
+                    <span class="article-item-time">{article.readTime}</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Help & Support Callout Banner -->
+  <section class="support-banner-section">
+    <div class="container">
+      <div class="support-card">
+        <div class="support-content">
+          <div class="support-badge">
+            <span class="pulse-dot"></span>
+            <span>Healthcare Solutions Engineering</span>
+          </div>
+          <h3 class="support-title">Need hands-on pairing assistance for your clinic?</h3>
+          <p class="support-desc">
+            Our clinical systems team provides complimentary live onboarding, workstation pairing diagnostics, and custom EHR adapter assessments for all registered LamaniHub practices.
+          </p>
+          <div class="support-actions">
+            <a href="/contact" class="btn-primary support-btn">
+              <span>Contact Clinical IT Support</span>
+              <svg style="width:14px; height:14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </a>
+            <a href="https://lamanihub.com" target="_blank" rel="noopener noreferrer" class="btn-secondary support-btn-ghost">
+              <span>Open LamaniHub Console</span>
+              <svg style="width:13px; height:13px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" x2="21" y1="14" y2="3"/></svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Banner -->
+  <CtaBanner />
+</Layout>
+
+<!-- Client-side Fast Filter Script -->
+<script is:inline define:vars={{ docArticles }}>
+  const searchInput = document.getElementById('docs-search');
+  const resultsSection = document.getElementById('search-results-section');
+  const resultsGrid = document.getElementById('results-grid');
+  const resultsCount = document.getElementById('results-count');
+  const popularSection = document.getElementById('popular-guides');
+  const categoriesSection = document.getElementById('all-categories');
+  const shortcutBadge = document.getElementById('search-shortcut');
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    const d = document.createElement('div');
+    d.textContent = String(str);
+    return d.innerHTML;
+  }
+
+  if (shortcutBadge && typeof navigator !== 'undefined' && !/Mac|iPhone|iPod|iPad/i.test(navigator.platform || navigator.userAgent || '')) {
+    shortcutBadge.textContent = 'Ctrl K';
+  }
+
+  if (searchInput) {
+    searchInput.addEventListener('input', (e) => {
+      const rawInput = e.target.value;
+      const q = rawInput.trim().toLowerCase();
+      if (!q) {
+        resultsSection.style.display = 'none';
+        if (popularSection) popularSection.style.display = 'block';
+        if (categoriesSection) categoriesSection.style.display = 'block';
+        return;
+      }
+
+      const matches = docArticles.filter((art) => {
+        const titleMatch = art.title.toLowerCase().includes(q);
+        const descMatch = art.description.toLowerCase().includes(q);
+        const catMatch = art.category.toLowerCase().includes(q);
+        const slugMatch = art.slug.toLowerCase().includes(q);
+        const contentMatch = art.content ? art.content.toLowerCase().includes(q) : false;
+        return titleMatch || descMatch || catMatch || slugMatch || contentMatch;
+      });
+
+      resultsSection.style.display = 'block';
+      if (popularSection) popularSection.style.display = 'none';
+      if (categoriesSection) categoriesSection.style.display = 'none';
+
+      resultsCount.textContent = `${matches.length} article${matches.length === 1 ? '' : 's'} found`;
+
+      if (matches.length === 0) {
+        resultsGrid.innerHTML = `
+          <div class="empty-search-state">
+            <h4>No documentation matches found for "${escapeHtml(rawInput.trim())}"</h4>
+            <p>Try searching for terms like <strong>Dentrix</strong>, <strong>eClinicalWorks</strong>, <strong>Lease</strong>, or <strong>Firewall</strong>.</p>
+          </div>
+        `;
+      } else {
+        resultsGrid.innerHTML = matches.map((m) => `
+          <a href="/docs/${escapeHtml(m.slug)}" class="popular-card">
+            <div class="popular-cat-row">
+              <span class="popular-cat">${escapeHtml(m.category)}</span>
+              <span class="popular-time">${escapeHtml(m.readTime)}</span>
+            </div>
+            <h3 class="popular-card-title">${escapeHtml(m.title)}</h3>
+            <p class="popular-card-desc">${escapeHtml(m.description)}</p>
+            <div class="popular-card-footer">
+              <span class="read-link">Read Guide →</span>
+            </div>
+          </a>
+        `).join('');
+      }
+    });
+
+    // Keyboard shortcut (⌘K or Ctrl+K) to focus search
+    window.addEventListener('keydown', (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        searchInput.focus();
+      }
+    });
+  }
+</script>
+
+<style>
+  .docs-hero {
+    position: relative;
+    padding: 5.5rem 0 3.5rem 0;
+    overflow: hidden;
+    background: #ffffff;
+  }
+
+  .hero-glow {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(700px, 100%);
+    max-width: 100%;
+    height: 380px;
+    background: radial-gradient(circle, rgba(233, 36, 81, 0.04) 0%, rgba(255, 255, 255, 0) 70%);
+    pointer-events: none;
+  }
+
+  .hero-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero-title {
+    font-size: clamp(2rem, 4.5vw, 3.8rem);
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -0.03em;
+    margin-top: 1.25rem;
+    margin-bottom: 1.25rem;
+    max-width: 900px;
+    overflow-wrap: break-word;
+  }
+
+  .hero-subtitle {
+    font-size: 1.15rem;
+    color: var(--text-muted);
+    max-width: 680px;
+    line-height: 1.6;
+    margin-bottom: 2.25rem;
+  }
+
+  /* Search Input Styling */
+  .search-wrapper {
+    width: 100%;
+    max-width: 620px;
+    position: relative;
+  }
+
+  .search-input-box {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background: #ffffff;
+    border: 1px solid var(--border-hairline);
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(15, 23, 42, 0.05);
+    padding: 0 1rem;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .search-input-box:focus-within {
+    border-color: var(--primary);
+    box-shadow: 0 4px 24px rgba(233, 36, 81, 0.12);
+  }
+
+  .search-icon {
+    width: 20px;
+    height: 20px;
+    color: #94a3b8;
+    flex-shrink: 0;
+  }
+
+  .search-field {
+    width: 100%;
+    border: none;
+    outline: none;
+    font-family: inherit;
+    font-size: 0.96rem;
+    color: #0f172a;
+    padding: 0.95rem 0.75rem;
+    min-height: 48px;
+    background: transparent;
+  }
+
+  .search-field::placeholder {
+    color: #94a3b8;
+  }
+
+  .search-shortcut {
+    font-size: 0.74rem;
+    font-weight: 600;
+    color: #64748b;
+    background: #f1f5f9;
+    padding: 0.2rem 0.5rem;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+    flex-shrink: 0;
+  }
+
+  /* Search Results Section */
+  .search-results-section {
+    padding: 2rem 0 4rem 0;
+  }
+
+  .results-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-hairline);
+  }
+
+  .results-title {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: #0f172a;
+  }
+
+  .results-count {
+    font-size: 0.86rem;
+    font-weight: 600;
+    color: var(--primary);
+  }
+
+  .results-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+
+  .empty-search-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 3rem 1rem;
+    background: #fafafa;
+    border: 1px solid var(--border-hairline);
+    border-radius: var(--radius-card);
+  }
+
+  .empty-search-state h4 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 0.5rem;
+  }
+
+  .empty-search-state p {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+  }
+
+  /* Sections */
+  .section {
+    padding: 3.5rem 0;
+  }
+
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-hairline);
+  }
+
+  .section-tag {
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: var(--primary);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    display: block;
+    margin-bottom: 0.25rem;
+  }
+
+  .section-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #0f172a;
+    letter-spacing: -0.02em;
+  }
+
+  .view-all-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.86rem;
+    font-weight: 600;
+    color: var(--primary);
+    text-decoration: none;
+    min-height: 44px;
+    transition: color 0.15s;
+  }
+
+  .view-all-link svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .view-all-link:hover {
+    color: var(--primary-dark);
+  }
+
+  .total-badge {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #64748b;
+    background: #f8fafc;
+    border: 1px solid var(--border-hairline);
+    padding: 0.35rem 0.75rem;
+    border-radius: 9999px;
+  }
+
+  /* Popular Grid */
+  .popular-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+
+  .popular-card {
+    background: #ffffff;
+    border: 1px solid var(--border-hairline);
+    border-radius: var(--radius-card);
+    padding: 1.75rem;
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.02);
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s, border-color 0.2s;
+  }
+
+  .popular-card:hover {
+    transform: translateY(-2px);
+    border-color: #cbd5e1;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+  }
+
+  .popular-cat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+  }
+
+  .popular-cat {
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: var(--primary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .popular-time {
+    font-size: 0.74rem;
+    color: var(--text-muted);
+  }
+
+  .popular-card-title {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #0f172a;
+    line-height: 1.35;
+    margin-bottom: 0.65rem;
+    letter-spacing: -0.015em;
+  }
+
+  .popular-card-desc {
+    font-size: 0.88rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+    flex-grow: 1;
+  }
+
+  .popular-card-footer {
+    display: flex;
+    align-items: center;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-subtle);
+  }
+
+  .read-link {
+    font-size: 0.84rem;
+    font-weight: 600;
+    color: var(--primary);
+    display: inline-flex;
+    align-items: center;
+  }
+
+  /* Categories Grid */
+  .categories-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+  }
+
+  .category-block {
+    background: #ffffff;
+    border: 1px solid var(--border-hairline);
+    border-radius: var(--radius-container);
+    padding: 2.25rem;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.02);
+  }
+
+  .cat-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.25rem;
+    margin-bottom: 1.75rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border-hairline);
+  }
+
+  .cat-icon-wrap {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    background: var(--primary-subtle);
+    border: 1px solid var(--primary-border);
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .cat-icon-wrap svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  .cat-title {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #0f172a;
+    letter-spacing: -0.015em;
+    margin-bottom: 0.35rem;
+  }
+
+  .cat-desc {
+    font-size: 0.86rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+
+  .cat-article-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .cat-article-item {
+    margin: 0;
+  }
+
+  .cat-article-link {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    text-decoration: none;
+    padding: 0.65rem 0.5rem;
+    border-radius: 8px;
+    min-height: 44px;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+
+  .cat-article-link:hover {
+    background: #f8fafc;
+  }
+
+  .article-bullet {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #cbd5e1;
+    flex-shrink: 0;
+    transition: background 0.15s;
+  }
+
+  .cat-article-link:hover .article-bullet {
+    background: var(--primary);
+  }
+
+  .article-item-title {
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: #0f172a;
+    flex-grow: 1;
+    line-height: 1.4;
+    transition: color 0.15s;
+  }
+
+  .cat-article-link:hover .article-item-title {
+    color: var(--primary);
+  }
+
+  .article-item-time {
+    font-size: 0.74rem;
+    color: var(--text-subtle);
+    flex-shrink: 0;
+  }
+
+  /* Support Callout Banner */
+  .support-banner-section {
+    padding: 1.5rem 0 5rem 0;
+  }
+
+  .support-card {
+    background: #0f172a;
+    border-radius: var(--radius-container);
+    padding: 3rem;
+    color: #ffffff;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid #1e293b;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+  }
+
+  .support-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.76rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #fca5a5;
+    background: rgba(233, 36, 81, 0.15);
+    border: 1px solid rgba(233, 36, 81, 0.3);
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    margin-bottom: 1.25rem;
+  }
+
+  .pulse-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--primary);
+    box-shadow: 0 0 8px var(--primary);
+  }
+
+  .support-title {
+    font-size: clamp(1.4rem, 2.5vw, 2rem);
+    font-weight: 800;
+    color: #ffffff;
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+    margin-bottom: 1rem;
+    max-width: 650px;
+  }
+
+  .support-desc {
+    font-size: 0.95rem;
+    color: #94a3b8;
+    max-width: 680px;
+    line-height: 1.6;
+    margin-bottom: 2rem;
+  }
+
+  .support-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .support-btn {
+    min-height: 44px;
+    padding: 0.65rem 1.4rem;
+  }
+
+  .support-btn-ghost {
+    background: rgba(255, 255, 255, 0.06);
+    color: #ffffff;
+    border-color: rgba(255, 255, 255, 0.15);
+    min-height: 44px;
+    padding: 0.65rem 1.4rem;
+  }
+
+  .support-btn-ghost:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: #ffffff;
+    border-color: rgba(255, 255, 255, 0.25);
+  }
+
+  @media (max-width: 860px) {
+    .popular-grid,
+    .categories-grid,
+    .results-grid {
+      grid-template-columns: 1fr;
+    }
+    .section-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.75rem;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .docs-hero {
+      padding: 3.5rem 0 2rem 0;
+    }
+    .search-field {
+      font-size: 0.88rem;
+    }
+    .search-shortcut {
+      display: none;
+    }
+    .category-block {
+      padding: 1.5rem 1rem;
+    }
+    .support-card {
+      padding: 2rem 1.25rem;
+    }
+    .support-actions {
+      flex-direction: column;
+      width: 100%;
+    }
+    .support-btn,
+    .support-btn-ghost {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+</style>
