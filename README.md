@@ -1,12 +1,24 @@
-# LamaniSync Chrome Extension
+# LamaniSync — Clinic Management System (CMS) & EMR Data Synchronization
 
-Secure bridge connecting authenticated cloud CMS tabs to LamaniHub sync services.
+> **Universal clinic system synchronization bridge for LamaniHub.** Keep your existing Clinic Management System while enabling real-time appointment and patient workflow sync without complex API integrations or staff retraining.
+
+---
+
+### Need to Integrate Your Clinic's CMS?
+LamaniSync provides turnkey, certified integration for any web-based clinic management system (Dental, Medical GP, Specialist EHRs, or proprietary hospital portals).
+
+👉 **[Contact Us for CMS Integration](https://lamanisync.com/contact)** *(Fast 48-Hour Turnaround)*
+
+---
 
 ## Overview
 
-LamaniSync operates as a Manifest V3 Chrome Extension providing bi-directional, allowlisted synchronization between healthcare CMS platforms and LamaniHub without storing raw credentials or transmitting sensitive patient health information unencrypted.
+LamaniSync operates as a secure, healthcare-compliant browser bridge providing bi-directional synchronization between web-based clinic management systems and LamaniHub.
 
-See [docs/architecture.md](docs/architecture.md) for architectural data flow.
+* **Universal Compatibility**: Connects with any web-based clinic management software and EHR platform.
+* **Zero Credential Exposure**: Never stores or transmits raw healthcare login credentials.
+* **Real-Time Verification**: Instant readback confirmation prevents double-bookings and scheduling conflicts.
+* **Privacy Compliant**: Built strictly adhering to healthcare privacy and data protection standards (PDPA / HIPAA compliant architecture).
 
 ## Prerequisites
 
