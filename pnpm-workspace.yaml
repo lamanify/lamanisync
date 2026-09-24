@@ -2,6 +2,9 @@ packages:
   - '.'
   - 'website'
 
+overrides:
+  undici: '8.11.0'
+
 allowBuilds:
   esbuild: true
   sharp: true
