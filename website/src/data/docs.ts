@@ -478,6 +478,58 @@ When running with LamaniPulse EHR, LamaniSync unlocks exclusive capabilities:
 | **Patient Check-in** | Manual status change | Automatic WhatsApp arrival trigger |
 | **Double-Booking Prevention** | Workstation-level mutex | Real-time database atomic locks |
 | **Doctor Schedule Overrides** | 60-second polling delay | Immediate WebSocket push notification |
+
+---
+
+## Browser Tab Operating Rules & Route Flexibility
+
+### Do Staff Need to Keep the Tab Open Always?
+
+**Yes, during clinic operating hours.**
+LamaniSync operates on an **Ambient Authentication** architecture (Rule 4 of our security model). The extension **never** stores or transmits staff passwords, master API keys, or long-lived authentication tokens to the cloud. Instead, it relies on the front-desk staff member's active browser login session.
+
+| State | What Happens | Action Required |
+| :--- | :--- | :--- |
+| **Tab Open & Active** | Real-time bi-directional synchronization (< 80ms latency). | None (Normal operation) |
+| **Tab Open in Background / Another Tab Focused** | Full real-time synchronization continues uninterrupted. | None (Background workers handle events) |
+| **Tab Closed Accidentally** | Inbound appointments from LamaniHub queue safely in \`public.sync_outbox\` as \`PENDING\`. Zero data loss. | Reopen any LamaniPulse tab. All queued appointments auto-flush and sync instantly. |
+
+### Does Sync Only Work on \`/appointments\` or Other Pages Too?
+
+**Any page under \`https://app.lamanipulse.com/*\` maintains 100% active sync.**
+Staff do **not** need to stay anchored to the \`/appointments\` screen. You can freely navigate throughout the entire system:
+
+- \`/patients\`: Manage patient demographics, registrations, and medical records.
+- \`/dashboard\`: View clinic KPI cards and daily overview.
+- \`/queue\`: Call patients to consultation rooms and monitor wait times.
+- \`/billing\`: Process invoices, insurance claims, and payments.
+
+#### How Multi-Route Sync Functions:
+
+1. **Hub → CMS Writes (Create, Reschedule, Cancel)**:
+   - When a patient books or modifies an appointment on WhatsApp with Sara AI, LamaniSync executes the write via the PostgREST data layer directly inside the open page context.
+   - This executes seamlessly in the background regardless of whether staff is on \`/patients\`, \`/queue\`, or \`/dashboard\`.
+   - When staff later navigates to or refreshes \`/appointments\`, the newly confirmed appointment is already rendered on the calendar.
+
+2. **CMS → Hub Observations (Staff Activity Interception)**:
+   - When staff creates or edits patients on \`/patients\`, the in-page observer intercepts the write and replicates it to LamaniHub.
+   - When staff edits or cancels bookings on \`/appointments\`, the observer instantly syncs the calendar state to LamaniHub.
+
+3. **In-Page Visual Indicator**:
+   - The green LamaniSync sync badge (\`#lamanisync-sync-indicator\`) floats unobtrusively in the bottom-right corner of every page across the portal, giving staff instant visual confirmation of every synchronized record.
+
+---
+
+## Best Practice: Tab Pinning & Chrome Memory Saver
+
+To ensure uninterrupted sync throughout the working day:
+
+1. **Pin the Tab**: Right-click your LamaniPulse tab in Chrome and select **Pin**. A pinned tab stays compact on the left of the tab bar and cannot be closed with a single accidental click.
+2. **Prevent Chrome Memory Saver from Discarding the Tab**:
+   - Navigate to \`chrome://settings/performance\` in Google Chrome.
+   - Under **Always keep these sites active**, click **Add**.
+   - Enter \`https://app.lamanipulse.com\` and save.
+   - Chrome will never put the clinic tab to sleep.
     `,
   },
 
@@ -809,6 +861,19 @@ When a patient requests a cancellation or reschedule with Sara AI:
 
 ### Can we manually override or block times in the CMS?
 **Yes.** When doctors block time off for surgery, personal leave, or lunch breaks directly in the CMS calendar, LamaniSync detects the block in real-time. Sara AI will never offer a blocked slot to a patient.
+
+### Do we always need to keep a CMS tab open in Chrome?
+**Yes, during clinic operating hours.**
+LamaniSync relies on **ambient credentials** from your logged-in clinic portal session. This security design guarantees that your CMS master passwords and tokens are never stored on disk or sent to the cloud. Pinning the CMS tab (\`Right-click tab\` → \`Pin\`) keeps the session open seamlessly throughout the day without cluttering the screen.
+
+### What happens if staff accidentally closes the CMS tab?
+**Zero appointments or patient data are lost.**
+1. Any new bookings created from WhatsApp or LamaniHub safely wait in the cloud outbox queue (\`public.sync_outbox\`) with status \`PENDING\`.
+2. As soon as a receptionist reopens or logs back into the CMS portal, LamaniSync automatically detects the tab, claims the pending queue, and syncs all bookings into the calendar immediately.
+
+### Does LamaniSync only work when looking at the /appointments tab?
+**No, it works across every page in the CMS.**
+LamaniSync is registered across the entire CMS domain (\`https://app.lamanipulse.com/*\`). Staff can work normally on \`/patients\`, \`/queue\`, \`/dashboard\`, or \`/billing\`. Inbound appointments from WhatsApp are written directly to the database in the page background, and the green sync badge in the lower-right corner confirms successful synchronization regardless of which screen is currently visible.
 
 ### Who do we contact if we need help with setup?
 Our healthcare solutions engineering team provides free live onboarding assistance for all LamaniHub clinics. Reach out via WhatsApp or email:
