@@ -2,7 +2,7 @@ import { defineManifest } from '@crxjs/vite-plugin';
 
 export default defineManifest({
   manifest_version: 3,
-  name: 'LamaniSync Dev',
+  name: 'LamaniSync',
   version: '0.1.0',
   description: 'Secure bridge between authenticated cloud CMS tabs and LamaniHub',
   icons: {
@@ -24,6 +24,13 @@ export default defineManifest({
     service_worker: 'src/background/service-worker.ts',
     type: 'module',
   },
-  permissions: ['storage', 'scripting', 'alarms'],
-  optional_host_permissions: ['http://localhost:4001/*', 'https://*/*'],
+  permissions: ['storage', 'scripting', 'alarms', 'declarativeNetRequest'],
+  // Backend Sync API endpoint for background service worker (Rule 13 / CHROMEWEBSTORE.md).
+  // Runtime CMS permissions remain strictly dynamic via optional_host_permissions (Rule 3).
+  host_permissions: ['https://app.lamanihub.com/*'],
+  optional_host_permissions: [
+    'https://app.lamanipulse.com/*',
+    'https://vxnvdmepejjhvphqxopl.supabase.co/*',
+    'https://*/*',
+  ],
 });

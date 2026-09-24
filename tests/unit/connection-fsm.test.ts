@@ -143,6 +143,17 @@ describe('Connection Finite State Machine (ConnectionFSM)', () => {
     expect(listener).toHaveBeenCalledTimes(1); // Not called after unsubscribe
   });
 
+  it('updates metadata and notifies listeners without state transition', () => {
+    const fsm = new ConnectionFSM();
+    const listener = vi.fn();
+    fsm.onTransition(listener);
+
+    const updated = fsm.updateMetadata({ lastReadAt: '2026-09-21T10:00:00.000Z' });
+    expect(updated.metadata?.lastReadAt).toBe('2026-09-21T10:00:00.000Z');
+    expect(fsm.getRecord().metadata?.lastReadAt).toBe('2026-09-21T10:00:00.000Z');
+    expect(listener).toHaveBeenCalledWith(updated, updated);
+  });
+
   it('serializes to JSON and restores from JSON correctly', () => {
     const original = new ConnectionFSM();
     original.transition('PAIRING', {

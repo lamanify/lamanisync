@@ -147,4 +147,69 @@ describe('Read-After-Write Verifier (Phase 8)', () => {
     expect(verifyReadBackRecord('CREATE_APPOINTMENT', {}, null).verified).toBe(false);
     expect(verifyReadBackRecord('CREATE_APPOINTMENT', {}, 'not-an-object').verified).toBe(false);
   });
+
+  it('verifies snake_case PostgREST read-back records against camelCase command inputs', () => {
+    const intended = {
+      patientId: 'P-POSTGREST-01',
+      providerId: 'DOC-POSTGREST-01',
+      startTime: '2026-10-01T09:00:00+08:00',
+      endTime: '2026-10-01T09:15:00+08:00',
+    };
+
+    // PostgREST returns snake_case columns, possibly inside an array
+    const postgrestResponse = [
+      {
+        id: 'APT-PGRST-100',
+        patient_id: 'P-POSTGREST-01',
+        provider_id: 'DOC-POSTGREST-01',
+        start_time: '2026-10-01T01:00:00Z',
+        end_time: '2026-10-01T01:15:00Z',
+        status: 'booked',
+        rev: 1,
+      },
+    ];
+
+    const result = verifyReadBackRecord('CREATE_APPOINTMENT', intended, postgrestResponse);
+    expect(result.verified).toBe(true);
+    expect(result.writeReceipt?.externalId).toBe('APT-PGRST-100');
+    expect(result.writeReceipt?.revision).toBe(1);
+  });
+
+  it('verifies snake_case patient record from PostgREST against camelCase input', () => {
+    const intended = {
+      fullName: 'Siti Aminah',
+      phone: '+60123456789',
+    };
+
+    const postgrestPatient = {
+      id: 'PAT-PGRST-01',
+      full_name: 'Siti Aminah',
+      phone: '+60123456789',
+    };
+
+    const result = verifyReadBackRecord('CREATE_PATIENT', intended, postgrestPatient);
+    expect(result.verified).toBe(true);
+    expect(result.writeReceipt?.externalId).toBe('PAT-PGRST-01');
+  });
+
+  it('verifies PostgREST appointment reschedule with composite appointment_date and duration_minutes', () => {
+    const intended = {
+      appointmentId: '0620fa7d-9277-4404-ae4a-ab9a8d1b44b7',
+      startTime: '2026-10-05T11:00:00+08:00',
+      endTime: '2026-10-05T11:30:00+08:00',
+    };
+
+    const postgrestRecord = {
+      id: '0620fa7d-9277-4404-ae4a-ab9a8d1b44b7',
+      appointment_date: '2026-10-05',
+      appointment_time: '11:00:00',
+      duration_minutes: 30,
+      endTime: '', // empty string fallback
+      status: 'scheduled',
+    };
+
+    const result = verifyReadBackRecord('RESCHEDULE_APPOINTMENT', intended, postgrestRecord);
+    expect(result.verified).toBe(true);
+    expect(result.writeReceipt?.externalId).toBe('0620fa7d-9277-4404-ae4a-ab9a8d1b44b7');
+  });
 });

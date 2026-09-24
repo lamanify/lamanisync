@@ -7,6 +7,7 @@
 
 import { LamaniError } from '../core/errors.js';
 
+export const DEFAULT_PROD_SYNC_API_URL = 'https://app.lamanihub.com';
 export const DEFAULT_DEV_SYNC_API_URL = 'http://localhost:4002';
 
 const KNOWN_PRODUCTION_HOSTS = new Set([
@@ -58,6 +59,7 @@ export function isProductionDomain(urlOrHost: string): boolean {
 
 export interface EnvOverrides {
   VITE_SYNC_API_URL?: string;
+  VITE_ALLOW_PROD_SYNC?: boolean | string;
   MODE?: string;
   DEV?: boolean;
 }
@@ -95,9 +97,14 @@ export function isDevelopment(overrides?: EnvOverrides): boolean {
 
 /**
  * Validates a target Sync API URL against development environment safety rules.
- * Throws a LamaniError if a development build attempts to point to production LamaniHub.
+ * Throws a LamaniError if a development build attempts to point to production LamaniHub
+ * without explicit authorization (AGENTS.md Rule 14).
  */
-export function validateSyncApiUrl(url: string, isDev: boolean = true): string {
+export function validateSyncApiUrl(
+  url: string,
+  isDev: boolean = true,
+  allowProdSync: boolean = false
+): string {
   const trimmed = url.trim();
   if (!trimmed) {
     throw new LamaniError('Sync API URL cannot be empty', 'CONFIG_ERROR', { statusCode: 400 });
@@ -119,7 +126,7 @@ export function validateSyncApiUrl(url: string, isDev: boolean = true): string {
     });
   }
 
-  if (isDev && isProductionDomain(parsed.hostname)) {
+  if (isDev && !allowProdSync && isProductionDomain(parsed.hostname)) {
     throw new LamaniError(
       `Development build prohibited from pointing to production LamaniHub endpoint: '${parsed.origin}' (AGENTS.md Rule 14)`,
       'PROD_ENDPOINT_PROHIBITED',
@@ -132,29 +139,36 @@ export function validateSyncApiUrl(url: string, isDev: boolean = true): string {
 
 /**
  * Resolves the active Sync API URL based on build-time environment variables,
- * with fallback to local mock server and strict safety checks.
+ * with fallback to local mock server in dev and production LamaniHub in prod.
  */
 export function getSyncApiUrl(overrides?: EnvOverrides): string {
   let rawUrl: string | undefined;
+  let allowProd = false;
 
-  if (overrides?.VITE_SYNC_API_URL) {
+  if (overrides) {
     rawUrl = overrides.VITE_SYNC_API_URL;
+    allowProd = overrides.VITE_ALLOW_PROD_SYNC === true || overrides.VITE_ALLOW_PROD_SYNC === 'true';
   } else {
     try {
-      if (typeof import.meta !== 'undefined' && import.meta.env?.VITE_SYNC_API_URL) {
+      if (typeof import.meta !== 'undefined' && import.meta.env) {
         rawUrl = import.meta.env.VITE_SYNC_API_URL;
+        allowProd =
+          import.meta.env.VITE_ALLOW_PROD_SYNC === 'true' || import.meta.env.VITE_ALLOW_PROD_SYNC === true;
       }
     } catch {
       // Fallthrough to process.env
     }
 
-    if (!rawUrl && typeof process !== 'undefined' && process.env?.VITE_SYNC_API_URL) {
+    if (!rawUrl && typeof process !== 'undefined' && process.env) {
       rawUrl = process.env.VITE_SYNC_API_URL;
+    }
+    if (!allowProd && typeof process !== 'undefined' && process.env) {
+      allowProd = process.env.VITE_ALLOW_PROD_SYNC === 'true';
     }
   }
 
-  const targetUrl = rawUrl || DEFAULT_DEV_SYNC_API_URL;
   const isDev = isDevelopment(overrides);
+  const targetUrl = rawUrl || (isDev && !allowProd ? DEFAULT_DEV_SYNC_API_URL : DEFAULT_PROD_SYNC_API_URL);
 
-  return validateSyncApiUrl(targetUrl, isDev);
+  return validateSyncApiUrl(targetUrl, isDev, allowProd);
 }

@@ -14,7 +14,7 @@ export const MAX_PRECONDITIONS_PER_RECIPE = 5;
 export const SafeRelativePathSchema = z
   .string()
   .min(1)
-  .regex(/^\/[a-zA-Z0-9_\-/:?&=%.]*$/, 'Must be a safe relative URL path starting with /')
+  .regex(/^\/[a-zA-Z0-9_\-/:?&=%.*,()]*$/, 'Must be a safe relative URL path starting with /')
   .refine(
     (path) => {
       const lower = path.toLowerCase();

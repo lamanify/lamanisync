@@ -70,6 +70,7 @@ export class OutboxPoller {
 
   setAdapterManifest(manifest?: AdapterManifest): void {
     this.adapterManifest = manifest;
+    this.commandExecutor.setAdapterManifest(manifest);
   }
 
   setKillSwitches(killSwitches?: KillSwitchOptions): void {
@@ -158,9 +159,17 @@ export class OutboxPoller {
     if (this.isCurrentlyPolling) return null;
 
     // 1. Multi-workstation Safety: Verify active leader lease with fencing token
-    const lease = this.leaseCoordinator.getActiveLease();
+    let lease = this.leaseCoordinator.getActiveLease();
     if (!lease || lease.fencingToken <= 0) {
-      return null;
+      if (this.connectionId && this.fsm.getState() === 'ACTIVE') {
+        const renewed = await this.leaseCoordinator.renew().catch(() => false);
+        if (renewed) {
+          lease = this.leaseCoordinator.getActiveLease();
+        }
+      }
+      if (!lease || lease.fencingToken <= 0) {
+        return null;
+      }
     }
 
     // 2. Respect kill switches & connection readiness

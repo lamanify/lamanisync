@@ -22,11 +22,15 @@ import { normalizeExactOrigin } from '../background/permissions.js';
 export interface MainWorldRunnerOptions {
   targetWindow?: Window;
   targetOrigin?: string;
+  allowedApiOrigins?: string[];
+  adapterApiOrigin?: string;
 }
 
 export class MainWorldRunner {
   private targetWindow: Window;
   private targetOrigin: string;
+  private allowedApiOrigins?: string[];
+  private adapterApiOrigin?: string;
   private handshakeToken: string | null = null;
   private observerHandle: NetworkObserverHandle | null = null;
   private messageListener?: (event: MessageEvent) => void;
@@ -42,6 +46,9 @@ export class MainWorldRunner {
         // preserve for validator failure if malformed
       }
     }
+    const win = this.targetWindow as unknown as Record<string, unknown>;
+    this.allowedApiOrigins = options.allowedApiOrigins || (win.__LAMANISYNC_ALLOWED_ORIGINS__ as string[] | undefined);
+    this.adapterApiOrigin = options.adapterApiOrigin || (win.__LAMANISYNC_ADAPTER_ORIGIN__ as string | undefined);
   }
 
   getHandshakeToken(): string | null {
@@ -126,6 +133,8 @@ export class MainWorldRunner {
           handshakeToken: this.handshakeToken,
           targetOrigin: this.targetOrigin,
           targetWindow: this.targetWindow,
+          allowedApiOrigins: this.allowedApiOrigins,
+          adapterApiOrigin: this.adapterApiOrigin,
         });
       } else {
         this.observerHandle.updateToken(this.handshakeToken);

@@ -220,4 +220,33 @@ describe('Two-World Boundary & Message Validator (Phase 5)', () => {
 
     expect(result.success).toBe(true);
   });
+
+  it('validates observation endpoint containing PostgREST query characters (*, (), +, commas)', () => {
+    const rawMsg = {
+      channel: BRIDGE_CHANNEL,
+      source: SOURCE_MAIN,
+      token,
+      type: 'OBSERVATION',
+      payload: {
+        endpoint: '/rest/v1/patients?phone=eq.+60123456789&select=id,full_name,created_at(date)&start_time=gte.2026-10-01T09:00:00+08:00',
+        method: 'GET',
+        statusCode: 200,
+        data: [{ id: 'PAT-01' }],
+        timestamp: new Date().toISOString(),
+      },
+    };
+
+    const result = validateIncomingPageMessage<PageToIsolatedMessage>({
+      event: {
+        origin,
+        source: window,
+        data: rawMsg,
+      },
+      expectedOrigin: origin,
+      handshakeToken: token,
+      expectedSource: SOURCE_MAIN,
+    });
+
+    expect(result.success).toBe(true);
+  });
 });

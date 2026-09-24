@@ -37,6 +37,8 @@ export const ConnectionSessionSchema = z.object({
   expiresAt: z.string().min(1),
   targetOrigin: TargetOriginSchema,
   pairedAt: z.string().min(1),
+  lastReadAt: z.string().optional(),
+  lastWriteAt: z.string().optional(),
 });
 
 export type ConnectionSession = z.infer<typeof ConnectionSessionSchema>;
@@ -157,7 +159,7 @@ export class PairingCoordinator {
    * On success: stores connection session and transitions FSM to PAIRED_NO_PERMISSION.
    * On failure: resets FSM to UNPAIRED and throws classified non-PHI error.
    */
-  async pair(pairingCode: string, deviceName?: string): Promise<PairingResponse> {
+  async pair(pairingCode: string, deviceName?: string, targetOrigin?: string): Promise<PairingResponse> {
     const cleanCode = pairingCode.trim();
     if (!cleanCode) {
       throw new LamaniError('Pairing code cannot be empty', 'VALIDATION_ERROR', { statusCode: 400 });
@@ -183,7 +185,7 @@ export class PairingCoordinator {
       const { publicKeySpki } = await getOrCreateDeviceKey(this.idbFactory);
 
       // Step 3: Request pairing from Sync API
-      const result = await this.apiClient.pair(cleanCode, publicKeySpki, deviceName);
+      const result = await this.apiClient.pair(cleanCode, publicKeySpki, deviceName, targetOrigin);
 
       // Step 4: Persist connection metadata (Zero CMS credentials / PHI)
       const session: ConnectionSession = {

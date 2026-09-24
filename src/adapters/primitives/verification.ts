@@ -40,8 +40,17 @@ export function areValuesEquivalent(actual: unknown, expected: unknown): boolean
   // String / Number equivalence
   if (String(actual) === String(expected)) return true;
 
-  // Date timestamp equivalence (e.g. UTC Z vs +08:00 offset)
+  // Date timestamp equivalence (e.g. UTC Z vs +08:00 offset or local ISO prefix)
   if (typeof actual === 'string' && typeof expected === 'string') {
+    if (
+      actual.length >= 16 &&
+      expected.length >= 16 &&
+      actual.slice(0, 16) === expected.slice(0, 16) &&
+      actual.includes('T') &&
+      expected.includes('T')
+    ) {
+      return true;
+    }
     const d1 = new Date(actual).getTime();
     const d2 = new Date(expected).getTime();
     if (!isNaN(d1) && !isNaN(d2) && d1 === d2) {

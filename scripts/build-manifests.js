@@ -643,11 +643,225 @@ const vendorCms1Manifest = {
   },
 };
 
+export const lamanipulseManifest = {
+  adapterId: 'lamanipulse-v1',
+  name: 'LamaniPulse Cloud CMS Certified Adapter',
+  version: '1.0.0',
+  minExtensionVersion: '0.1.0',
+  targetOrigin: 'https://app.lamanipulse.com',
+  capabilities: [
+    'PATIENT_READ',
+    'PATIENT_WRITE',
+    'APPOINTMENT_READ',
+    'APPOINTMENT_WRITE',
+    'REFERENCE_DATA_READ',
+    'patients.read',
+    'patients.create',
+    'patients.update',
+    'appointments.read',
+    'appointments.create',
+    'appointments.reschedule',
+    'appointments.cancel',
+    'reference.read',
+  ],
+  endpoints: {
+    patients: {
+      list: '/rest/v1/patients',
+      get: '/rest/v1/patients?id=eq.:id',
+      create: '/rest/v1/patients',
+      update: '/rest/v1/patients?id=eq.:id',
+    },
+    appointments: {
+      list: '/rest/v1/appointments',
+      create: '/rest/v1/appointments',
+      reschedule: '/rest/v1/appointments?id=eq.:id',
+      cancel: '/rest/v1/appointments?id=eq.:id',
+    },
+    reference: {
+      providers: '/rest/v1/profiles',
+      services: '/rest/v1/medical_services',
+      locations: '/rest/v1/clinic_settings',
+    },
+  },
+  recipes: {
+    patients_list: {
+      recipeId: 'patients_list',
+      type: 'read',
+      capability: 'PATIENT_READ',
+      method: 'GET',
+      path: '/rest/v1/patients?select=*',
+    },
+    'patients.read': {
+      recipeId: 'patients.read',
+      type: 'read',
+      capability: 'patients.read',
+      method: 'GET',
+      path: '/rest/v1/patients?select=*',
+    },
+    patients_get: {
+      recipeId: 'patients_get',
+      type: 'read',
+      capability: 'PATIENT_READ',
+      method: 'GET',
+      path: '/rest/v1/patients?id=eq.:id&select=*',
+    },
+    'patients.create': {
+      recipeId: 'patients.create',
+      type: 'write',
+      capability: 'patients.create',
+      method: 'POST',
+      path: '/rest/v1/patients',
+      verification: {
+        path: '/rest/v1/patients?id=eq.:id',
+      },
+    },
+    patients_create: {
+      recipeId: 'patients_create',
+      type: 'write',
+      capability: 'PATIENT_WRITE',
+      method: 'POST',
+      path: '/rest/v1/patients',
+      verification: {
+        path: '/rest/v1/patients?id=eq.:id',
+      },
+    },
+    'patients.update': {
+      recipeId: 'patients.update',
+      type: 'write',
+      capability: 'patients.update',
+      method: 'PUT',
+      path: '/rest/v1/patients?id=eq.:id',
+      verification: {
+        path: '/rest/v1/patients?id=eq.:id',
+      },
+    },
+    patients_update: {
+      recipeId: 'patients_update',
+      type: 'write',
+      capability: 'PATIENT_WRITE',
+      method: 'PUT',
+      path: '/rest/v1/patients?id=eq.:id',
+      verification: {
+        path: '/rest/v1/patients?id=eq.:id',
+      },
+    },
+    appointments_list: {
+      recipeId: 'appointments_list',
+      type: 'read',
+      capability: 'APPOINTMENT_READ',
+      method: 'GET',
+      path: '/rest/v1/appointments?select=*',
+    },
+    'appointments.read': {
+      recipeId: 'appointments.read',
+      type: 'read',
+      capability: 'appointments.read',
+      method: 'GET',
+      path: '/rest/v1/appointments?select=*',
+    },
+    'appointments.create': {
+      recipeId: 'appointments.create',
+      type: 'write',
+      capability: 'appointments.create',
+      method: 'POST',
+      path: '/rest/v1/appointments',
+      verification: {
+        path: '/rest/v1/appointments?id=eq.:id',
+      },
+    },
+    appointments_create: {
+      recipeId: 'appointments_create',
+      type: 'write',
+      capability: 'APPOINTMENT_WRITE',
+      method: 'POST',
+      path: '/rest/v1/appointments',
+      verification: {
+        path: '/rest/v1/appointments?id=eq.:id',
+      },
+    },
+    'appointments.reschedule': {
+      recipeId: 'appointments.reschedule',
+      type: 'write',
+      capability: 'appointments.reschedule',
+      method: 'PUT',
+      path: '/rest/v1/appointments?id=eq.:id',
+      verification: {
+        path: '/rest/v1/appointments?id=eq.:id',
+      },
+    },
+    appointments_reschedule: {
+      recipeId: 'appointments_reschedule',
+      type: 'write',
+      capability: 'APPOINTMENT_WRITE',
+      method: 'PUT',
+      path: '/rest/v1/appointments?id=eq.:id',
+      verification: {
+        path: '/rest/v1/appointments?id=eq.:id',
+      },
+    },
+    'appointments.cancel': {
+      recipeId: 'appointments.cancel',
+      type: 'write',
+      capability: 'appointments.cancel',
+      method: 'PUT',
+      path: '/rest/v1/appointments?id=eq.:id',
+      verification: {
+        path: '/rest/v1/appointments?id=eq.:id',
+      },
+    },
+    appointments_cancel: {
+      recipeId: 'appointments_cancel',
+      type: 'write',
+      capability: 'APPOINTMENT_WRITE',
+      method: 'PUT',
+      path: '/rest/v1/appointments?id=eq.:id',
+      verification: {
+        path: '/rest/v1/appointments?id=eq.:id',
+      },
+    },
+    reference_providers: {
+      recipeId: 'reference_providers',
+      type: 'read',
+      capability: 'REFERENCE_DATA_READ',
+      method: 'GET',
+      path: '/rest/v1/profiles?select=*',
+    },
+    reference_services: {
+      recipeId: 'reference_services',
+      type: 'read',
+      capability: 'REFERENCE_DATA_READ',
+      method: 'GET',
+      path: '/rest/v1/medical_services?select=*',
+    },
+    reference_locations: {
+      recipeId: 'reference_locations',
+      type: 'read',
+      capability: 'REFERENCE_DATA_READ',
+      method: 'GET',
+      path: '/rest/v1/clinic_settings?select=*',
+    },
+    'reference.read': {
+      recipeId: 'reference.read',
+      type: 'read',
+      capability: 'reference.read',
+      method: 'GET',
+      path: '/rest/v1/profiles?select=*',
+    },
+  },
+  polling: {
+    intervalSeconds: 60,
+    deltaField: 'updated_at',
+  },
+};
+
 const signature = signManifest(manifest);
 manifest.signature = signature;
 
 const vendorSignature = signManifest(vendorCms1Manifest);
 vendorCms1Manifest.signature = vendorSignature;
+
+const lamanipulseSignature = signManifest(lamanipulseManifest);
+lamanipulseManifest.signature = lamanipulseSignature;
 
 const manifestDir = path.resolve('src/adapters/manifests');
 if (!fs.existsSync(manifestDir)) fs.mkdirSync(manifestDir, { recursive: true });
@@ -658,6 +872,9 @@ fs.writeFileSync(path.resolve('test-harness/fixtures/adapter-manifest.json'), ma
 
 const vendorManifestContent = JSON.stringify(vendorCms1Manifest, null, 2);
 fs.writeFileSync(path.join(manifestDir, 'vendor-cms-1.json'), vendorManifestContent);
+
+const lamanipulseManifestContent = JSON.stringify(lamanipulseManifest, null, 2);
+fs.writeFileSync(path.join(manifestDir, 'lamanipulse.json'), lamanipulseManifestContent);
 
 console.log('Manifests successfully built, canonically signed, and saved.');
 

@@ -80,7 +80,7 @@ export class LeaseCoordinator {
 
   constructor(options: LeaseCoordinatorOptions) {
     this.apiClient = options.apiClient;
-    this.defaultDurationSeconds = options.defaultDurationSeconds || 30;
+    this.defaultDurationSeconds = options.defaultDurationSeconds || 120;
     this.storage = resolveStorage(options.storage);
   }
 

@@ -44,12 +44,21 @@ function createInitialSyncState() {
 }
 
 export class MockSyncApiServer {
-  constructor(port = 4002) {
+  /**
+   * @param {number} [port]
+   * @param {string|null} [targetCmsOrigin]
+   */
+  constructor(port = 4002, targetCmsOrigin = null) {
     this.port = port;
+    this.targetCmsOrigin = targetCmsOrigin;
     this.server = null;
     this.state = createInitialSyncState();
     const manifestPath = path.resolve('test-harness/fixtures/adapter-manifest.json');
     this.adapterManifest = JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
+    const pulsePath = path.resolve('src/adapters/manifests/lamanipulse.json');
+    this.pulseManifest = fs.existsSync(pulsePath)
+      ? JSON.parse(fs.readFileSync(pulsePath, 'utf-8'))
+      : null;
     this.publicKey = TEST_PUBLIC_KEY;
   }
 
@@ -245,6 +254,16 @@ export class MockSyncApiServer {
         const sessionToken = `stk_mock_${Date.now()}`;
         const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
 
+        const isPulse =
+          (body.pairingCode && (body.pairingCode.toUpperCase().includes('PULSE') || body.pairingCode.toUpperCase().startsWith('SYNC-'))) ||
+          process.env.CMS_ORIGIN === 'https://app.lamanipulse.com';
+
+        const targetOrigin = this.targetCmsOrigin
+          ? this.targetCmsOrigin
+          : isPulse
+            ? 'https://app.lamanipulse.com'
+            : 'http://localhost:4001';
+
         const installation = {
           installationId,
           connectionId,
@@ -253,11 +272,13 @@ export class MockSyncApiServer {
           deviceName: body.deviceName || 'Chrome Dev Profile',
           sessionToken,
           expiresAt,
+          targetOrigin,
           pairedAt: new Date().toISOString(),
           lastHeartbeat: new Date().toISOString(),
         };
 
         this.state.installations.set(installationId, installation);
+        console.log(`[Mock Sync API] Paired code='${body.pairingCode}' -> targetOrigin='${targetOrigin}'`);
 
         return this.sendJson(res, 200, {
           installationId,
@@ -265,7 +286,7 @@ export class MockSyncApiServer {
           clinicId: 'CLN-001',
           sessionToken,
           expiresAt,
-          targetOrigin: 'http://localhost:4001',
+          targetOrigin,
         });
       }
 
@@ -328,7 +349,16 @@ export class MockSyncApiServer {
       if (pathname.startsWith('/v1/sync/connections/') && pathname.endsWith('/adapter') && req.method === 'GET') {
         const variant = parsedUrl.searchParams.get('variant') || req.headers['x-adapter-variant'] || 'valid';
         const targetOriginParam = parsedUrl.searchParams.get('targetOrigin');
-        const manifest = JSON.parse(JSON.stringify(this.adapterManifest));
+        const parts = pathname.split('/');
+        const connectionId = parts[parts.length - 2];
+        const isPulse =
+          targetOriginParam === 'https://app.lamanipulse.com' ||
+          Array.from(this.state.installations.values()).some(
+            (inst) => inst.connectionId === connectionId && inst.targetOrigin === 'https://app.lamanipulse.com'
+          );
+
+        const baseManifest = isPulse && this.pulseManifest ? this.pulseManifest : this.adapterManifest;
+        const manifest = JSON.parse(JSON.stringify(baseManifest));
         if (targetOriginParam) {
           manifest.targetOrigin = targetOriginParam;
         }
@@ -542,16 +572,18 @@ export class MockSyncApiServer {
         const commandId = parts[parts.length - 2];
         const cmd = this.state.outbox.find((c) => c.commandId === commandId);
 
+        const normalizedStatus = (body.status === 'SUCCESS' || body.status === 'VERIFIED') ? 'VERIFIED' : (body.status || 'FAILED');
+
         const receipt = {
           commandId,
-          status: body.status || 'VERIFIED',
+          status: normalizedStatus,
           writeReceipt: body.writeReceipt || null,
           error: body.error || null,
           recordedAt: new Date().toISOString(),
         };
 
         if (cmd) {
-          cmd.status = body.status || 'VERIFIED';
+          cmd.status = normalizedStatus;
           cmd.result = receipt;
         }
 

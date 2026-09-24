@@ -5,6 +5,7 @@ import {
   validateSyncApiUrl,
   getSyncApiUrl,
   DEFAULT_DEV_SYNC_API_URL,
+  DEFAULT_PROD_SYNC_API_URL,
 } from '../../src/config/env.js';
 import { LamaniError } from '../../src/core/errors.js';
 
@@ -66,6 +67,10 @@ describe('Environment Configuration & Production Domain Guard (Phase 10)', () =>
       expect(validateSyncApiUrl('https://api.lamanihub.com', false)).toBe('https://api.lamanihub.com');
     });
 
+    it('allows production URL if allowProdSync is true even in dev mode', () => {
+      expect(validateSyncApiUrl('https://app.lamanihub.com', true, true)).toBe('https://app.lamanihub.com');
+    });
+
     it('rejects invalid or non-HTTP protocols', () => {
       expect(() => validateSyncApiUrl('ftp://localhost:4002', true)).toThrow(LamaniError);
       expect(() => validateSyncApiUrl('javascript:alert(1)', true)).toThrow(LamaniError);
@@ -75,9 +80,14 @@ describe('Environment Configuration & Production Domain Guard (Phase 10)', () =>
   });
 
   describe('getSyncApiUrl', () => {
-    it('defaults to http://localhost:4002 when no env is provided', () => {
+    it('defaults to http://localhost:4002 when no env is provided in dev mode', () => {
       const url = getSyncApiUrl({ DEV: true });
       expect(url).toBe(DEFAULT_DEV_SYNC_API_URL);
+    });
+
+    it('defaults to https://app.lamanihub.com when in production mode', () => {
+      const url = getSyncApiUrl({ DEV: false });
+      expect(url).toBe(DEFAULT_PROD_SYNC_API_URL);
     });
 
     it('accepts staging URL override in dev mode', () => {
@@ -88,13 +98,22 @@ describe('Environment Configuration & Production Domain Guard (Phase 10)', () =>
       expect(url).toBe('https://staging-api.lamani.my');
     });
 
-    it('prohibits production URL override in dev mode', () => {
+    it('prohibits production URL override in dev mode without allowProdSync', () => {
       expect(() =>
         getSyncApiUrl({
           VITE_SYNC_API_URL: 'https://app.lamani.my',
           DEV: true,
         })
       ).toThrow(LamaniError);
+    });
+
+    it('permits production URL override in dev mode when VITE_ALLOW_PROD_SYNC is true', () => {
+      const url = getSyncApiUrl({
+        VITE_SYNC_API_URL: 'https://app.lamanihub.com',
+        VITE_ALLOW_PROD_SYNC: true,
+        DEV: true,
+      });
+      expect(url).toBe('https://app.lamanihub.com');
     });
   });
 });

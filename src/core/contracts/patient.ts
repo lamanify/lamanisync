@@ -15,7 +15,7 @@ export const NormalizedPatientSchema = z.object({
   gender: GenderSchema.optional().default('unknown'),
   createdAt: z.string().min(1),
   updatedAt: z.string().min(1),
-});
+}).passthrough();
 
 export type NormalizedPatient = z.infer<typeof NormalizedPatientSchema>;
 
@@ -27,7 +27,7 @@ export function normalizePatient(raw: unknown): NormalizedPatient {
   const r = raw as Record<string, unknown>;
 
   // Normalize phone (retain + and digits only)
-  const rawPhone = String(r.phone ?? '').trim();
+  const rawPhone = String(r.phone ?? r.contact_number ?? r.mobile ?? '').trim();
   const cleanPhone = rawPhone.startsWith('+')
     ? '+' + rawPhone.slice(1).replace(/\D/g, '')
     : rawPhone.replace(/\D/g, '');
@@ -41,25 +41,32 @@ export function normalizePatient(raw: unknown): NormalizedPatient {
   }
 
   let dateOfBirth: string | undefined = undefined;
-  if (r.dateOfBirth) {
-    const dobStr = String(r.dateOfBirth).trim();
+  if (r.dateOfBirth || r.dob || r.date_of_birth) {
+    const dobStr = String(r.dateOfBirth || r.dob || r.date_of_birth).trim();
     const dobMatch = dobStr.match(/^(\d{4}-\d{2}-\d{2})/);
     dateOfBirth = dobMatch ? dobMatch[1] : (dobStr || undefined);
   }
 
   const email = r.email && String(r.email).trim() ? String(r.email).trim() : undefined;
 
+  const rawFullName = String(
+    r.fullName ??
+    r.full_name ??
+    r.name ??
+    (r.first_name ? `${r.first_name} ${r.last_name || ''}`.trim() : '')
+  ).trim();
+
   const normalized = {
     id: String(r.id ?? '').trim(),
     mrn: r.mrn ? String(r.mrn).trim() : undefined,
-    fullName: String(r.fullName ?? r.name ?? '').trim(),
-    icOrPassport: r.icOrPassport ? String(r.icOrPassport).trim() : undefined,
+    fullName: rawFullName,
+    icOrPassport: (r.icOrPassport || r.nric || r.ic_number) ? String(r.icOrPassport || r.nric || r.ic_number).trim() : undefined,
     phone: cleanPhone,
     email,
     dateOfBirth,
     gender,
-    createdAt: String(r.createdAt || new Date().toISOString()),
-    updatedAt: String(r.updatedAt || new Date().toISOString()),
+    createdAt: String(r.createdAt || r.created_at || new Date().toISOString()),
+    updatedAt: String(r.updatedAt || r.updated_at || new Date().toISOString()),
   };
 
   return NormalizedPatientSchema.parse(normalized);

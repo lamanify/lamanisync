@@ -1,0 +1,17 @@
+{
+  "name": "lamanisync-website",
+  "type": "module",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Official marketing site for LamaniSync - The dedicated synchronizer connecting LamaniHub to various Clinic Management Systems",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "astro": "^5.4.2"
+  }
+}

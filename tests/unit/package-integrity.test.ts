@@ -96,10 +96,10 @@ describe('Package Integrity & Chrome Web Store Bundle Verification (Phase 13)', 
     const swContent = readZipFileContent(zipBuffer, manifest.background.service_worker);
     expect(swContent.length).toBeGreaterThan(0);
 
-    // Strict permissions: storage, scripting, alarms
-    expect(manifest.permissions).toEqual(['storage', 'scripting', 'alarms']);
-    // Host permissions must remain runtime optional only
-    expect(manifest.host_permissions).toBeUndefined();
+    // Strict permissions: storage, scripting, alarms, declarativeNetRequest
+    expect(manifest.permissions).toEqual(['storage', 'scripting', 'alarms', 'declarativeNetRequest']);
+    // Backend host permission for Sync API (Rule 13 / CHROMEWEBSTORE.md)
+    expect(manifest.host_permissions).toEqual(['https://app.lamanihub.com/*']);
     expect(manifest.optional_host_permissions).toBeDefined();
   });
 

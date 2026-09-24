@@ -16,6 +16,7 @@ import {
 } from './schema.js';
 import { verifyManifestSignature, DEFAULT_PINNED_PUBLIC_KEY } from './verifier.js';
 import { LamaniError } from '../core/errors.js';
+import { getSyncApiUrl } from '../config/env.js';
 
 export const LKG_STORAGE_PREFIX = 'lamanisync_lkg_manifest_';
 export const ACTIVE_STORAGE_PREFIX = 'lamanisync_active_manifest_';
@@ -105,7 +106,7 @@ export async function downloadCandidateManifest(
   connectionId: string,
   options: CandidateDownloadOptions = {}
 ): Promise<unknown> {
-  const syncApiUrl = (options.syncApiUrl || 'http://localhost:4002').replace(/\/$/, '');
+  const syncApiUrl = (options.syncApiUrl || getSyncApiUrl()).replace(/\/$/, '');
   const fetchFn = options.fetchFn || (typeof fetch !== 'undefined' ? fetch : undefined);
 
   if (!fetchFn) {

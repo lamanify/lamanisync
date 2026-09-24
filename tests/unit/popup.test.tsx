@@ -115,6 +115,24 @@ describe('Popup App Component', () => {
     expect(screen.getByTestId('adapter-version').textContent).toBe('v1.2.3');
   });
 
+  it('displays "Connecting..." in status badge when state is PROBING', async () => {
+    (chrome.runtime.sendMessage as unknown as ReturnType<typeof vi.fn>).mockImplementation((msg, cb) => {
+      if (msg?.type === 'GET_CONNECTION_STATE') {
+        cb({ record: { state: 'PROBING', targetOrigin: 'https://app.lamanipulse.com' } });
+      } else if (msg?.type === 'RUN_PROBE') {
+        cb({ success: true, record: { state: 'PROBING', targetOrigin: 'https://app.lamanipulse.com' } });
+      } else if (cb) {
+        cb({ record: { state: 'PROBING' } });
+      }
+    });
+
+    render(<App />);
+
+    const statusBadge = await screen.findByTestId('connection-status');
+    expect(statusBadge.textContent).toContain('Connecting...');
+    expect(statusBadge.textContent).not.toContain('Connected');
+  });
+
   it('triggers confirmation dialog on unpair and cancels or confirms', async () => {
     render(<App />);
 

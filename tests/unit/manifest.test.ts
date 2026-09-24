@@ -10,7 +10,7 @@ describe('Manifest V3 Configuration', () => {
   });
 
   it('should declare name and valid semver version', () => {
-    expect(manifest.name).toBe('LamaniSync Dev');
+    expect(manifest.name).toBe('LamaniSync');
     expect(manifest.version).toMatch(/^\d+\.\d+\.\d+$/);
   });
 
@@ -37,11 +37,11 @@ describe('Manifest V3 Configuration', () => {
 
   it('strictly adheres to declared permissions: storage, scripting, and alarms declared, zero broad static host permissions', () => {
     const raw = manifest as unknown as Record<string, unknown>;
-    // Storage, scripting, and alarms permissions required for session persistence, dynamic script registration, and lease renewal scheduling
-    expect(raw.permissions).toEqual(['storage', 'scripting', 'alarms']);
-    // Static host_permissions must remain strictly undefined (AGENTS.md Rule 3)
-    expect(raw.host_permissions).toBeUndefined();
-    // Runtime exact origin requests are supported via optional_host_permissions
+    // Storage, scripting, alarms, and declarativeNetRequest (for upstream CORS normalization)
+    expect(raw.permissions).toEqual(['storage', 'scripting', 'alarms', 'declarativeNetRequest']);
+    // Static host_permissions strictly limited to canonical backend Sync API (Rule 13 / CHROMEWEBSTORE.md)
+    expect(raw.host_permissions).toEqual(['https://app.lamanihub.com/*']);
+    // Runtime exact CMS origin requests are supported exclusively via optional_host_permissions (Rule 3)
     expect(raw.optional_host_permissions).toBeDefined();
     expect(Array.isArray(raw.optional_host_permissions)).toBe(true);
   });

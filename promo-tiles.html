@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LamaniSync - Chrome Web Store Promo Tiles</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --primary: #e92451;
+      --primary-dark: #c71a41;
+      --primary-subtle: #fff1f3;
+      --primary-border: #fecdd6;
+      --primary-glow: rgba(233, 36, 81, 0.15);
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --bg-solid: #ffffff;
+    }
+
+    body {
+      background: #f1f5f9;
+      color: var(--text-main);
+      font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+      padding: 2.5rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3.5rem;
+    }
+
+    .section-header {
+      text-align: center;
+      max-width: 800px;
+    }
+
+    .section-title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #0f172a;
+      margin-bottom: 0.35rem;
+    }
+
+    .section-meta {
+      font-size: 0.85rem;
+      color: #64748b;
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .section-meta span {
+      background: #ffffff;
+      padding: 0.2rem 0.6rem;
+      border-radius: 6px;
+      border: 1px solid #e2e8f0;
+      font-weight: 600;
+    }
+
+    .export-btn {
+      margin-top: 0.75rem;
+      padding: 0.55rem 1.25rem;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 9999px;
+      font-family: inherit;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      box-shadow: 0 4px 12px rgba(233, 36, 81, 0.25);
+      transition: all 0.2s;
+    }
+
+    .export-btn:hover {
+      background: var(--primary-dark);
+      transform: translateY(-1px);
+    }
+
+    /* ==============================================================
+       1. SMALL PROMO TILE (440 x 280) - EXACT DIMENSIONS (NO ALPHA)
+       ============================================================== */
+    .tile-small-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    #tile-small {
+      width: 440px;
+      height: 280px;
+      min-width: 440px;
+      min-height: 280px;
+      max-width: 440px;
+      max-height: 280px;
+      position: relative;
+      background: #ffffff;
+      background-image: radial-gradient(circle at 50% -10%, #fff1f3 0%, #ffffff 65%, #fdf2f4 100%);
+      box-shadow: inset 0 0 0 1px var(--primary-border), 0 15px 35px -10px rgba(233, 36, 81, 0.12);
+      border-radius: 12px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 1.5rem 1.4rem;
+    }
+
+    /* Subtle Pattern Grid inside 440x280 */
+    .small-grid {
+      position: absolute;
+      inset: 0;
+      background-image: 
+        linear-gradient(to right, rgba(15, 23, 42, 0.04) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(15, 23, 42, 0.04) 1px, transparent 1px);
+      background-size: 20px 20px;
+      mask-image: radial-gradient(circle at 50% 50%, black 40%, transparent 80%);
+      pointer-events: none;
+    }
+
+    .small-top {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .small-logo-img {
+      height: 32px;
+      width: auto;
+      object-fit: contain;
+    }
+
+    .small-tag {
+      font-size: 0.62rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      background: var(--primary-subtle);
+      border: 1px solid var(--primary-border);
+      color: var(--primary);
+      padding: 0.2rem 0.55rem;
+      border-radius: 9999px;
+    }
+
+    .small-center {
+      position: relative;
+      z-index: 2;
+      margin: 0.4rem 0;
+    }
+
+    .small-heading {
+      font-size: 1.18rem;
+      font-weight: 800;
+      line-height: 1.25;
+      color: #0f172a;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.35rem;
+    }
+
+    .gradient-text {
+      background: linear-gradient(135deg, var(--primary) 0%, #be123c 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .small-desc {
+      font-size: 0.74rem;
+      color: #64748b;
+      line-height: 1.35;
+      font-weight: 400;
+    }
+
+    .small-bottom {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+    }
+
+    .pill-cms {
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: #0f172a;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      padding: 0.22rem 0.55rem;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    }
+
+    .pill-cms svg {
+      width: 10px;
+      height: 10px;
+      color: var(--primary);
+      stroke-width: 2.5;
+    }
+
+    /* ==============================================================
+       2. MARQUEE PROMO TILE (1400 x 560) - EXACT DIMENSIONS (NO ALPHA)
+       ============================================================== */
+    .tile-marquee-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      overflow-x: auto;
+      padding-bottom: 2rem;
+    }
+
+    #tile-marquee {
+      width: 1400px;
+      height: 560px;
+      min-width: 1400px;
+      min-height: 560px;
+      max-width: 1400px;
+      max-height: 560px;
+      position: relative;
+      background: #ffffff;
+      background-image: radial-gradient(circle at 40% -10%, #fff1f3 0%, #ffffff 55%, #fcf4f6 100%);
+      box-shadow: inset 0 0 0 1px var(--primary-border), 0 25px 60px -15px rgba(233, 36, 81, 0.12);
+      border-radius: 18px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 3.5rem 4.5rem;
+    }
+
+    /* Ambient Glow & Grid for Marquee */
+    .marquee-grid {
+      position: absolute;
+      inset: 0;
+      background-image: 
+        linear-gradient(to right, rgba(15, 23, 42, 0.035) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(15, 23, 42, 0.035) 1px, transparent 1px);
+      background-size: 32px 32px;
+      mask-image: radial-gradient(circle at 50% 50%, black 50%, transparent 85%);
+      pointer-events: none;
+    }
+
+    .marquee-ambient {
+      position: absolute;
+      top: -25%;
+      left: 25%;
+      width: 650px;
+      height: 650px;
+      background: radial-gradient(circle, rgba(233, 36, 81, 0.09) 0%, transparent 70%);
+      pointer-events: none;
+      filter: blur(50px);
+    }
+
+    /* Left Column */
+    .marquee-left {
+      position: relative;
+      z-index: 2;
+      flex: 1.25;
+      max-width: 720px;
+      text-align: left;
+    }
+
+    .marquee-logo-img {
+      height: 52px;
+      width: auto;
+      object-fit: contain;
+      margin-bottom: 1.25rem;
+      filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.04));
+    }
+
+    .marquee-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      background: var(--primary-subtle);
+      border: 1px solid var(--primary-border);
+      color: var(--primary);
+      padding: 0.35rem 0.95rem;
+      border-radius: 9999px;
+      margin-bottom: 1rem;
+    }
+
+    .marquee-heading {
+      font-size: 2.65rem;
+      font-weight: 800;
+      line-height: 1.2;
+      color: #0f172a;
+      letter-spacing: -0.03em;
+      margin-bottom: 0.9rem;
+    }
+
+    .marquee-desc {
+      font-size: 1.05rem;
+      color: #64748b;
+      line-height: 1.55;
+      margin-bottom: 1.85rem;
+      font-weight: 400;
+      max-width: 640px;
+    }
+
+    .marquee-tags {
+      display: flex;
+      gap: 0.65rem;
+      flex-wrap: wrap;
+    }
+
+    .tag-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #0f172a;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      padding: 0.4rem 0.9rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+    }
+
+    .tag-item svg {
+      width: 14px;
+      height: 14px;
+      color: var(--primary);
+      stroke-width: 2.25;
+    }
+
+    /* Right Column (Architecture Showcase Card) */
+    .marquee-right {
+      position: relative;
+      z-index: 2;
+      flex: 1;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .showcase-card {
+      width: 440px;
+      background: #ffffff;
+      border: 1.5px solid var(--primary-border);
+      border-radius: 18px;
+      padding: 1.75rem;
+      box-shadow: 0 20px 45px -10px rgba(233, 36, 81, 0.12), 0 0 25px var(--primary-glow);
+    }
+
+    .showcase-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--primary-border);
+      margin-bottom: 1rem;
+    }
+
+    .showcase-title {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .showcase-pulse {
+      width: 9px;
+      height: 9px;
+      background: var(--primary);
+      border-radius: 50%;
+      box-shadow: 0 0 10px var(--primary);
+      display: inline-block;
+    }
+
+    .showcase-pill {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--primary);
+      background: var(--primary-subtle);
+      border: 1px solid var(--primary-border);
+      padding: 0.2rem 0.65rem;
+      border-radius: 9999px;
+    }
+
+    .showcase-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.86rem;
+      padding: 0.55rem 0;
+      color: var(--text-muted);
+      border-bottom: 1px dashed #fce7ec;
+    }
+
+    .showcase-row:last-child {
+      border-bottom: none;
+    }
+
+    .showcase-row span:last-child {
+      color: #0f172a;
+      font-weight: 600;
+    }
+
+    .showcase-security-banner {
+      margin-top: 1rem;
+      padding: 0.75rem 1rem;
+      background: var(--primary-subtle);
+      border: 1px solid var(--primary-border);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--primary-dark);
+    }
+
+    .showcase-security-banner svg {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+      stroke-width: 2.25;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ==========================================
+       SECTION 1: SMALL PROMO TILE (440 x 280)
+       ========================================== -->
+  <div class="tile-small-wrapper">
+    <div class="section-header">
+      <h2 class="section-title">Small Promo Tile</h2>
+      <div class="section-meta">
+        <span>440 × 280 Canvas</span>
+        <span>JPEG / 24-bit PNG (No Alpha)</span>
+        <span>Color: #e92451</span>
+      </div>
+      <a class="export-btn" href="release/promo-small-440x280.png" download="promo-small-440x280.png" style="text-decoration:none;">
+        <svg style="width:14px; height:14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+        <span>Download 440×280 PNG</span>
+      </a>
+    </div>
+
+    <div style="margin-top: 1.25rem;">
+      <div id="tile-small">
+        <div class="small-grid"></div>
+
+        <div class="small-top">
+          <img src="https://res.cloudinary.com/lamanify/image/upload/v1790242929/LamaniSync_Logo.png" alt="LamaniSync" class="small-logo-img">
+          <div class="small-tag">EHR Bridge</div>
+        </div>
+
+        <div class="small-center">
+          <h2 class="small-heading">Sync LamaniHub <br>With <span class="gradient-text">Any Clinic CMS</span></h2>
+          <p class="small-desc">Real-time schedule & Sara AI WhatsApp synchronization with zero push webhooks.</p>
+        </div>
+
+        <div class="small-bottom">
+          <div class="pill-cms">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+            <span>Dentrix</span>
+          </div>
+          <div class="pill-cms">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+            <span>eClinicalWorks</span>
+          </div>
+          <div class="pill-cms">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+            <span>Pulse</span>
+          </div>
+          <div class="pill-cms">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+            <span>Custom EHR</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       SECTION 2: MARQUEE PROMO TILE (1400 x 560)
+       ========================================== -->
+  <div class="tile-marquee-wrapper">
+    <div class="section-header">
+      <h2 class="section-title">Marquee Promo Tile</h2>
+      <div class="section-meta">
+        <span>1400 × 560 Canvas</span>
+        <span>JPEG / 24-bit PNG (No Alpha)</span>
+        <span>Color: #e92451</span>
+      </div>
+      <a class="export-btn" href="release/promo-marquee-1400x560.png" download="promo-marquee-1400x560.png" style="text-decoration:none;">
+        <svg style="width:14px; height:14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+        <span>Download 1400×560 PNG</span>
+      </a>
+    </div>
+
+    <div style="margin-top: 1.5rem;">
+      <div id="tile-marquee">
+        <div class="marquee-grid"></div>
+        <div class="marquee-ambient"></div>
+
+        <div class="marquee-left">
+          <img src="https://res.cloudinary.com/lamanify/image/upload/v1790242929/LamaniSync_Logo.png" alt="LamaniSync Logo" class="marquee-logo-img">
+          
+          <div class="marquee-badge">
+            <svg style="width:14px; height:14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            <span>Official LamaniHub Workstation Bridge</span>
+          </div>
+
+          <h1 class="marquee-heading">Connect LamaniHub Directly to <br><span class="gradient-text">Your Clinic CMS</span></h1>
+          
+          <p class="marquee-desc">Real-time bidirectional synchronization for Sara AI WhatsApp bookings and clinic doctor schedules. Deploys inside the browser with zero push webhooks required.</p>
+
+          <div class="marquee-tags">
+            <div class="tag-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+              <span>Dentrix Ascend</span>
+            </div>
+            <div class="tag-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+              <span>eClinicalWorks</span>
+            </div>
+            <div class="tag-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+              <span>LamaniPulse EHR</span>
+            </div>
+            <div class="tag-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+              <span>Custom Clinic Portals</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="marquee-right">
+          <div class="showcase-card">
+            <div class="showcase-header">
+              <div class="showcase-title">
+                <span class="showcase-pulse"></span>
+                <span>LamaniSync Station #1</span>
+              </div>
+              <span class="showcase-pill">ACTIVE SYNC</span>
+            </div>
+
+            <div class="showcase-row">
+              <span>Connected Hub</span>
+              <span>LamaniHub & Sara AI</span>
+            </div>
+            <div class="showcase-row">
+              <span>Target Clinic CMS</span>
+              <span>Dentrix / eCW / Pulse</span>
+            </div>
+            <div class="showcase-row">
+              <span>Workstation Lease</span>
+              <span>Monotonic Fenced (#42)</span>
+            </div>
+            <div class="showcase-row">
+              <span>AI WhatsApp Outbox</span>
+              <span>Injected & Read Verified</span>
+            </div>
+
+            <div class="showcase-security-banner">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              <span>Zero Raw PHI in Storage • Hardware Ed25519 Signing</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Client-side Exporter Script to guarantee exact pixel size and zero alpha -->
+  <script>
+    async function exportTile(elementId, width, height, filename) {
+      const element = document.getElementById(elementId);
+      if (!element) return;
+
+      const clone = element.cloneNode(true);
+      clone.style.transform = 'none';
+      clone.style.margin = '0';
+
+      // Inline styles to render cleanly into SVG
+      const wrapper = document.createElement('div');
+      wrapper.setAttribute('xmlns', 'http://www.w3.org/1999/xhtml');
+      wrapper.appendChild(clone);
+
+      const htmlContent = new XMLSerializer().serializeToString(wrapper);
+      
+      const svg = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">
+          <foreignObject width="100%" height="100%">
+            ${htmlContent}
+          </foreignObject>
+        </svg>
+      `;
+
+      const svgBlob = new Blob([svg], { type: 'image/svg+xml;charset=utf-8' });
+      const URL = window.URL || window.webkitURL || window;
+      const blobURL = URL.createObjectURL(svgBlob);
+
+      const img = new Image();
+      img.onload = function() {
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        
+        // Enforce solid white background (NO ALPHA / 0% transparency)
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, width, height);
+
+        ctx.drawImage(img, 0, 0);
+
+        // Download as solid 24-bit PNG
+        const a = document.createElement('a');
+        a.download = filename;
+        a.href = canvas.toDataURL('image/png', 1.0);
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(blobURL);
+      };
+      img.src = blobURL;
+    }
+  </script>
+
+</body>
+</html>

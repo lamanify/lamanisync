@@ -243,7 +243,8 @@ export class SyncApiClient {
   async pair(
     pairingCode: string,
     clientPublicKey: string,
-    deviceName: string = 'Chrome Extension'
+    deviceName: string = 'Chrome Extension',
+    targetOrigin?: string
   ): Promise<PairingResponse> {
     const data = await this.request<unknown>('/v1/sync/installations/pair', {
       method: 'POST',
@@ -251,6 +252,7 @@ export class SyncApiClient {
         pairingCode,
         clientPublicKey,
         deviceName,
+        ...(targetOrigin ? { targetOrigin } : {}),
       },
     });
 
@@ -448,10 +450,11 @@ export class SyncApiClient {
     }
   ): Promise<{ acknowledged: boolean; commandId: string; status: string }> {
     const path = `/v1/sync/outbox/${encodeURIComponent(commandId)}/result`;
+    const backendStatus = result.status === 'VERIFIED' ? 'SUCCESS' : result.status;
     return this.request(path, {
       method: 'POST',
       body: {
-        status: result.status,
+        status: backendStatus,
         writeReceipt: result.writeReceipt,
         error: result.error,
       },

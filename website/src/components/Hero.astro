@@ -1,0 +1,518 @@
+---
+---
+<section class="hero-section">
+  <div class="bg-grid-pattern"></div>
+  <div class="hero-glow"></div>
+
+  <div class="container hero-container">
+    <div class="hero-badge-wrapper">
+      <div class="badge-pill">
+        <svg style="width:12px; height:12px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        <span>Exclusively for LamaniHub Clinics</span>
+      </div>
+      <div class="badge-pill-subtle">
+        <span class="live-dot"></span>
+        <span>MV3 Workstation Synchronizer</span>
+      </div>
+    </div>
+
+    <h1 class="hero-title">
+      The missing bridge between your <span class="gradient-text">Clinic Management System</span> and LamaniHub.
+    </h1>
+
+    <p class="hero-subtitle">
+      Most clinic software has no open webhooks or public APIs. LamaniSync lives in your clinic's browser on the front-desk workstation—instantly syncing schedule availability and writing Sara AI WhatsApp bookings into your CMS without staff intervention.
+    </p>
+
+    <div class="hero-actions">
+      <a href="https://lamanihub.com" target="_blank" rel="noopener noreferrer" class="btn-primary hero-btn-lg">
+        <span>Go to LamaniHub to Get Started</span>
+        <svg style="width:16px; height:16px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+      </a>
+      <a href="#how-it-works" class="btn-secondary hero-btn-lg">
+        <span>How It Works</span>
+        <svg style="width:15px; height:15px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+      </a>
+    </div>
+
+    <!-- Live Synchronizer Architecture Flow Visual -->
+    <div class="sync-canvas">
+      <div class="sync-canvas-header">
+        <div class="sync-canvas-dots">
+          <span class="mac-dot red"></span>
+          <span class="mac-dot yellow"></span>
+          <span class="mac-dot green"></span>
+        </div>
+        <div class="sync-canvas-title">
+          <svg style="width:14px; height:14px; color: var(--primary);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          <span>Live Synchronizer Topology</span>
+        </div>
+        <div class="sync-canvas-status">
+          <span class="ping-circle"></span>
+          <span>Active Tunnel</span>
+        </div>
+      </div>
+
+      <div class="sync-flow-grid">
+        <!-- Node 1: WhatsApp Patient -->
+        <div class="node-card">
+          <div class="node-icon-box whatsapp">
+            <svg style="width:24px; height:24px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+          </div>
+          <div class="node-label">1. WhatsApp / Sara AI</div>
+          <div class="node-sub">Patient books appointment 24/7 via natural chat</div>
+          <div class="node-tag">Sara AI Agent</div>
+        </div>
+
+        <div class="sync-connector">
+          <div class="pulse-line"></div>
+          <span class="connector-badge">Direct Event</span>
+        </div>
+
+        <!-- Node 2: LamaniHub Cloud -->
+        <div class="node-card highlight">
+          <div class="node-icon-box lamanihub">
+            <svg style="width:24px; height:24px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 4.24 4.24"/><path d="m14.83 9.17 4.24-4.24"/><path d="m14.83 14.83 4.24 4.24"/><path d="m9.17 14.83-4.24 4.24"/></svg>
+          </div>
+          <div class="node-label">2. LamaniHub Cloud</div>
+          <div class="node-sub">Dispatches signed job queue via WebCrypto Ed25519</div>
+          <div class="node-tag primary">Orchestration Hub</div>
+        </div>
+
+        <div class="sync-connector">
+          <div class="pulse-line"></div>
+          <span class="connector-badge">Zero Ports</span>
+        </div>
+
+        <!-- Node 3: LamaniSync Extension -->
+        <div class="node-card active-bridge">
+          <div class="node-icon-box sync">
+            <svg style="width:24px; height:24px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+          </div>
+          <div class="node-label">3. LamaniSync (Workstation)</div>
+          <div class="node-sub">Runs securely inside clinic browser, 0 local server needed</div>
+          <div class="node-tag active">MV3 Bridge</div>
+        </div>
+
+        <div class="sync-connector">
+          <div class="pulse-line"></div>
+          <span class="connector-badge">DOM / API</span>
+        </div>
+
+        <!-- Node 4: Clinic CMS -->
+        <div class="node-card">
+          <div class="node-icon-box cms">
+            <svg style="width:24px; height:24px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/><path d="m9 16 2 2 4-4"/></svg>
+          </div>
+          <div class="node-label">4. Your Clinic CMS</div>
+          <div class="node-sub">Dentrix, eClinicalWorks, LamaniPulse appointment booked!</div>
+          <div class="node-tag success">Verified Write</div>
+        </div>
+      </div>
+
+      <div class="sync-canvas-footer">
+        <div class="sync-metric">
+          <span class="metric-val">100%</span>
+          <span class="metric-lbl">Readback Verified</span>
+        </div>
+        <div class="sync-metric-divider"></div>
+        <div class="sync-metric">
+          <span class="metric-val">&lt; 1.2s</span>
+          <span class="metric-lbl">Average Sync Speed</span>
+        </div>
+        <div class="sync-metric-divider"></div>
+        <div class="sync-metric">
+          <span class="metric-val">0</span>
+          <span class="metric-lbl">Open Firewall Ports</span>
+        </div>
+        <div class="sync-metric-divider"></div>
+        <div class="sync-metric">
+          <span class="metric-val">Zero PHI</span>
+          <span class="metric-lbl">Stored on Workstation</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero-section {
+    position: relative;
+    padding: 5rem 0 6rem 0;
+    overflow: hidden;
+    background: #ffffff;
+  }
+
+  .hero-glow {
+    position: absolute;
+    top: -15%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 800px;
+    height: 480px;
+    background: radial-gradient(circle, rgba(233, 36, 81, 0.08) 0%, rgba(255, 255, 255, 0) 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .hero-container {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .hero-badge-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.8rem;
+  }
+
+  .badge-pill-subtle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    color: #475569;
+    padding: 0.35rem 0.9rem;
+    border-radius: 9999px;
+  }
+
+  .live-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #10b981;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+  }
+
+  .hero-title {
+    font-size: clamp(2.4rem, 5vw, 4rem);
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -0.03em;
+    max-width: 960px;
+    color: var(--text-main);
+    margin-bottom: 1.5rem;
+  }
+
+  .hero-subtitle {
+    font-size: clamp(1.05rem, 2vw, 1.25rem);
+    font-weight: 400;
+    color: var(--text-muted);
+    max-width: 780px;
+    line-height: 1.65;
+    margin-bottom: 2.5rem;
+  }
+
+  .hero-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.2rem;
+    flex-wrap: wrap;
+    margin-bottom: 4.5rem;
+  }
+
+  .hero-btn-lg {
+    padding: 0.9rem 2rem;
+    font-size: 1.02rem;
+  }
+
+  /* Topology Visual Canvas */
+  .sync-canvas {
+    width: 100%;
+    max-width: 1120px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
+    box-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.08), 0 0 0 1px rgba(233, 36, 81, 0.05);
+    overflow: hidden;
+    text-align: left;
+  }
+
+  .sync-canvas-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.5rem;
+    background: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .sync-canvas-dots {
+    display: flex;
+    gap: 6px;
+  }
+
+  .mac-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+  }
+  .mac-dot.red { background: #ff5f56; }
+  .mac-dot.yellow { background: #ffbd2e; }
+  .mac-dot.green { background: #27c93f; }
+
+  .sync-canvas-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.84rem;
+    font-weight: 600;
+    color: #475569;
+  }
+
+  .sync-canvas-status {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #059669;
+  }
+
+  .ping-circle {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #10b981;
+    position: relative;
+  }
+
+  .ping-circle::after {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 50%;
+    border: 2px solid #10b981;
+    animation: ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+  }
+
+  @keyframes ping {
+    75%, 100% {
+      transform: scale(2);
+      opacity: 0;
+    }
+  }
+
+  .sync-flow-grid {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr;
+    align-items: center;
+    padding: 2.8rem 2rem;
+    gap: 0.75rem;
+    background: radial-gradient(circle at 50% 50%, rgba(233, 36, 81, 0.02) 0%, transparent 80%);
+  }
+
+  .node-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 1.4rem 1.2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.03);
+  }
+
+  .node-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.07);
+  }
+
+  .node-card.highlight {
+    border-color: var(--primary-border);
+    background: linear-gradient(180deg, #ffffff 0%, var(--primary-subtle) 100%);
+  }
+
+  .node-card.active-bridge {
+    border-color: var(--primary);
+    box-shadow: 0 8px 24px rgba(233, 36, 81, 0.12);
+  }
+
+  .node-icon-box {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.9rem;
+  }
+
+  .node-icon-box.whatsapp {
+    background: #dcfce7;
+    color: #15803d;
+  }
+
+  .node-icon-box.lamanihub {
+    background: var(--primary-subtle);
+    color: var(--primary);
+  }
+
+  .node-icon-box.sync {
+    background: var(--primary);
+    color: #ffffff;
+  }
+
+  .node-icon-box.cms {
+    background: #eff6ff;
+    color: #1d4ed8;
+  }
+
+  .node-label {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 0.4rem;
+  }
+
+  .node-sub {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    line-height: 1.45;
+    margin-bottom: 0.8rem;
+    min-height: 2.8rem;
+  }
+
+  .node-tag {
+    font-size: 0.68rem;
+    font-weight: 700;
+    padding: 0.2rem 0.6rem;
+    border-radius: 9999px;
+    background: #f1f5f9;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .node-tag.primary {
+    background: var(--primary-subtle);
+    color: var(--primary);
+  }
+
+  .node-tag.active {
+    background: var(--primary);
+    color: #ffffff;
+  }
+
+  .node-tag.success {
+    background: #dcfce7;
+    color: #15803d;
+  }
+
+  .sync-connector {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    position: relative;
+    padding: 0 0.25rem;
+  }
+
+  .pulse-line {
+    width: 48px;
+    height: 2px;
+    background: #cbd5e1;
+    position: relative;
+  }
+
+  .pulse-line::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: 0;
+    width: 8px;
+    height: 6px;
+    border-radius: 3px;
+    background: var(--primary);
+    animation: flowPulse 2s ease-in-out infinite;
+  }
+
+  @keyframes flowPulse {
+    0% { left: 0; opacity: 0; }
+    30% { opacity: 1; }
+    70% { opacity: 1; }
+    100% { left: 40px; opacity: 0; }
+  }
+
+  .connector-badge {
+    font-size: 0.62rem;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    padding: 0.15rem 0.45rem;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+
+  .sync-canvas-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    padding: 1.4rem 2rem;
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+  }
+
+  .sync-metric {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .metric-val {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--primary);
+    letter-spacing: -0.02em;
+  }
+
+  .metric-lbl {
+    font-size: 0.78rem;
+    color: #64748b;
+    font-weight: 500;
+    margin-top: 0.15rem;
+  }
+
+  .sync-metric-divider {
+    width: 1px;
+    height: 32px;
+    background: #e2e8f0;
+  }
+
+  @media (max-width: 992px) {
+    .sync-flow-grid {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+    .sync-connector {
+      transform: rotate(90deg);
+      padding: 0.5rem 0;
+    }
+    .pulse-line {
+      width: 32px;
+    }
+    .sync-metric-divider {
+      display: none;
+    }
+  }
+</style>

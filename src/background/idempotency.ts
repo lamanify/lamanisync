@@ -84,8 +84,10 @@ export class IdempotencyResolver {
 
           const match = appts.find((a) => {
             if (a.status === 'cancelled') return false;
-            const timeMatches = areValuesEquivalent(a.startTime, criteria.startTime);
-            const patientMatches = criteria.patientId ? areValuesEquivalent(a.patientId, criteria.patientId) : true;
+            const apptStartTime = a.startTime ?? a.start_time;
+            const apptPatientId = a.patientId ?? a.patient_id;
+            const timeMatches = areValuesEquivalent(apptStartTime, criteria.startTime);
+            const patientMatches = criteria.patientId ? areValuesEquivalent(apptPatientId, criteria.patientId) : true;
             return timeMatches && patientMatches;
           });
 
@@ -138,8 +140,10 @@ export class IdempotencyResolver {
           const patients = (Array.isArray(json.data) ? json.data : Array.isArray(json) ? json : []) as Array<Record<string, unknown>>;
 
           const match = patients.find((p) => {
-            if (criteria.phone && !areValuesEquivalent(p.phone, criteria.phone)) return false;
-            if (criteria.fullName && !areValuesEquivalent(p.fullName, criteria.fullName)) return false;
+            const patientPhone = p.phone ?? (p as Record<string, unknown>).mobile_no;
+            const patientName = p.fullName ?? (p as Record<string, unknown>).full_name;
+            if (criteria.phone && !areValuesEquivalent(patientPhone, criteria.phone)) return false;
+            if (criteria.fullName && !areValuesEquivalent(patientName, criteria.fullName)) return false;
             return true;
           });
 
@@ -179,7 +183,10 @@ export class IdempotencyResolver {
       const slots = (json.slots || json.data) as Array<{ startTime: string; available: boolean }> | undefined;
 
       if (Array.isArray(slots)) {
-        const targetSlot = slots.find((s) => areValuesEquivalent(s.startTime, startTime));
+        const targetSlot = slots.find((s) => {
+          const sTime = s.startTime ?? (s as Record<string, unknown>).start_time;
+          return areValuesEquivalent(sTime, startTime);
+        });
         if (targetSlot) {
           return {
             available: Boolean(targetSlot.available),

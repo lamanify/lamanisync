@@ -21,12 +21,15 @@ import {
   type WriteReceipt,
   SyncCommandSchema,
 } from '../core/contracts/commands.js';
+import { type AdapterManifest } from '../adapters/schema.js';
 import { verifyReadBackRecord } from '../core/verification.js';
 import {
   ACTION_APPOINTMENT_CREATE,
   ACTION_APPOINTMENT_RESCHEDULE,
   ACTION_APPOINTMENT_CANCEL,
+  ACTION_APPOINTMENT_VERIFY,
   ACTION_PATIENT_CREATE,
+  ACTION_PATIENT_VERIFY,
   type PredefinedActionId,
   isAllowlistedActionId,
   executePredefinedAction,
@@ -88,6 +91,7 @@ export interface CommandExecutorOptions {
   actionDispatcher?: ActionDispatcherFn;
   storage?: StorageAdapter;
   maxRetries?: number;
+  adapterManifest?: AdapterManifest;
   killSwitches?: {
     isPaused?: () => boolean;
   };
@@ -105,6 +109,7 @@ export class CommandExecutor {
   private actionDispatcher?: ActionDispatcherFn;
   private storage: StorageAdapter;
   private maxRetries: number;
+  private adapterManifest?: AdapterManifest;
   private killSwitches?: { isPaused?: () => boolean };
 
   constructor(options: CommandExecutorOptions) {
@@ -115,6 +120,7 @@ export class CommandExecutor {
     this.fetchFn = options.fetchFn || ((...args) => globalThis.fetch(...args));
     this.storage = resolveStorage(options.storage);
     this.maxRetries = options.maxRetries ?? 3;
+    this.adapterManifest = options.adapterManifest;
     this.killSwitches = options.killSwitches;
 
     this.echoSuppressor = options.echoSuppressor || new EchoSuppressor({ storage: this.storage });
@@ -140,6 +146,10 @@ export class CommandExecutor {
 
   setActionDispatcher(dispatcher: ActionDispatcherFn): void {
     this.actionDispatcher = dispatcher;
+  }
+
+  setAdapterManifest(manifest?: AdapterManifest): void {
+    this.adapterManifest = manifest;
   }
 
   getEchoSuppressor(): EchoSuppressor {
@@ -332,6 +342,8 @@ export class CommandExecutor {
     // --- Step 4 & 5: Dispatch and Execute Action ---
     let rawReceiptId: string | undefined;
     let rawReceiptRev: number = 1;
+    let resolvedPatientId: string | undefined;
+    let resolvedProviderId: string | undefined;
 
     if (!writeAlreadySucceeded) {
       fsm.startExecuting();
@@ -398,6 +410,12 @@ export class CommandExecutor {
           (command.parameters.appointmentId as string | undefined) ||
           (command.parameters.id as string | undefined);
         rawReceiptRev = typeof dataObj.rev === 'number' ? dataObj.rev : 1;
+        resolvedPatientId =
+          (dataObj.resolvedPatientId as string | undefined) ||
+          (dataObj.patientId as string | undefined);
+        resolvedProviderId =
+          (dataObj.resolvedProviderId as string | undefined) ||
+          (dataObj.providerId as string | undefined);
       }
     }
 
@@ -421,49 +439,98 @@ export class CommandExecutor {
     await this.saveInFlightCommand(fsm);
 
     const isPatient = actionId === ACTION_PATIENT_CREATE;
-    const readEndpoint = isPatient
-      ? `${this.targetOrigin}/api/patients/${encodeURIComponent(rawReceiptId)}`
-      : `${this.targetOrigin}/api/appointments/${encodeURIComponent(rawReceiptId)}`;
+    let readEntity: Record<string, unknown> | null =
+      writeAlreadySucceeded && existingRecord ? existingRecord : null;
 
-    let readRes: Response;
-    try {
-      readRes = await this.fetchFn(readEndpoint, {
-        method: 'GET',
-        headers: { Accept: 'application/json' },
-        credentials: 'include',
-      });
-    } catch (err) {
-      const retryResult = fsm.markRetryable(`Read-back request failed: ${(err as Error).message}`);
-      await this.resultReporter.report(command.commandId, retryResult);
-      await this.clearInFlightCommand(command.commandId);
-      return retryResult;
+    if (!readEntity && this.actionDispatcher) {
+      const verifyActionId = isPatient ? ACTION_PATIENT_VERIFY : ACTION_APPOINTMENT_VERIFY;
+      const verifyCorrelationId = `verify-${command.commandId}-${Date.now()}`;
+      const verifyParams = isPatient
+        ? { patientId: rawReceiptId }
+        : { appointmentId: rawReceiptId };
+
+      try {
+        const verifyRes = await this.actionDispatcher(verifyActionId, verifyCorrelationId, verifyParams);
+        if (verifyRes && verifyRes.status === 'SUCCESS' && verifyRes.data) {
+          const d = verifyRes.data as Record<string, unknown>;
+          if (d.patientId || d.patient_id || d.startTime || d.start_time || d.fullName || d.full_name) {
+            readEntity = d;
+          }
+        }
+      } catch {
+        // Fallback to direct fetchFn below
+      }
     }
 
-    if (!readRes.ok) {
-      const conflictResult = fsm.markConflict(
-        `Read-back entity '${rawReceiptId}' failed with HTTP ${readRes.status}`
-      );
-      await this.resultReporter.report(command.commandId, conflictResult);
-      await this.clearInFlightCommand(command.commandId);
-      return conflictResult;
-    }
+    if (!readEntity) {
+      let readEndpoint: string;
+      if (this.adapterManifest?.recipes) {
+        const recipeKey = isPatient ? 'patients.create' : 'appointments.create';
+        const fallbackKey = isPatient ? 'patients_create' : 'appointments_create';
+        const verifyPath =
+          this.adapterManifest.recipes[recipeKey]?.verification?.path ||
+          this.adapterManifest.recipes[fallbackKey]?.verification?.path ||
+          (isPatient ? this.adapterManifest.endpoints?.patients?.get : this.adapterManifest.endpoints?.appointments?.reschedule);
+        if (verifyPath) {
+          const pathWithId = verifyPath.replace(':id', encodeURIComponent(rawReceiptId));
+          readEndpoint = `${this.targetOrigin}${pathWithId.startsWith('/') ? '' : '/'}${pathWithId}`;
+        } else {
+          readEndpoint = isPatient
+            ? `${this.targetOrigin}/api/patients/${encodeURIComponent(rawReceiptId)}`
+            : `${this.targetOrigin}/api/appointments/${encodeURIComponent(rawReceiptId)}`;
+        }
+      } else {
+        readEndpoint = isPatient
+          ? `${this.targetOrigin}/api/patients/${encodeURIComponent(rawReceiptId)}`
+          : `${this.targetOrigin}/api/appointments/${encodeURIComponent(rawReceiptId)}`;
+      }
 
-    let readBackJson: Record<string, unknown>;
-    try {
-      readBackJson = (await readRes.json()) as Record<string, unknown>;
-    } catch {
-      const conflictResult = fsm.markConflict('Read-back returned non-JSON payload');
-      await this.resultReporter.report(command.commandId, conflictResult);
-      await this.clearInFlightCommand(command.commandId);
-      return conflictResult;
-    }
+      let readRes: Response;
+      const isCrossOriginRead =
+        readEndpoint.startsWith('http') &&
+        Boolean(this.targetOrigin) &&
+        !readEndpoint.startsWith(this.targetOrigin);
+      try {
+        readRes = await this.fetchFn(readEndpoint, {
+          method: 'GET',
+          headers: { Accept: 'application/json' },
+          credentials: isCrossOriginRead ? 'omit' : 'include',
+        });
+      } catch (err) {
+        const retryResult = fsm.markRetryable(`Read-back request failed: ${(err as Error).message}`);
+        await this.resultReporter.report(command.commandId, retryResult);
+        await this.clearInFlightCommand(command.commandId);
+        return retryResult;
+      }
 
-    const readEntity = ((readBackJson.data as Record<string, unknown>) || readBackJson) as Record<string, unknown>;
+      if (!readRes.ok) {
+        const conflictResult = fsm.markConflict(
+          `Read-back entity '${rawReceiptId}' failed with HTTP ${readRes.status}`
+        );
+        await this.resultReporter.report(command.commandId, conflictResult);
+        await this.clearInFlightCommand(command.commandId);
+        return conflictResult;
+      }
+
+      let readBackJson: Record<string, unknown>;
+      try {
+        readBackJson = (await readRes.json()) as Record<string, unknown>;
+      } catch {
+        const conflictResult = fsm.markConflict('Read-back returned non-JSON payload');
+        await this.resultReporter.report(command.commandId, conflictResult);
+        await this.clearInFlightCommand(command.commandId);
+        return conflictResult;
+      }
+
+      readEntity = ((readBackJson.data as Record<string, unknown>) || readBackJson) as Record<string, unknown>;
+    }
 
     // --- Step 8: Verification Diff ---
     const diffResult = verifyReadBackRecord(command.action, command.parameters, readEntity, {
       idParam: 'id',
       revisionPath: 'rev',
+      resolvedPatientId,
+      resolvedProviderId,
     });
 
     if (!diffResult.verified) {

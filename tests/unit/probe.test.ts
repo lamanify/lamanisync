@@ -136,4 +136,88 @@ describe('Probe & Compatibility Checker (Phase 7)', () => {
     expect(result.error).toContain('Tenant mismatch');
     expect(fsm.getState()).toBe('PROBING'); // Not transitioned to ACTIVE
   });
+
+  it('runs successful probe for LamaniPulse targetOrigin using PostgREST endpoints', async () => {
+    const mockFetch = vi.fn().mockImplementation(async (url: string) => {
+      if (url.includes('/rest/v1/profiles')) {
+        return {
+          ok: true,
+          status: 200,
+          json: async () => [{ id: 'USR-01', role: 'doctor' }],
+        } as Response;
+      }
+      if (url.includes('/rest/v1/medical_services')) {
+        return {
+          ok: true,
+          status: 200,
+          json: async () => [{ id: 'SRV-01', name: 'General Consultation' }],
+        } as Response;
+      }
+      return { ok: false, status: 404 } as Response;
+    });
+
+    const runner = new ProbeRunner({
+      fsm,
+      apiClient,
+      targetOrigin: 'https://app.lamanipulse.com',
+      connectionId: 'conn_pulse',
+      installationId: 'inst_pulse',
+      expectedClinicId: 'CLN-PULSE',
+      fetchFn: mockFetch,
+    });
+
+    const result = await runner.runProbe();
+
+    expect(result.passed).toBe(true);
+    expect(fsm.getState()).toBe('ACTIVE');
+    expect(mockFetch).toHaveBeenCalledWith(
+      'https://app.lamanipulse.com/rest/v1/profiles?select=id&limit=1',
+      expect.any(Object)
+    );
+    expect(mockFetch).toHaveBeenCalledWith(
+      'https://app.lamanipulse.com/rest/v1/medical_services?select=id&limit=1',
+      expect.any(Object)
+    );
+  });
+
+  it('transitions FSM to DEGRADED when CMS network call fails', async () => {
+    const mockFetch = vi.fn().mockRejectedValue(new Error('Connection refused'));
+
+    const runner = new ProbeRunner({
+      fsm,
+      apiClient,
+      targetOrigin: 'https://app.lamanipulse.com',
+      connectionId: 'conn_pulse',
+      installationId: 'inst_pulse',
+      fetchFn: mockFetch,
+    });
+
+    const result = await runner.runProbe();
+
+    expect(result.passed).toBe(false);
+    expect(result.error).toBe('CMS unreachable');
+    expect(fsm.getState()).toBe('DEGRADED');
+  });
+
+  it('transitions FSM to DEGRADED when CMS responds with 500 error', async () => {
+    const mockFetch = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 500,
+      json: async () => ({ error: 'Internal Server Error' }),
+    } as Response);
+
+    const runner = new ProbeRunner({
+      fsm,
+      apiClient,
+      targetOrigin: 'https://app.lamanipulse.com',
+      connectionId: 'conn_pulse',
+      installationId: 'inst_pulse',
+      fetchFn: mockFetch,
+    });
+
+    const result = await runner.runProbe();
+
+    expect(result.passed).toBe(false);
+    expect(fsm.getState()).toBe('DEGRADED');
+  });
 });

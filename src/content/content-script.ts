@@ -166,6 +166,7 @@ export class IsolatedContentBridge {
 
       case 'OBSERVATION': {
         this.forwardObservationToServiceWorker(message.payload);
+        showInPageSyncToast(message.payload);
         break;
       }
 
@@ -291,3 +292,58 @@ if (typeof window !== 'undefined' && typeof chrome !== 'undefined' && chrome.run
   const bridge = new IsolatedContentBridge();
   bridge.start();
 }
+
+export function showInPageSyncToast(payload: unknown): void {
+  if (typeof document === 'undefined' || !document.body) return;
+  try {
+    let pill = document.getElementById('lamanisync-sync-indicator');
+    if (!pill) {
+      pill = document.createElement('div');
+      pill.id = 'lamanisync-sync-indicator';
+      pill.style.cssText = [
+        'position: fixed',
+        'bottom: 24px',
+        'right: 24px',
+        'z-index: 2147483647',
+        'background: rgba(15, 23, 42, 0.95)',
+        'color: #f8fafc',
+        'padding: 8px 14px',
+        'border-radius: 9999px',
+        'font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+        'font-size: 12px',
+        'font-weight: 500',
+        'box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25)',
+        'border: 1px solid rgba(255, 255, 255, 0.15)',
+        'display: flex',
+        'align-items: center',
+        'gap: 8px',
+        'pointer-events: none',
+        'transition: opacity 0.25s ease, transform 0.25s ease',
+        'opacity: 0',
+        'transform: translateY(8px)',
+        'backdrop-filter: blur(8px)',
+      ].join('; ');
+      document.body.appendChild(pill);
+    }
+
+    const payloadObj = payload && typeof payload === 'object' ? (payload as Record<string, unknown>) : null;
+    const endpoint = typeof payloadObj?.endpoint === 'string' ? payloadObj.endpoint : '/sync';
+    const cleanEndpoint = endpoint.split('?')[0];
+
+    pill.innerHTML = `<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#10b981;box-shadow:0 0 8px #10b981;"></span> LamaniSync: Synced ${cleanEndpoint}`;
+    pill.style.opacity = '1';
+    pill.style.transform = 'translateY(0)';
+
+    const holder = pill as unknown as { _hideTimer?: ReturnType<typeof setTimeout> };
+    if (holder._hideTimer) clearTimeout(holder._hideTimer);
+    holder._hideTimer = setTimeout(() => {
+      if (pill) {
+        pill.style.opacity = '0';
+        pill.style.transform = 'translateY(8px)';
+      }
+    }, 2200);
+  } catch {
+    // Non-fatal UI indicator fallback
+  }
+}
+

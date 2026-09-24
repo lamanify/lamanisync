@@ -103,9 +103,9 @@ describe('Phase 11: 15 Required Browser & Runtime E2E Scenarios', () => {
   it('Scenario 1: Fresh install of unpacked extension initializes MV3 shell, Ed25519 key, and UNPAIRED state with zero PHI', async () => {
     const manifest = rawManifest as chrome.runtime.ManifestV3;
     expect(manifest.manifest_version).toBe(3);
-    expect(manifest.name).toBe('LamaniSync Dev');
-    expect(manifest.permissions).toEqual(['storage', 'scripting', 'alarms']);
-    expect(manifest.host_permissions).toBeUndefined(); // AGENTS.md Rule 3
+    expect(manifest.name).toBe('LamaniSync');
+    expect(manifest.permissions).toEqual(['storage', 'scripting', 'alarms', 'declarativeNetRequest']);
+    expect(manifest.host_permissions).toEqual(['https://app.lamanihub.com/*']); // Rule 13 / CHROMEWEBSTORE.md
 
     const idb = createMockIDBFactory();
     setIndexedDbFactory(idb);

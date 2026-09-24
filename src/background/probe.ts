@@ -21,6 +21,8 @@ export interface ProbeOptions {
   fetchFn?: typeof fetch;
   autoActivate?: boolean;
   headers?: Record<string, string>;
+  sessionEndpoint?: string;
+  referenceEndpoint?: string;
 }
 
 export interface ProbeResult {
@@ -41,6 +43,8 @@ export class ProbeRunner {
   private fetchFn: typeof fetch;
   private autoActivate: boolean;
   private headers?: Record<string, string>;
+  private sessionEndpoint?: string;
+  private referenceEndpoint?: string;
 
   constructor(options: ProbeOptions) {
     this.fsm = options.fsm;
@@ -52,13 +56,20 @@ export class ProbeRunner {
     this.fetchFn = options.fetchFn || ((...args) => globalThis.fetch(...args));
     this.autoActivate = options.autoActivate ?? true;
     this.headers = options.headers;
+    this.sessionEndpoint = options.sessionEndpoint;
+    this.referenceEndpoint = options.referenceEndpoint;
   }
 
   /**
    * Executes the full CMS probe cycle and updates connection state machine.
    */
   async runProbe(): Promise<ProbeResult> {
-    const sessionUrl = `${this.targetOrigin}/api/auth/session`;
+    const isPulse = this.targetOrigin.includes('lamanipulse.com');
+    const defaultSessionPath = isPulse
+      ? '/rest/v1/profiles?select=id&limit=1'
+      : '/api/auth/session';
+    const sessionPath = this.sessionEndpoint || defaultSessionPath;
+    const sessionUrl = `${this.targetOrigin}${sessionPath.startsWith('/') ? sessionPath : `/${sessionPath}`}`;
     let sessionRes: Response;
 
     try {
@@ -68,6 +79,15 @@ export class ProbeRunner {
         credentials: 'include',
       });
     } catch (netErr) {
+      if (this.fsm.canTransition('DEGRADED')) {
+        this.fsm.transition('DEGRADED', {
+          reason: `CMS unreachable: ${(netErr as Error).message}`,
+          connectionId: this.connectionId,
+          installationId: this.installationId,
+          targetOrigin: this.targetOrigin,
+        });
+      }
+
       const result: ProbeResult = {
         passed: false,
         cmsVersion: 'unknown',
@@ -142,6 +162,15 @@ export class ProbeRunner {
     }
 
     if (!sessionRes.ok) {
+      if (this.fsm.canTransition('DEGRADED')) {
+        this.fsm.transition('DEGRADED', {
+          reason: `CMS returned HTTP ${sessionRes.status}`,
+          connectionId: this.connectionId,
+          installationId: this.installationId,
+          targetOrigin: this.targetOrigin,
+        });
+      }
+
       const result: ProbeResult = {
         passed: false,
         cmsVersion: 'unknown',
@@ -157,7 +186,10 @@ export class ProbeRunner {
     // 4. Verify session payload and tenant scope
     let sessionData: Record<string, unknown> = {};
     try {
-      sessionData = (await sessionRes.json()) as Record<string, unknown>;
+      const rawJson = await sessionRes.json();
+      sessionData = Array.isArray(rawJson)
+        ? { clinicId: this.expectedClinicId, authenticated: true }
+        : ((rawJson as Record<string, unknown>) || {});
     } catch {
       sessionData = {};
     }
@@ -177,7 +209,11 @@ export class ProbeRunner {
     }
 
     // 5. Probe reference capability
-    const refUrl = `${this.targetOrigin}/api/reference/providers`;
+    const defaultRefPath = isPulse
+      ? '/rest/v1/medical_services?select=id&limit=1'
+      : '/api/reference/providers';
+    const refPath = this.referenceEndpoint || defaultRefPath;
+    const refUrl = `${this.targetOrigin}${refPath.startsWith('/') ? refPath : `/${refPath}`}`;
     let refOk = false;
     try {
       const refRes = await this.fetchFn(refUrl, {

@@ -7,7 +7,7 @@
  */
 
 import { ConnectionFSM } from './connection-fsm.js';
-import { PairingCoordinator } from './pairing.js';
+import { PairingCoordinator, SESSION_STORAGE_KEY } from './pairing.js';
 import { SyncApiClient } from './api-client.js';
 import { LeaseCoordinator } from './lease-client.js';
 import { DeduplicationCache } from './dedupe.js';
@@ -22,6 +22,8 @@ import { OutboxPoller, OUTBOX_ALARM_NAME } from './outbox-poller.js';
 import { KillSwitchCoordinator } from './kill-switch.js';
 import { TokenManager } from './token-manager.js';
 import { UpdateManager } from './update-manager.js';
+import { normalizeAppointmentSyncEvent, normalizePatientSyncEvent } from '../core/event-normalizer.js';
+import { type SyncEvent } from '../core/contracts/events.js';
 
 export const TOKEN_RENEWAL_ALARM_NAME = 'lamanisync_token_renewal';
 
@@ -83,6 +85,58 @@ export const commandExecutor = new CommandExecutor({
   leaseCoordinator,
   fsm,
   echoSuppressor,
+  actionDispatcher: async (actionId, correlationId, parameters) => {
+    const session = await coordinator.getSession();
+    const targetOrigin = session?.targetOrigin || 'https://app.lamanipulse.com';
+    const tabs = await chrome.tabs.query({ url: `${targetOrigin}/*` });
+    if (!tabs || tabs.length === 0 || !tabs[0].id) {
+      throw new Error(`No active tab found for CMS origin ${targetOrigin}`);
+    }
+    const tabId = tabs[0].id;
+    let response: { success: boolean; result?: unknown; error?: string } | undefined;
+    try {
+      response = (await chrome.tabs.sendMessage(tabId, {
+        type: 'EXECUTE_PAGE_ACTION',
+        actionId,
+        correlationId,
+        parameters,
+      })) as { success: boolean; result?: unknown; error?: string };
+    } catch (err: unknown) {
+      const errMsg = (err as Error)?.message || '';
+      if (errMsg.includes('Receiving end does not exist') || errMsg.includes('Could not establish connection')) {
+        if (chrome.scripting?.executeScript) {
+          try {
+            await chrome.scripting.executeScript({
+              target: { tabId },
+              files: ['content-script.js'],
+            });
+            await chrome.scripting.executeScript({
+              target: { tabId },
+              world: 'MAIN',
+              files: ['page-world.js'],
+            });
+            await new Promise((r) => setTimeout(r, 300));
+            response = (await chrome.tabs.sendMessage(tabId, {
+              type: 'EXECUTE_PAGE_ACTION',
+              actionId,
+              correlationId,
+              parameters,
+            })) as { success: boolean; result?: unknown; error?: string };
+          } catch (injectErr) {
+            throw new Error(`Failed to inject into tab: ${(injectErr as Error)?.message || String(injectErr)}`);
+          }
+        } else {
+          throw err;
+        }
+      } else {
+        throw err;
+      }
+    }
+    if (!response || !response.success) {
+      throw new Error(response?.error || 'Action execution failed in page world');
+    }
+    return response.result as { status: string; data?: unknown; error?: unknown };
+  },
 });
 export const updateManager = new UpdateManager({
   commandExecutor,
@@ -111,8 +165,34 @@ if (typeof chrome !== 'undefined' && chrome.runtime?.onUpdateAvailable) {
   });
 }
 
+export function updateActionBadge(text: string, color: string = '#10b981'): void {
+  if (typeof chrome !== 'undefined' && chrome.action?.setBadgeText) {
+    try {
+      chrome.action.setBadgeText({ text });
+      if (text && chrome.action.setBadgeBackgroundColor) {
+        chrome.action.setBadgeBackgroundColor({ color });
+      }
+    } catch {
+      // Ignore
+    }
+  }
+}
+
 // Broadcast FSM state transitions to popup / extension views (Phase 9 reactive state)
 fsm.onTransition((record) => {
+  if (record.state === 'ACTIVE') {
+    updateActionBadge('LIVE', '#10b981');
+    coordinator.getSession().then((session) => {
+      if (session?.connectionId && session?.installationId && !leaseCoordinator.hasActiveLease()) {
+        leaseCoordinator.acquire(session.connectionId, session.installationId, 120).catch(() => {});
+      }
+    }).catch(() => {});
+  } else if (record.state === 'PROBING') {
+    updateActionBadge('PROBE', '#f59e0b');
+  } else if (record.state === 'UNPAIRED' || record.state === 'REVOKED') {
+    updateActionBadge('');
+  }
+
   if (typeof chrome !== 'undefined' && typeof chrome.runtime?.sendMessage === 'function') {
     try {
       const p = chrome.runtime.sendMessage({
@@ -137,6 +217,22 @@ leaseCoordinator.onLeaseAcquired((lease) => {
   });
 
   outboxPoller.setConnectionId(lease.connectionId);
+
+  if (fsm.getState() === 'PROBING') {
+    if (fsm.canTransition('SHADOW')) {
+      fsm.transition('SHADOW', {
+        reason: 'Transitioning to active under acquired leader lease',
+        connectionId: lease.connectionId,
+      });
+      if (fsm.canTransition('ACTIVE')) {
+        fsm.transition('ACTIVE', {
+          reason: 'Connection active under acquired leader lease',
+          connectionId: lease.connectionId,
+        });
+      }
+    }
+  }
+
   outboxPoller.start();
 
   if (typeof chrome !== 'undefined' && chrome.alarms?.create) {
@@ -179,6 +275,82 @@ export function recordObservation(obs: unknown): void {
   if (recentObservations.length > MAX_RECENT_OBSERVATIONS) {
     recentObservations.pop();
   }
+
+  const timestamp =
+    obs && typeof obs === 'object' && 'timestamp' in obs && typeof (obs as { timestamp: unknown }).timestamp === 'string'
+      ? (obs as { timestamp: string }).timestamp
+      : new Date().toISOString();
+
+  fsm.updateMetadata({ lastReadAt: timestamp });
+  console.log('[LamaniSync SW] Observation recorded. lastReadAt:', timestamp);
+
+  updateActionBadge('SYNC', '#0284c7');
+  setTimeout(() => {
+    if (fsm.getState() === 'ACTIVE') {
+      updateActionBadge('LIVE', '#10b981');
+    }
+  }, 2000);
+
+  coordinator.getSession().then((session) => {
+    if (session) {
+      defaultStorage.set({
+        [SESSION_STORAGE_KEY]: {
+          ...session,
+          lastReadAt: timestamp,
+        },
+      }).catch(() => {});
+    }
+  }).catch(() => {});
+
+  // Intercepted CMS observation pipeline -> normalized SyncEvents -> BatchUploader
+  if (obs && typeof obs === 'object') {
+    const rawObs = obs as Record<string, unknown>;
+    const endpoint = String(rawObs.endpoint || '');
+    const data = rawObs.data;
+
+    if (data) {
+      coordinator.getSession().then(async (session) => {
+        if (!session?.installationId) return;
+
+        batchUploader.setInstallationId(session.installationId);
+        if (session.sessionToken) {
+          apiClient.setSessionToken(session.sessionToken);
+        }
+
+        const items = Array.isArray(data) ? data : [data];
+        const events: SyncEvent[] = [];
+
+        if (endpoint.includes('appointment')) {
+          for (const item of items) {
+            try {
+              const evt = normalizeAppointmentSyncEvent(item, { occurredAt: timestamp });
+              events.push(evt);
+            } catch (err) {
+              console.warn('[LamaniSync SW] Failed to normalize appointment from observation:', err);
+            }
+          }
+        } else if (endpoint.includes('patient')) {
+          for (const item of items) {
+            try {
+              const evt = normalizePatientSyncEvent(item, { occurredAt: timestamp });
+              events.push(evt);
+            } catch (err) {
+              console.warn('[LamaniSync SW] Failed to normalize patient from observation:', err);
+            }
+          }
+        }
+
+        if (events.length > 0) {
+          console.log(`[LamaniSync SW] Enqueueing ${events.length} observed events for batch upload...`);
+          await batchUploader.enqueue(events, { force: true });
+          const flushRes = await batchUploader.flush();
+          console.log('[LamaniSync SW] Flushed observed events to Sync API. Result:', flushRes ? 'ACKNOWLEDGED' : 'EMPTY');
+        }
+      }).catch((err) => {
+        console.warn('[LamaniSync SW] Error processing observed events for batch upload:', err);
+      });
+    }
+  }
 }
 
 export function clearObservations(): void {
@@ -187,6 +359,39 @@ export function clearObservations(): void {
 
 export async function ensureServiceWorkerRestored(): Promise<void> {
   try {
+    if (typeof chrome !== 'undefined' && chrome.declarativeNetRequest?.updateDynamicRules) {
+      try {
+        await chrome.declarativeNetRequest.updateDynamicRules({
+          removeRuleIds: [9001],
+          addRules: [
+            {
+              id: 9001,
+              priority: 1,
+              action: {
+                type: chrome.declarativeNetRequest.RuleActionType.MODIFY_HEADERS,
+                responseHeaders: [
+                  {
+                    header: 'access-control-allow-origin',
+                    operation: chrome.declarativeNetRequest.HeaderOperation.SET,
+                    value: '*',
+                  },
+                ],
+              },
+              condition: {
+                urlFilter: '*app.lamanihub.com*',
+                resourceTypes: [
+                  chrome.declarativeNetRequest.ResourceType.XMLHTTPREQUEST,
+                  chrome.declarativeNetRequest.ResourceType.OTHER,
+                ],
+              },
+            },
+          ],
+        });
+      } catch (err) {
+        console.warn('[LamaniSync SW] Failed to update declarativeNetRequest rule:', err);
+      }
+    }
+
     await killSwitch.restore();
     const activeLease = await leaseCoordinator.restore();
     await echoSuppressor.restoreFromStorage();
@@ -225,8 +430,28 @@ export async function ensureServiceWorkerRestored(): Promise<void> {
         leaseId: activeLease.leaseId,
         fencingToken: activeLease.fencingToken,
       });
+
+      if (fsm.getState() === 'PROBING') {
+        if (fsm.canTransition('SHADOW')) {
+          fsm.transition('SHADOW', {
+            reason: 'Restoring verified session to active under leader lease',
+            connectionId: activeLease.connectionId,
+          });
+          if (fsm.canTransition('ACTIVE')) {
+            fsm.transition('ACTIVE', {
+              reason: 'Connection active under leader lease',
+              connectionId: activeLease.connectionId,
+            });
+          }
+        }
+      }
+
       outboxPoller.setConnectionId(activeLease.connectionId);
       outboxPoller.start();
+    } else if (session?.connectionId && session?.installationId) {
+      leaseCoordinator.acquire(session.connectionId, session.installationId, 120).catch((err) => {
+        console.warn('[LamaniSync SW] Failed to auto-acquire leader lease on restore:', err);
+      });
     }
     return record as unknown as void;
   } catch (err) {
@@ -245,6 +470,13 @@ chrome.runtime.onStartup.addListener(async () => {
   console.log(`[LamaniSync Dev] Service Worker started. Version: ${version}`);
   await ensureServiceWorkerRestored();
 });
+
+// Top-level service worker restore on wake-up (AGENTS.md Rule 7)
+if (typeof chrome !== 'undefined' && chrome.runtime?.id) {
+  ensureServiceWorkerRestored().catch((err) => {
+    console.warn('[LamaniSync SW] Top-level restore error:', err);
+  });
+}
 
 // Real-time host permission removal listener (Chrome settings or browser drop)
 if (typeof chrome !== 'undefined' && chrome.permissions?.onRemoved) {
@@ -270,7 +502,7 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
 
   if (message?.type === 'PAIR') {
     coordinator
-      .pair(message.pairingCode, message.deviceName)
+      .pair(message.pairingCode, message.deviceName, message.targetOrigin)
       .then((result) => {
         if (typeof chrome !== 'undefined' && chrome.alarms?.create) {
           try {

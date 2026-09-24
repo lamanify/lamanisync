@@ -6,6 +6,7 @@ dist/
 build/
 release/
 *.zip
+.astro/
 
 # Local implementation phase plans
 Implementations/

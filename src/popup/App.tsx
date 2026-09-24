@@ -47,7 +47,7 @@ export function App() {
       case 'PAIRED_NO_PERMISSION':
         return 'Paired (Permission Needed)';
       case 'PROBING':
-        return 'Connected';
+        return 'Connecting...';
       case 'SHADOW':
         return 'Shadow Mode';
       case 'ACTIVE':

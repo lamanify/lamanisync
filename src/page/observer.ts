@@ -13,6 +13,7 @@ export const ALLOWLISTED_OBSERVATION_PATHS = [
   /^\/api\/appointments(\/[a-zA-Z0-9_-]+)?(\?.*)?$/,
   /^\/api\/patients(\/[a-zA-Z0-9_-]+)?(\?.*)?$/,
   /^\/api\/reference\/(providers|services|locations)(\?.*)?$/,
+  /^\/rest\/v1\/(patients|appointments|profiles|medical_services|clinic_settings)(\?.*)?$/,
 ];
 
 export const SENSITIVE_PARAM_NAMES = new Set([
@@ -126,11 +127,58 @@ export function stripAuthSecrets(obj: unknown): unknown {
   return clean;
 }
 
+function normalizeOrigin(origin: string): string {
+  try {
+    return new URL(origin).origin;
+  } catch {
+    return origin.replace(/\/$/, '');
+  }
+}
+
+function matchOriginPattern(pattern: string, origin: string): boolean {
+  if (pattern === origin) return true;
+  if (pattern.includes('*')) {
+    const escaped = pattern.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*');
+    return new RegExp(`^${escaped}$`).test(origin);
+  }
+  return false;
+}
+
+export function isPermittedObservationOrigin(
+  urlOrigin: string,
+  pageOrigin: string,
+  allowedOrigins?: string[],
+  adapterOrigin?: string
+): boolean {
+  const normUrl = normalizeOrigin(urlOrigin);
+  const normPage = normalizeOrigin(pageOrigin);
+  if (normUrl === normPage) return true;
+  if (adapterOrigin) {
+    const normAdapter = normalizeOrigin(adapterOrigin);
+    if (normUrl === normAdapter || matchOriginPattern(adapterOrigin, normUrl)) return true;
+  }
+  if (allowedOrigins && allowedOrigins.length > 0) {
+    for (const pat of allowedOrigins) {
+      const normPat = normalizeOrigin(pat);
+      if (normPat === normUrl || matchOriginPattern(pat, normUrl)) {
+        return true;
+      }
+    }
+  }
+  // Allow PostgREST / Supabase hosted backends (e.g. *.supabase.co)
+  if (/^https:\/\/[a-z0-9-]+\.supabase\.co$/.test(normUrl)) {
+    return true;
+  }
+  return false;
+}
+
 export interface NetworkObserverOptions {
   handshakeToken: string;
   targetOrigin: string;
   targetWindow?: Window;
   onObservation?: (event: unknown) => void;
+  allowedApiOrigins?: string[];
+  adapterApiOrigin?: string;
 }
 
 export interface NetworkObserverHandle {
@@ -200,7 +248,7 @@ export function installNetworkObserver(options: NetworkObserverOptions): Network
 
           const parsedUrl = new URL(rawUrl, targetWindow.location.origin);
 
-          if (parsedUrl.origin === targetWindow.location.origin) {
+          if (isPermittedObservationOrigin(parsedUrl.origin, targetWindow.location.origin, options.allowedApiOrigins, options.adapterApiOrigin)) {
             const pathname = parsedUrl.pathname;
             if (isAllowlistedObservationPath(pathname)) {
               const cloned = response.clone();
@@ -209,6 +257,7 @@ export function installNetworkObserver(options: NetworkObserverOptions): Network
               if (cloned.status !== 204 && cloned.status !== 205 && contentType.includes('application/json') && cloned.ok) {
                 const rawData = await cloned.json();
                 const sanitizedEndpoint = sanitizeUrlPath(pathname + parsedUrl.search, targetWindow.location.origin);
+                console.log('[LamaniSync Observer] Intercepted CMS read:', sanitizedEndpoint);
                 emitObservation(sanitizedEndpoint, response.status, rawData);
               }
             }
@@ -262,7 +311,7 @@ export function installNetworkObserver(options: NetworkObserverOptions): Network
             const rawUrl = this._lamaniUrl || '';
             const parsedUrl = new URL(rawUrl, targetWindow.location.origin);
 
-            if (parsedUrl.origin === targetWindow.location.origin) {
+            if (isPermittedObservationOrigin(parsedUrl.origin, targetWindow.location.origin, options.allowedApiOrigins, options.adapterApiOrigin)) {
               const pathname = parsedUrl.pathname;
               if (isAllowlistedObservationPath(pathname)) {
                 const contentType = this.getResponseHeader('content-type') || '';

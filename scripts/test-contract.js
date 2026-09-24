@@ -15,6 +15,7 @@ const res = spawnSync(
     'tests/contract/acme-cloud-adapter.test.ts',
     'tests/contract/acme-cloud.contract.test.ts',
     'tests/contract/vendor-cms-1.contract.test.ts',
+    'tests/contract/lamanipulse.contract.test.ts',
   ],
   {
     stdio: 'inherit',

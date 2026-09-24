@@ -1,0 +1,83 @@
+---
+---
+<header class="navbar">
+  <div class="container nav-container">
+    <a href="/" class="brand-link">
+      <img src="https://res.cloudinary.com/lamanify/image/upload/v1790242929/LamaniSync_Logo.png" alt="LamaniSync Logo" class="brand-logo">
+    </a>
+
+    <nav class="nav-links">
+      <a href="#what-is-it" class="nav-link">What is it?</a>
+      <a href="#how-it-works" class="nav-link">How it works</a>
+      <a href="#supported-cms" class="nav-link">Supported CMS</a>
+      <a href="#security" class="nav-link">Security & Privacy</a>
+    </nav>
+
+    <div class="nav-cta">
+      <a href="https://lamanihub.com" target="_blank" rel="noopener noreferrer" class="btn-primary nav-btn">
+        <span>Go to LamaniHub</span>
+        <svg style="width:14px; height:14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" x2="21" y1="14" y2="3"/></svg>
+      </a>
+    </div>
+  </div>
+</header>
+
+<style>
+  .navbar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(255, 255, 255, 0.88);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+    transition: all 0.3s;
+  }
+
+  .nav-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 76px;
+  }
+
+  .brand-link {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+  }
+
+  .brand-logo {
+    height: 42px;
+    width: auto;
+    object-fit: contain;
+  }
+
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+  }
+
+  .nav-link {
+    color: var(--text-muted);
+    font-size: 0.92rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: color 0.15s;
+  }
+
+  .nav-link:hover {
+    color: var(--primary);
+  }
+
+  .nav-btn {
+    font-size: 0.88rem;
+    padding: 0.6rem 1.35rem;
+  }
+
+  @media (max-width: 860px) {
+    .nav-links {
+      display: none;
+    }
+  }
+</style>

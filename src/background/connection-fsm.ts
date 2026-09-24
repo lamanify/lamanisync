@@ -119,6 +119,26 @@ export class ConnectionFSM {
     return () => this.listeners.delete(listener);
   }
 
+  updateMetadata(metadataUpdate: Record<string, unknown>): ConnectionStateRecord {
+    this.currentRecord = ConnectionStateRecordSchema.parse({
+      ...this.currentRecord,
+      metadata: {
+        ...(this.currentRecord.metadata || {}),
+        ...metadataUpdate,
+      },
+    });
+
+    for (const listener of this.listeners) {
+      try {
+        listener(this.currentRecord, this.currentRecord);
+      } catch (err) {
+        console.error('Error in ConnectionFSM listener:', err);
+      }
+    }
+
+    return this.getRecord();
+  }
+
   toJSON(): ConnectionStateRecord {
     return this.currentRecord;
   }

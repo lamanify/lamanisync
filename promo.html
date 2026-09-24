@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LamaniSync - The Official LamaniHub CMS Synchronizer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    /* Reset & LamaniSync Design System (#e92451) */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg: #ffffff;
+      --card-bg: rgba(255, 255, 255, 0.95);
+      --card-border: #f1f5f9;
+      --primary: #e92451;
+      --primary-dark: #c71a41;
+      --primary-subtle: #fff1f3;
+      --primary-border: #fecdd6;
+      --primary-glow: rgba(233, 36, 81, 0.15);
+      --accent: #fb7185;
+      --accent-subtle: #fff1f4;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --video-duration: 20s;
+    }
+
+    body {
+      background: #f8fafc;
+      color: var(--text-main);
+      font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      padding: 1.5rem;
+    }
+
+    /* 16:9 Video Canvas Viewport */
+    .video-viewport {
+      position: relative;
+      width: 100%;
+      max-width: 1160px;
+      aspect-ratio: 16 / 9;
+      background: radial-gradient(circle at 50% 0%, #fff1f3 0%, #ffffff 55%, #fafafa 100%);
+      border-radius: 20px;
+      border: 1px solid var(--primary-border);
+      box-shadow: 0 25px 60px -15px rgba(233, 36, 81, 0.08), 0 0 35px var(--primary-glow);
+      overflow: hidden;
+    }
+
+    /* Subtle Background Grid */
+    .grid-bg {
+      position: absolute;
+      inset: 0;
+      background-image: 
+        linear-gradient(to right, rgba(15, 23, 42, 0.04) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(15, 23, 42, 0.04) 1px, transparent 1px);
+      background-size: 32px 32px;
+      mask-image: radial-gradient(circle at 50% 45%, black 45%, transparent 85%);
+      pointer-events: none;
+    }
+
+    /* Cohesive Brand Glow Orbs */
+    .ambient-glow-1 {
+      position: absolute;
+      top: -20%;
+      left: 20%;
+      width: 480px;
+      height: 480px;
+      background: radial-gradient(circle, rgba(233, 36, 81, 0.09) 0%, transparent 70%);
+      pointer-events: none;
+      filter: blur(45px);
+    }
+
+    .ambient-glow-2 {
+      position: absolute;
+      bottom: -15%;
+      right: 20%;
+      width: 420px;
+      height: 420px;
+      background: radial-gradient(circle, rgba(233, 36, 81, 0.06) 0%, transparent 70%);
+      pointer-events: none;
+      filter: blur(45px);
+    }
+
+    /* Top Brand Watermark */
+    .brand-watermark {
+      position: absolute;
+      top: 1.75rem;
+      left: 2.25rem;
+      display: flex;
+      align-items: center;
+      z-index: 50;
+    }
+
+    .brand-logo-img {
+      height: 40px;
+      width: auto;
+      object-fit: contain;
+      filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.04));
+    }
+
+    /* Scene Transitions & Timeline */
+    .scene {
+      position: absolute;
+      inset: 0;
+      padding: 4.5rem 3.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      opacity: 0;
+      pointer-events: none;
+      transform: scale(0.97) translateY(10px);
+      animation-duration: var(--video-duration);
+      animation-iteration-count: infinite;
+      animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* Scene 1: The Multi-CMS Sync Challenge for LamaniHub (0s - 4s) */
+    .scene-1 { animation-name: animScene1; }
+
+    /* Scene 2: Introducing LamaniSync (4s - 8s) */
+    .scene-2 { animation-name: animScene2; }
+
+    /* Scene 3: Universal CMS Connectivity (8s - 12.5s) */
+    .scene-3 { animation-name: animScene3; }
+
+    /* Scene 4: Security & Compliance (12.5s - 16.5s) */
+    .scene-4 { animation-name: animScene4; }
+
+    /* Scene 5: Outro & Call To Action (16.5s - 20s) */
+    .scene-5 { animation-name: animScene5; }
+
+    /* Unified Tag Component (#e92451) */
+    .scene-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 0.85rem;
+      padding: 0.35rem 0.95rem;
+      border-radius: 9999px;
+      background: var(--primary-subtle);
+      border: 1px solid var(--primary-border);
+      color: var(--primary);
+    }
+
+    /* Typography */
+    .title-large {
+      font-size: clamp(2.1rem, 4vw, 3.1rem);
+      font-weight: 800;
+      line-height: 1.2;
+      letter-spacing: -0.03em;
+      color: var(--text-main);
+      max-width: 860px;
+      margin-bottom: 0.85rem;
+    }
+
+    .subtitle {
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      max-width: 660px;
+      line-height: 1.55;
+      font-weight: 400;
+    }
+
+    .gradient-text {
+      background: linear-gradient(135deg, var(--primary) 0%, #be123c 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* Unified Card Grid */
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.25rem;
+      margin-top: 1.85rem;
+      width: 100%;
+      max-width: 880px;
+    }
+
+    .feature-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(14px);
+      border: 1px solid var(--primary-border);
+      border-radius: 16px;
+      padding: 1.4rem 1.25rem;
+      text-align: left;
+      box-shadow: 0 10px 25px -5px rgba(233, 36, 81, 0.05), 0 4px 6px -2px rgba(15, 23, 42, 0.02);
+    }
+
+    /* Unified Icon Badge (#e92451) */
+    .lucide-icon-wrap {
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 0.85rem;
+      background: var(--primary-subtle);
+      color: var(--primary);
+    }
+
+    .lucide-icon {
+      width: 20px;
+      height: 20px;
+      stroke-width: 2.25;
+    }
+
+    .card-title {
+      font-size: 0.98rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 0.35rem;
+    }
+
+    .card-desc {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      line-height: 1.45;
+    }
+
+    /* Mock Extension Popup (Scene 2) */
+    .extension-mockup {
+      width: 420px;
+      background: #ffffff;
+      border: 1px solid var(--primary-border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-top: 1.5rem;
+      box-shadow: 0 20px 45px -10px rgba(233, 36, 81, 0.12), 0 0 25px var(--primary-glow);
+      text-align: left;
+    }
+
+    .mockup-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 0.9rem;
+      border-bottom: 1px solid var(--primary-border);
+      margin-bottom: 0.9rem;
+    }
+
+    .station-name {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--text-main);
+    }
+
+    .pulse-dot {
+      width: 9px;
+      height: 9px;
+      background: var(--primary);
+      border-radius: 50%;
+      box-shadow: 0 0 10px var(--primary);
+      display: inline-block;
+    }
+
+    .status-pill {
+      font-size: 0.72rem;
+      color: var(--primary);
+      font-weight: 700;
+      background: var(--primary-subtle);
+      padding: 0.2rem 0.65rem;
+      border-radius: 9999px;
+      border: 1px solid var(--primary-border);
+    }
+
+    .mockup-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.84rem;
+      padding: 0.45rem 0;
+      color: var(--text-muted);
+      border-bottom: 1px dashed #fce7ec;
+    }
+
+    .mockup-row:last-child {
+      border-bottom: none;
+    }
+
+    .mockup-row span:last-child {
+      color: var(--text-main);
+      font-weight: 600;
+    }
+
+    /* Universal CMS Connectivity Diagram (Scene 3) */
+    .cms-matrix-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1.5rem;
+      margin-top: 1.75rem;
+      width: 100%;
+      max-width: 880px;
+    }
+
+    .hub-node {
+      background: linear-gradient(135deg, #881337, var(--primary));
+      color: #ffffff;
+      border-radius: 16px;
+      padding: 1.5rem 1.25rem;
+      min-width: 220px;
+      box-shadow: 0 12px 30px -5px rgba(233, 36, 81, 0.35);
+      text-align: center;
+    }
+
+    .hub-node h4 {
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+      margin-bottom: 0.25rem;
+    }
+
+    .hub-node p {
+      font-size: 0.75rem;
+      color: #ffe4e6;
+    }
+
+    .engine-bridge {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .engine-badge {
+      background: #ffffff;
+      border: 1.5px solid var(--primary);
+      color: var(--primary);
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.35rem 0.85rem;
+      border-radius: 9999px;
+      box-shadow: 0 4px 12px rgba(233, 36, 81, 0.15);
+      white-space: nowrap;
+    }
+
+    .bridge-arrows {
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      animation: pulseArrow 1.5s ease-in-out infinite;
+    }
+
+    .cms-targets-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      min-width: 220px;
+    }
+
+    .cms-target-pill {
+      background: #ffffff;
+      border: 1px solid var(--primary-border);
+      border-radius: 10px;
+      padding: 0.65rem 1rem;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 4px 10px rgba(233, 36, 81, 0.03);
+    }
+
+    .cms-target-pill span.tag {
+      font-size: 0.65rem;
+      color: var(--primary);
+      background: var(--primary-subtle);
+      border: 1px solid var(--primary-border);
+      padding: 0.1rem 0.45rem;
+      border-radius: 6px;
+      font-weight: 700;
+    }
+
+    /* Outro CTA Elements (Scene 5) */
+    .cta-button {
+      margin-top: 1.75rem;
+      padding: 0.95rem 2.5rem;
+      font-size: 1.05rem;
+      font-weight: 700;
+      font-family: inherit;
+      border-radius: 9999px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: #ffffff;
+      border: none;
+      box-shadow: 0 12px 30px -5px rgba(233, 36, 81, 0.35);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .outro-logo {
+      height: 56px;
+      width: auto;
+      object-fit: contain;
+      margin-bottom: 1.25rem;
+      filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.06));
+    }
+
+    /* Bottom Timeline Track */
+    .video-timeline {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 6px;
+      background: #f1f5f9;
+      z-index: 100;
+    }
+
+    .timeline-progress {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary), #fb7185);
+      box-shadow: 0 0 10px rgba(233, 36, 81, 0.4);
+      width: 0%;
+      animation: progressTrack var(--video-duration) linear infinite;
+    }
+
+    /* Animations */
+    @keyframes progressTrack {
+      0% { width: 0%; }
+      100% { width: 100%; }
+    }
+
+    @keyframes pulseArrow {
+      0%, 100% { transform: scale(1); opacity: 0.75; }
+      50% { transform: scale(1.15); opacity: 1; }
+    }
+
+    /* Scene Transitions */
+    @keyframes animScene1 {
+      0% { opacity: 0; transform: scale(0.97) translateY(10px); }
+      3%, 16% { opacity: 1; transform: scale(1) translateY(0); }
+      20% { opacity: 0; transform: scale(1.02) translateY(-10px); }
+      21%, 100% { opacity: 0; }
+    }
+
+    @keyframes animScene2 {
+      0%, 19% { opacity: 0; transform: scale(0.97) translateY(10px); }
+      23%, 36% { opacity: 1; transform: scale(1) translateY(0); }
+      40% { opacity: 0; transform: scale(1.02) translateY(-10px); }
+      41%, 100% { opacity: 0; }
+    }
+
+    @keyframes animScene3 {
+      0%, 39% { opacity: 0; transform: scale(0.97) translateY(10px); }
+      43%, 58% { opacity: 1; transform: scale(1) translateY(0); }
+      62.5% { opacity: 0; transform: scale(1.02) translateY(-10px); }
+      63.5%, 100% { opacity: 0; }
+    }
+
+    @keyframes animScene4 {
+      0%, 61.5% { opacity: 0; transform: scale(0.97) translateY(10px); }
+      65%, 78% { opacity: 1; transform: scale(1) translateY(0); }
+      82.5% { opacity: 0; transform: scale(1.02) translateY(-10px); }
+      83.5%, 100% { opacity: 0; }
+    }
+
+    @keyframes animScene5 {
+      0%, 81.5% { opacity: 0; transform: scale(0.97) translateY(10px); }
+      85%, 96% { opacity: 1; transform: scale(1) translateY(0); }
+      100% { opacity: 0; transform: scale(1.02) translateY(0); }
+    }
+
+    .controls-hint {
+      margin-top: 1.25rem;
+      font-size: 0.85rem;
+      color: #64748b;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 16:9 Video Canvas -->
+  <div class="video-viewport">
+    
+    <!-- Background Grid & Brand Ambient Glows -->
+    <div class="grid-bg"></div>
+    <div class="ambient-glow-1"></div>
+    <div class="ambient-glow-2"></div>
+
+    <!-- Permanent Watermark (Clean Logo Only - No Text Pill) -->
+    <div class="brand-watermark">
+      <img src="https://res.cloudinary.com/lamanify/image/upload/v1790242929/LamaniSync_Logo.png" alt="LamaniSync Logo" class="brand-logo-img">
+    </div>
+
+    <!-- SCENE 1: THE MULTI-CMS PROBLEM FOR LAMANIHUB -->
+    <div class="scene scene-1">
+      <div class="scene-tag">
+        <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
+        <span>The Clinical Integration Gap</span>
+      </div>
+      <h1 class="title-large">Clinics Use Different Cloud CMSs. <br><span class="gradient-text">None Have Outbound Webhooks.</span></h1>
+      <p class="subtitle">Whether your clinic runs Dentrix, eClinicalWorks, or custom EHRs, PMS vendors don't push live bookings to LamaniHub.</p>
+      
+      <div class="card-grid">
+        <div class="feature-card">
+          <div class="lucide-icon-wrap">
+            <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/><path d="M6 6h10"/><path d="M6 10h10"/></svg>
+          </div>
+          <div class="card-title">Fragmented EHRs</div>
+          <div class="card-desc">Every clinic uses a different web-based management portal.</div>
+        </div>
+        <div class="feature-card">
+          <div class="lucide-icon-wrap">
+            <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg>
+          </div>
+          <div class="card-title">Zero Push Webhooks</div>
+          <div class="card-desc">Cloud CMS systems cannot send outbound real-time events to LamaniHub.</div>
+        </div>
+        <div class="feature-card">
+          <div class="lucide-icon-wrap">
+            <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M15 2H9a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1Z"/></svg>
+          </div>
+          <div class="card-title">Manual Re-Entry</div>
+          <div class="card-desc">Staff re-type WhatsApp AI appointments by hand into the PMS.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCENE 2: THE SOLUTION — EXCLUSIVE LAMANIHUB BRIDGE -->
+    <div class="scene scene-2">
+      <div class="scene-tag">
+        <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        <span>Purpose-Built for LamaniHub</span>
+      </div>
+      <h1 class="title-large">LamaniSync Bridges <br><span class="gradient-text">LamaniHub to ANY Clinic CMS</span></h1>
+      <p class="subtitle">An enterprise Manifest V3 extension deployed on staff workstations. Powers seamless two-way synchronization directly through the staff's browser session.</p>
+
+      <div class="extension-mockup">
+        <div class="mockup-header">
+          <div class="station-name">
+            <span class="pulse-dot"></span>
+            <span>Station #1 • Front Desk</span>
+          </div>
+          <span class="status-pill">LAMANIHUB SYNC</span>
+        </div>
+        <div class="mockup-row">
+          <span>Connected Platform</span>
+          <span>LamaniHub & Sara AI</span>
+        </div>
+        <div class="mockup-row">
+          <span>Paired Clinic CMS</span>
+          <span>Dentrix / Pulse / eCW / Custom</span>
+        </div>
+        <div class="mockup-row">
+          <span>Multi-Workstation Fencing</span>
+          <span>Leader Leased (Token #42)</span>
+        </div>
+        <div class="mockup-row">
+          <span>WhatsApp AI Outbox</span>
+          <span>Auto-Injected & Verified</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCENE 3: UNIVERSAL CMS ADAPTER MATRIX -->
+    <div class="scene scene-3">
+      <div class="scene-tag">
+        <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m21 16-4 4-4-4"/><path d="M17 20V4"/><path d="m3 8 4-4 4 4"/><path d="M7 4v16"/></svg>
+        <span>One Hub • Any Cloud PMS</span>
+      </div>
+      <h1 class="title-large">Connect LamaniHub Across <br><span class="gradient-text">Your Entire CMS Roster</span></h1>
+      <p class="subtitle">LamaniSync uses declarative signed adapter manifests. One extension connects LamaniHub to all major healthcare systems without code rewrites.</p>
+
+      <div class="cms-matrix-wrap">
+        <div class="hub-node">
+          <h4>LamaniHub</h4>
+          <p>Sara AI • WhatsApp Bookings</p>
+        </div>
+        <div class="engine-bridge">
+          <div class="bridge-arrows">
+            <svg class="lucide-icon" style="width:26px; height:26px;" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M7 16V4m0 0L3 8m4-4 4 4m6 4v12m0 0 4-4m-4 4-4-4"/></svg>
+          </div>
+          <div class="engine-badge">⚡ LamaniSync Engine</div>
+          <div class="bridge-arrows">
+            <svg class="lucide-icon" style="width:26px; height:26px;" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M7 16V4m0 0L3 8m4-4 4 4m6 4v12m0 0 4-4m-4 4-4-4"/></svg>
+          </div>
+        </div>
+        <div class="cms-targets-stack">
+          <div class="cms-target-pill">
+            <span>Dentrix Ascend</span>
+            <span class="tag">Certified</span>
+          </div>
+          <div class="cms-target-pill">
+            <span>eClinicalWorks</span>
+            <span class="tag">Certified</span>
+          </div>
+          <div class="cms-target-pill">
+            <span>LamaniPulse EHR</span>
+            <span class="tag">Certified</span>
+          </div>
+          <div class="cms-target-pill">
+            <span>Custom Clinic Portals</span>
+            <span class="tag">Supported</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCENE 4: HEALTHCARE GRADE COMPLIANCE -->
+    <div class="scene scene-4">
+      <div class="scene-tag">
+        <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <span>Zero-Knowledge Security</span>
+      </div>
+      <h1 class="title-large">Engineered for <br><span class="gradient-text">HIPAA & PDPA Compliance</span></h1>
+      <p class="subtitle">Zero passwords stored. Zero session cookies leaked. Zero raw patient health data stored in the extension.</p>
+
+      <div class="card-grid">
+        <div class="feature-card">
+          <div class="lucide-icon-wrap">
+            <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>
+          </div>
+          <div class="card-title">Zero Raw PHI Stored</div>
+          <div class="card-desc">Patient health records remain strictly contained inside your clinic's CMS.</div>
+        </div>
+        <div class="feature-card">
+          <div class="lucide-icon-wrap">
+            <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m15.5 7.5 2.3 2.3a1 1 0 0 0 1.4 0l2.1-2.1a1 1 0 0 0 0-1.4L19 4"/><path d="m21 2-9.6 9.6"/><circle cx="7.5" cy="15.5" r="5.5"/></svg>
+          </div>
+          <div class="card-title">Hardware Ed25519 Keys</div>
+          <div class="card-desc">Non-exportable WebCrypto keypair pairs each workstation securely to LamaniHub.</div>
+        </div>
+        <div class="feature-card">
+          <div class="lucide-icon-wrap">
+            <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 4.24 4.24"/><path d="m14.83 9.17 4.24-4.24"/><path d="m14.83 14.83 4.24 4.24"/><path d="m9.17 14.83-4.24 4.24"/></svg>
+          </div>
+          <div class="card-title">Exact-Origin Scope</div>
+          <div class="card-desc">Wildcards rejected. Permission binds strictly to your clinic's paired CMS origin.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCENE 5: OUTRO & CALL TO ACTION -->
+    <div class="scene scene-5">
+      <img src="https://res.cloudinary.com/lamanify/image/upload/v1790242929/LamaniSync_Logo.png" alt="LamaniSync Official Logo" class="outro-logo">
+      <h1 class="title-large">Connect LamaniHub to Your CMS <br>In <span class="gradient-text">Under 60 Seconds</span></h1>
+      <p class="subtitle">Eradicate manual double-entry. Automatically synchronize Sara AI WhatsApp bookings into your clinic calendar.</p>
+
+      <div class="cta-button">
+        <svg class="lucide-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+        <span>Install LamaniSync for LamaniHub</span>
+      </div>
+
+      <p style="margin-top: 1.5rem; font-size: 0.82rem; color: #64748b; font-weight: 500;">
+        Exclusively for LamaniHub Clinics • Certified Manifest V3 • Built by Lamanify
+      </p>
+    </div>
+
+    <!-- Video Progress Timeline Bar -->
+    <div class="video-timeline">
+      <div class="timeline-progress"></div>
+    </div>
+
+  </div>
+
+  <div class="controls-hint">
+    <svg class="lucide-icon" style="width:16px; height:16px;" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="16" y2="12"/><line x1="12" x2="12.01" y1="8" y2="8"/></svg>
+    <span>Loop: 20s. Open in Chrome (`open promo.html`) and record 16:9 canvas via QuickTime / OBS.</span>
+  </div>
+
+</body>
+</html>

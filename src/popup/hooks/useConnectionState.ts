@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import type { ConnectionState, ConnectionStateRecord } from '../../core/contracts/connection.js';
 import {
   SESSION_STORAGE_KEY,
@@ -105,6 +105,8 @@ export function useConnectionState(): UseConnectionStateReturn {
           if (parsed.success) {
             const sess = parsed.data;
             setSession(sess);
+            if (sess.lastReadAt) setLastReadAt(sess.lastReadAt);
+            if (sess.lastWriteAt) setLastWriteAt(sess.lastWriteAt);
 
             const hasPerm = await hasOriginPermission(sess.targetOrigin).catch(() => false);
             if (hasPerm) {
@@ -148,6 +150,12 @@ export function useConnectionState(): UseConnectionStateReturn {
                 const parsed = ConnectionSessionSchema.safeParse(raw);
                 if (parsed.success) {
                   setSession(parsed.data);
+                  if (parsed.data.lastReadAt && !rec.metadata?.lastReadAt) {
+                    setLastReadAt(parsed.data.lastReadAt);
+                  }
+                  if (parsed.data.lastWriteAt && !rec.metadata?.lastWriteAt) {
+                    setLastWriteAt(parsed.data.lastWriteAt);
+                  }
                 }
               }
             }
@@ -214,10 +222,50 @@ export function useConnectionState(): UseConnectionStateReturn {
     };
   }, [refreshState, applyRecordMetadata]);
 
-  const pair = async (code: string) => {
+  const probingAttemptedRef = useRef(false);
+
+  useEffect(() => {
+    if (connectionState === 'PROBING') {
+      if (!probingAttemptedRef.current && !isLoading) {
+        probingAttemptedRef.current = true;
+        void retry();
+      }
+    } else {
+      probingAttemptedRef.current = false;
+    }
+  }, [connectionState, isLoading]);
+
+  const pair = async (code: string, originOverride?: string) => {
     setIsLoading(true);
     setErrorMessage(null);
     try {
+      let resolvedOrigin = originOverride;
+      if (!resolvedOrigin && typeof chrome !== 'undefined' && chrome.tabs?.query) {
+        try {
+          const [activeTab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
+          if (activeTab?.url) {
+            const urlObj = new URL(activeTab.url);
+            if (urlObj.protocol === 'https:' || urlObj.protocol === 'http:') {
+              if (urlObj.hostname !== 'app.lamanihub.com') {
+                resolvedOrigin = urlObj.origin;
+              }
+            }
+          }
+          if (!resolvedOrigin) {
+            const allTabs = await chrome.tabs.query({});
+            const pulseTab = allTabs.find((t) => t.url && t.url.includes('app.lamanipulse.com'));
+            if (pulseTab?.url) {
+              resolvedOrigin = 'https://app.lamanipulse.com';
+            }
+          }
+        } catch {
+          // ignore
+        }
+      }
+      if (!resolvedOrigin) {
+        resolvedOrigin = 'https://app.lamanipulse.com';
+      }
+
       if (typeof chrome !== 'undefined' && chrome.runtime?.sendMessage) {
         const response = await new Promise<{
           success: boolean;
@@ -233,7 +281,12 @@ export function useConnectionState(): UseConnectionStateReturn {
           error?: string;
         }>((resolve) => {
           chrome.runtime.sendMessage(
-            { type: 'PAIR', pairingCode: code, deviceName: 'Popup Profile' },
+            {
+              type: 'PAIR',
+              pairingCode: code,
+              deviceName: 'Popup Profile',
+              targetOrigin: resolvedOrigin,
+            },
             (res) => {
               if (chrome.runtime.lastError) {
                 resolve({ success: false, error: chrome.runtime.lastError.message });
@@ -269,7 +322,7 @@ export function useConnectionState(): UseConnectionStateReturn {
       } else {
         const { publicKeySpki } = await getOrCreateDeviceKey();
         const client = new SyncApiClient();
-        const result = await client.pair(code, publicKeySpki, 'Popup Web Profile');
+        const result = await client.pair(code, publicKeySpki, 'Popup Web Profile', resolvedOrigin);
 
         const newSession: ConnectionSession = {
           installationId: result.installationId,

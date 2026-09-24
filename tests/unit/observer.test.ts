@@ -38,6 +38,13 @@ describe('MAIN-World Network Observer (Phase 5)', () => {
       expect(isAllowlistedObservationPath('/api/patients/P01')).toBe(true);
       expect(isAllowlistedObservationPath('/api/reference/providers')).toBe(true);
       expect(isAllowlistedObservationPath('/api/reference/services')).toBe(true);
+      expect(isAllowlistedObservationPath('/rest/v1/patients')).toBe(true);
+      expect(isAllowlistedObservationPath('/rest/v1/patients?select=*')).toBe(true);
+      expect(isAllowlistedObservationPath('/rest/v1/appointments')).toBe(true);
+      expect(isAllowlistedObservationPath('/rest/v1/appointments?id=eq.123')).toBe(true);
+      expect(isAllowlistedObservationPath('/rest/v1/profiles')).toBe(true);
+      expect(isAllowlistedObservationPath('/rest/v1/medical_services')).toBe(true);
+      expect(isAllowlistedObservationPath('/rest/v1/clinic_settings')).toBe(true);
     });
 
     it('rejects non-allowlisted and auth endpoints', () => {

@@ -38,9 +38,11 @@ export const HandshakeAckPayloadSchema = z
   })
   .strict();
 
+export const ENDPOINT_REGEX = /^\/[a-zA-Z0-9_\-/:?&=%.*,()+;$@~]*$/;
+
 export const ObservationPayloadSchema = z
   .object({
-    endpoint: z.string().min(1).regex(/^\/[a-zA-Z0-9_\-/:?&=%.]*$/),
+    endpoint: z.string().min(1).regex(ENDPOINT_REGEX),
     method: z.enum(['GET', 'HEAD']),
     statusCode: z.number().int(),
     data: z.unknown(),

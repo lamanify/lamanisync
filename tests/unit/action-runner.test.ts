@@ -206,4 +206,101 @@ describe('Predefined Action Runner (Phase 5)', () => {
     expect(data.id).toBe('APT-001');
     expect(data.rev).toBe(2);
   });
+
+  it('delegates write directly to window.supabase client in MAIN world without leaking tokens', async () => {
+    const mockInsert = vi.fn().mockReturnValue({
+      select: vi.fn().mockReturnValue({
+        single: vi.fn().mockResolvedValue({
+          data: {
+            id: 'APT-SB-1',
+            patient_id: 'P01',
+            provider_id: 'DOC01',
+            start_time: '2026-10-01T10:00:00+08:00',
+            end_time: '2026-10-01T10:15:00+08:00',
+            status: 'booked',
+            rev: 1,
+            created_at: '2026-09-23T00:00:00Z',
+          },
+          error: null,
+        }),
+      }),
+    });
+
+    const mockSupabase = {
+      from: vi.fn((table: string) => {
+        expect(table).toBe('appointments');
+        return { insert: mockInsert };
+      }),
+    };
+
+    const result = await executePredefinedAction({
+      actionId: ACTION_APPOINTMENT_CREATE,
+      correlationId: 'cmd-sb-1',
+      parameters: {
+        patientId: 'P01',
+        providerId: 'DOC01',
+        startTime: '2026-10-01T10:00:00+08:00',
+        endTime: '2026-10-01T10:15:00+08:00',
+      },
+      supabaseClient: mockSupabase,
+    });
+
+    expect(result.status).toBe('SUCCESS');
+    expect(mockSupabase.from).toHaveBeenCalledWith('appointments');
+    expect(mockInsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        patient_id: 'P01',
+        provider_id: 'DOC01',
+        status: 'booked',
+      })
+    );
+    const data = result.data as ApptResult;
+    expect(data.id).toBe('APT-SB-1');
+  });
+
+  it('executes PostgREST recipe override with snake_case mapping and Prefer representation header', async () => {
+    const mockFetch = vi.fn(async (url: string | URL | Request, init?: RequestInit) => {
+      expect(url).toBe('/rest/v1/appointments');
+      expect(init?.method).toBe('POST');
+      const headers = init?.headers as Record<string, string>;
+      expect(headers['Prefer']).toBe('return=representation');
+      const body = JSON.parse(init?.body as string);
+      expect(body.patient_id).toBe('P01');
+      return new Response(
+        JSON.stringify([
+          {
+            id: 'APT-PGRST-1',
+            patient_id: 'P01',
+            provider_id: 'DOC01',
+            start_time: '2026-10-01T10:00:00+08:00',
+            end_time: '2026-10-01T10:15:00+08:00',
+            status: 'booked',
+            rev: 1,
+          },
+        ]),
+        { status: 201, headers: { 'Content-Type': 'application/json' } }
+      );
+    });
+
+    const result = await executePredefinedAction({
+      actionId: ACTION_APPOINTMENT_CREATE,
+      correlationId: 'cmd-pgrst-1',
+      parameters: {
+        patientId: 'P01',
+        providerId: 'DOC01',
+        startTime: '2026-10-01T10:00:00+08:00',
+        endTime: '2026-10-01T10:15:00+08:00',
+      },
+      fetchFn: mockFetch as unknown as typeof fetch,
+      recipe: {
+        path: '/rest/v1/appointments',
+        method: 'POST',
+      },
+    });
+
+    expect(result.status).toBe('SUCCESS');
+    const data = result.data as ApptResult;
+    expect(data.id).toBe('APT-PGRST-1');
+    expect(data.status).toBe('booked');
+  });
 });

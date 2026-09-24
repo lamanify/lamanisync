@@ -25,7 +25,7 @@ export const NormalizedAppointmentSchema = z.object({
   revision: RevisionSchema,
   createdAt: z.string().min(1),
   updatedAt: z.string().min(1),
-});
+}).passthrough();
 
 export type NormalizedAppointment = z.infer<typeof NormalizedAppointmentSchema>;
 
@@ -36,12 +36,12 @@ export function normalizeAppointment(raw: unknown): NormalizedAppointment {
 
   const r = raw as Record<string, unknown>;
 
-  const startTime = String(r.startTime ?? '').trim();
-  const endTime = String(r.endTime ?? '').trim();
+  let startTime = String(r.startTime ?? r.start_time ?? '').trim();
+  let endTime = String(r.endTime ?? r.end_time ?? '').trim();
 
-  // Derive slotDate and slotTimeNaive from startTime if missing
-  let slotDate = typeof r.slotDate === 'string' ? r.slotDate.trim() : '';
-  let slotTimeNaive = typeof r.slotTimeNaive === 'string' ? r.slotTimeNaive.trim() : '';
+  // Derive slotDate and slotTimeNaive from startTime or appointment_date/appointment_time
+  let slotDate = typeof r.slotDate === 'string' ? r.slotDate.trim() : (typeof r.appointment_date === 'string' ? r.appointment_date.trim() : '');
+  let slotTimeNaive = typeof r.slotTimeNaive === 'string' ? r.slotTimeNaive.trim() : (typeof r.appointment_time === 'string' ? r.appointment_time.trim() : '');
 
   if (slotDate) {
     const match = slotDate.match(/^(\d{4}-\d{2}-\d{2})/);
@@ -68,6 +68,18 @@ export function normalizeAppointment(raw: unknown): NormalizedAppointment {
     slotTimeNaive = `${slotTimeNaive}:00`;
   }
 
+  if (!startTime && slotDate && slotTimeNaive) {
+    startTime = `${slotDate}T${slotTimeNaive}+08:00`;
+  }
+
+  if (!endTime && startTime) {
+    const duration = Number(r.duration_minutes ?? r.duration ?? 30);
+    const parsedStart = new Date(startTime);
+    endTime = !isNaN(parsedStart.getTime())
+      ? new Date(parsedStart.getTime() + duration * 60000).toISOString()
+      : startTime;
+  }
+
   const rawStatus = String(r.status ?? 'booked').toLowerCase().trim();
   const status: AppointmentStatus =
     rawStatus === 'cancelled' || rawStatus === 'canceled'
@@ -81,11 +93,27 @@ export function normalizeAppointment(raw: unknown): NormalizedAppointment {
   const rawRev = r.revision ?? r.rev ?? 1;
   const revision = Number.isInteger(Number(rawRev)) ? Math.max(0, Number(rawRev)) : 0;
 
+  const patientName =
+    r.patient_name ||
+    r.patientName ||
+    (r.patients && typeof r.patients === 'object'
+      ? `${String((r.patients as Record<string, unknown>).first_name || '')} ${String((r.patients as Record<string, unknown>).last_name || '')}`.trim()
+      : undefined);
+
+  const providerName =
+    r.doctor_name ||
+    r.providerName ||
+    (r.profiles && typeof r.profiles === 'object'
+      ? `Dr. ${String((r.profiles as Record<string, unknown>).first_name || '')} ${String((r.profiles as Record<string, unknown>).last_name || '')}`.trim()
+      : undefined);
+
+  const serviceName = r.service_name || r.serviceName || r.reason || undefined;
+
   const normalized = {
     id: String(r.id ?? '').trim(),
-    patientId: String(r.patientId ?? '').trim(),
-    providerId: String(r.providerId ?? '').trim(),
-    serviceId: String(r.serviceId ?? '').trim(),
+    patientId: String(r.patientId ?? r.patient_id ?? '').trim(),
+    providerId: String(r.providerId ?? r.provider_id ?? r.doctor_id ?? '').trim(),
+    serviceId: String(r.serviceId ?? r.service_id ?? (r.reason ? String(r.reason).slice(0, 32) : 'general')).trim(),
     locationId: r.locationId ? String(r.locationId).trim() : undefined,
     startTime,
     endTime,
@@ -93,10 +121,14 @@ export function normalizeAppointment(raw: unknown): NormalizedAppointment {
     slotTimeNaive,
     displayTime: r.displayTime ? String(r.displayTime).trim() : undefined,
     status,
-    notes: r.notes ? String(r.notes).trim() : undefined,
+    notes: r.notes ? String(r.notes).trim() : (r.reason ? String(r.reason).trim() : undefined),
     revision,
-    createdAt: String(r.createdAt || new Date().toISOString()),
-    updatedAt: String(r.updatedAt || new Date().toISOString()),
+    patientName: patientName || undefined,
+    providerName: providerName || undefined,
+    serviceName: serviceName ? String(serviceName) : undefined,
+    reason: r.reason ? String(r.reason) : undefined,
+    createdAt: String(r.createdAt || r.created_at || new Date().toISOString()),
+    updatedAt: String(r.updatedAt || r.updated_at || new Date().toISOString()),
   };
 
   return NormalizedAppointmentSchema.parse(normalized);
