@@ -13,6 +13,7 @@
     "test": "vitest run",
     "test:contract": "node scripts/test-contract.js",
     "test:e2e": "node scripts/test-e2e.js",
+    "test:responsive": "node scripts/audit-responsiveness.js",
     "scan:phi": "node scripts/scan-phi.js",
     "package": "node scripts/package.js",
     "mock:cms": "node test-harness/mock-cms/server.js",

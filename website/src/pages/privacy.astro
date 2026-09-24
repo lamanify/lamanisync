@@ -9,7 +9,7 @@ import Layout from '../layouts/Layout.astro';
   <section class="legal-hero">
     <div class="bg-grid-pattern"></div>
     <div class="container legal-container">
-      <div class="badge-pill">
+      <div class="attio-badge crimson">
         <svg style="width:12px; height:12px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
         <span>Healthcare Data Protection</span>
       </div>
@@ -130,8 +130,8 @@ import Layout from '../layouts/Layout.astro';
     position: relative;
     padding: 5rem 0 3.5rem 0;
     text-align: center;
-    background: linear-gradient(180deg, #ffffff 0%, #fcfcfd 100%);
-    border-bottom: 1px solid #f1f5f9;
+    background: #ffffff;
+    border-bottom: 1px solid var(--border-hairline);
   }
 
   .legal-container {
@@ -168,10 +168,10 @@ import Layout from '../layouts/Layout.astro';
 
   .legal-card {
     background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 20px;
+    border: 1px solid var(--border-hairline);
+    border-radius: 16px;
     padding: 3.5rem;
-    box-shadow: 0 4px 20px rgba(15, 23, 42, 0.03);
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
   }
 
   .legal-card h2 {
@@ -211,9 +211,11 @@ import Layout from '../layouts/Layout.astro';
   }
 
   .perm-table-wrapper {
+    max-width: 100%;
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
     margin: 1.5rem 0 2rem 0;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--border-hairline);
     border-radius: 12px;
   }
 
@@ -229,12 +231,12 @@ import Layout from '../layouts/Layout.astro';
     padding: 0.9rem 1.2rem;
     font-weight: 700;
     color: var(--text-main);
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 1px solid var(--border-hairline);
   }
 
   .perm-table td {
     padding: 0.9rem 1.2rem;
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1px solid var(--border-subtle);
     color: #475569;
     vertical-align: top;
     line-height: 1.55;
@@ -245,8 +247,9 @@ import Layout from '../layouts/Layout.astro';
   }
 
   .perm-table code {
-    background: var(--primary-subtle);
-    color: var(--primary-dark);
+    background: #f1f5f9;
+    color: #0f172a;
+    border: 1px solid var(--border-hairline);
     padding: 0.2rem 0.45rem;
     border-radius: 4px;
     font-size: 0.82rem;
@@ -256,7 +259,7 @@ import Layout from '../layouts/Layout.astro';
 
   .contact-box-legal {
     background: #f8fafc;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--border-hairline);
     border-radius: 12px;
     padding: 1.5rem;
     margin-top: 1.2rem;
@@ -279,6 +282,26 @@ import Layout from '../layouts/Layout.astro';
   @media (max-width: 768px) {
     .legal-card {
       padding: 2rem 1.5rem;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .legal-hero {
+      padding: 3.5rem 0 2.5rem 0;
+    }
+    .legal-title {
+      font-size: 2rem;
+    }
+    .legal-content-section {
+      padding: 2.5rem 0 4rem 0;
+    }
+    .legal-card {
+      padding: 1.5rem 1rem;
+    }
+    .perm-table th,
+    .perm-table td {
+      padding: 0.65rem 0.8rem;
+      font-size: 0.82rem;
     }
   }
 </style>

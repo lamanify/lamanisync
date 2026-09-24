@@ -9,11 +9,13 @@ import Layout from '../layouts/Layout.astro';
   <section class="contact-hero">
     <div class="bg-grid-pattern"></div>
     <div class="container contact-head-container">
-      <div class="badge-pill">
+      <div class="attio-badge crimson">
         <svg style="width:12px; height:12px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
         <span>Dedicated Clinical Support</span>
       </div>
-      <h1 class="contact-title">How can we help your clinic?</h1>
+      <h1 class="contact-title">
+        <span class="heading-dark">How can we help</span> <span class="heading-muted">your clinic?</span>
+      </h1>
       <p class="contact-subtitle">
         Whether you need help pairing your front-desk workstations or need a custom adapter built for your proprietary clinic software, our integration engineers are ready to help.
       </p>
@@ -201,8 +203,8 @@ import Layout from '../layouts/Layout.astro';
     position: relative;
     padding: 5rem 0 3.5rem 0;
     text-align: center;
-    background: linear-gradient(180deg, #ffffff 0%, #fcfcfd 100%);
-    border-bottom: 1px solid #f1f5f9;
+    background: #ffffff;
+    border-bottom: 1px solid var(--border-hairline);
   }
 
   .contact-head-container {
@@ -243,10 +245,10 @@ import Layout from '../layouts/Layout.astro';
 
   .form-card {
     background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 20px;
+    border: 1px solid var(--border-hairline);
+    border-radius: 16px;
     padding: 3rem;
-    box-shadow: 0 4px 20px rgba(15, 23, 42, 0.03);
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
   }
 
   .form-title {
@@ -292,29 +294,49 @@ import Layout from '../layouts/Layout.astro';
   }
 
   .form-group input,
-  .form-group select,
-  .form-group textarea {
+  .form-group select {
     font-family: inherit;
     font-size: 0.92rem;
     padding: 0.75rem 1rem;
-    border: 1px solid #cbd5e1;
-    border-radius: 10px;
+    border: 1px solid var(--border-hairline);
+    border-radius: 8px;
     background: #ffffff;
     color: var(--text-main);
     transition: border-color 0.15s, box-shadow 0.15s;
     outline: none;
+    width: 100%;
+    max-width: 100%;
+    min-height: 44px;
+    box-sizing: border-box;
+  }
+
+  .form-group textarea {
+    font-family: inherit;
+    font-size: 0.92rem;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border-hairline);
+    border-radius: 8px;
+    background: #ffffff;
+    color: var(--text-main);
+    transition: border-color 0.15s, box-shadow 0.15s;
+    outline: none;
+    width: 100%;
+    max-width: 100%;
+    min-height: 90px;
+    box-sizing: border-box;
   }
 
   .form-group input:focus,
   .form-group select:focus,
   .form-group textarea:focus {
     border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(233, 36, 81, 0.15);
+    box-shadow: 0 0 0 3px rgba(233, 36, 81, 0.1);
   }
 
   .form-submit-btn {
     align-self: flex-start;
     padding: 0.85rem 2rem;
+    min-height: 44px;
     margin-top: 0.5rem;
   }
 
@@ -371,16 +393,18 @@ import Layout from '../layouts/Layout.astro';
 
   .info-card {
     background: #ffffff;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--border-hairline);
     border-radius: 16px;
     padding: 1.8rem;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
   }
 
   .info-icon-box {
     width: 44px;
     height: 44px;
     border-radius: 10px;
-    background: var(--primary-subtle);
+    background: #f8fafc;
+    border: 1px solid var(--border-hairline);
     color: var(--primary);
     display: flex;
     align-items: center;
@@ -420,8 +444,8 @@ import Layout from '../layouts/Layout.astro';
   }
 
   .official-pill-card {
-    background: linear-gradient(135deg, #f8fafc 0%, var(--primary-subtle) 100%);
-    border: 1px solid var(--primary-border);
+    background: #fafafa;
+    border: 1px solid var(--border-hairline);
     border-radius: 16px;
     padding: 1.8rem;
     font-size: 0.85rem;
@@ -439,12 +463,39 @@ import Layout from '../layouts/Layout.astro';
   @media (max-width: 900px) {
     .contact-grid {
       grid-template-columns: 1fr;
+      gap: 2.5rem;
     }
     .form-row {
       grid-template-columns: 1fr;
     }
     .form-card {
       padding: 2rem 1.5rem;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .contact-hero {
+      padding: 3.5rem 0 2.5rem 0;
+    }
+    .contact-section {
+      padding: 3rem 0 4rem 0;
+    }
+    .contact-title {
+      font-size: 2rem;
+    }
+    .form-card {
+      padding: 1.5rem 1rem;
+    }
+    .form-submit-btn {
+      width: 100%;
+      min-height: 44px;
+      justify-content: center;
+    }
+    .info-card {
+      padding: 1.5rem 1rem;
+    }
+    .official-pill-card {
+      padding: 1.5rem 1rem;
     }
   }
 </style>

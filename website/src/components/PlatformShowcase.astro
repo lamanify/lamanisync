@@ -1,0 +1,1329 @@
+---
+// PlatformShowcase.astro - 1-to-1 Attio-inspired interactive platform showcase
+---
+<section class="section platform-section" id="platform">
+  <div class="container">
+    <!-- Header with Badge & Two-Tone Title -->
+    <div class="platform-header">
+      <div class="attio-badge blue">
+        <span>Platform</span>
+      </div>
+      <h2 class="platform-title">
+        <span class="heading-dark">The intelligent system that never sleeps.</span>
+        <span class="heading-muted">Reads real-time schedules at 2am. Catches booking clashes before they slip. Hands you the answer before you ask.</span>
+      </h2>
+    </div>
+
+    <!-- Framed Split Showcase Box (Attio media_1790251608654.png & media_1790251621281.png) -->
+    <div class="platform-framed-box">
+      <!-- Left Column: 5 Vertical Tabs -->
+      <div class="platform-tabs" role="tablist" aria-label="Platform features">
+        <button
+          class="tab-btn active"
+          id="tab-btn-sync"
+          role="tab"
+          aria-selected="true"
+          aria-controls="tab-sync"
+          tabindex="0"
+          data-tab="tab-sync"
+        >
+          <span class="tab-indicator" aria-hidden="true"></span>
+          <span class="tab-label">Sync appointments</span>
+        </button>
+        <button
+          class="tab-btn"
+          id="tab-btn-clashes"
+          role="tab"
+          aria-selected="false"
+          aria-controls="tab-clashes"
+          tabindex="-1"
+          data-tab="tab-clashes"
+        >
+          <span class="tab-indicator" aria-hidden="true"></span>
+          <span class="tab-label">Prevent clashes</span>
+        </button>
+        <button
+          class="tab-btn"
+          id="tab-btn-checkins"
+          role="tab"
+          aria-selected="false"
+          aria-controls="tab-checkins"
+          tabindex="-1"
+          data-tab="tab-checkins"
+        >
+          <span class="tab-indicator" aria-hidden="true"></span>
+          <span class="tab-label">Automate check-ins</span>
+        </button>
+        <button
+          class="tab-btn"
+          id="tab-btn-readbacks"
+          role="tab"
+          aria-selected="false"
+          aria-controls="tab-readbacks"
+          tabindex="-1"
+          data-tab="tab-readbacks"
+        >
+          <span class="tab-indicator" aria-hidden="true"></span>
+          <span class="tab-label">Verify readbacks</span>
+        </button>
+        <button
+          class="tab-btn"
+          id="tab-btn-security"
+          role="tab"
+          aria-selected="false"
+          aria-controls="tab-security"
+          tabindex="-1"
+          data-tab="tab-security"
+        >
+          <span class="tab-indicator" aria-hidden="true"></span>
+          <span class="tab-label">Zero-PHI security</span>
+        </button>
+      </div>
+
+      <!-- Right Column: Interactive Content Panes -->
+      <div class="platform-content">
+        <!-- Subhead Banner -->
+        <div class="platform-subhead-banner" id="platform-subhead">
+          <p>
+            <strong class="subhead-title">Your team, amplified.</strong>
+            <span class="subhead-desc">Agents synchronize appointments and reach out when patients are looking, building a schedule of slots ready to treat.</span>
+          </p>
+        </div>
+
+        <!-- Tab 1: Sync appointments (Matching Attio Bento Grid) -->
+        <div class="tab-pane active" id="tab-sync" role="tabpanel" aria-labelledby="tab-btn-sync">
+          <div class="split-pane">
+            <!-- Left Pane Column -->
+            <div class="split-col left-col">
+              <div class="col-head">
+                <h3 class="col-title">Free your front desk to care.</h3>
+                <p class="col-desc">Agents handle the schedule and busywork. Staff focus their time where patient care happens.</p>
+              </div>
+
+              <!-- Ask Sara AI Prompt Bar -->
+              <div class="prompt-bar">
+                <span class="prompt-placeholder">Ask Sara AI...</span>
+                <button class="prompt-submit-btn" aria-label="Submit query">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <line x1="12" y1="19" x2="12" y2="5"></line>
+                    <polyline points="5 12 12 5 19 12"></polyline>
+                  </svg>
+                </button>
+              </div>
+
+              <!-- Synced Appointments List Card -->
+              <div class="sync-list-box">
+                <div class="sync-list-title">6 appointments ready for sync</div>
+                <div class="sync-items">
+                  <div class="sync-item">
+                    <div class="item-icon dentrix">D</div>
+                    <div class="item-text">
+                      <strong class="item-name">Dentrix Ascend</strong>
+                      <span class="item-detail">Operatory 2: Root Canal · 09:30 AM</span>
+                    </div>
+                  </div>
+                  <div class="sync-item">
+                    <div class="item-icon ecw">eC</div>
+                    <div class="item-text">
+                      <strong class="item-name">eClinicalWorks</strong>
+                      <span class="item-detail">Dr. Sarah Lee: New Patient · 10:00 AM</span>
+                    </div>
+                  </div>
+                  <div class="sync-item">
+                    <div class="item-icon pulse">LP</div>
+                    <div class="item-text">
+                      <strong class="item-name">LamaniPulse</strong>
+                      <span class="item-detail">Chair 1: Scaling & Polishing · 10:45 AM</span>
+                    </div>
+                  </div>
+                  <div class="sync-item">
+                    <div class="item-icon dentrix">D</div>
+                    <div class="item-text">
+                      <strong class="item-name">Dentrix Ascend</strong>
+                      <span class="item-detail">Operatory 1: Ortho Checkup · 02:00 PM</span>
+                    </div>
+                  </div>
+                  <div class="sync-item">
+                    <div class="item-icon ecw">eC</div>
+                    <div class="item-text">
+                      <strong class="item-name">eClinicalWorks</strong>
+                      <span class="item-detail">Dr. Tan: Pediatric Intake · 03:15 PM</span>
+                    </div>
+                  </div>
+                  <div class="sync-item">
+                    <div class="item-icon pulse">LP</div>
+                    <div class="item-text">
+                      <strong class="item-name">LamaniPulse</strong>
+                      <span class="item-detail">Chair 2: Whitening Consultation · 04:30 PM</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Pane Column: Concentric Rings Canvas -->
+            <div class="split-col right-col">
+              <div class="col-head">
+                <h3 class="col-title">Agents verify. You treat.</h3>
+                <p class="col-desc">Every slot is verified and read back, so doctors know when and why to engage.</p>
+              </div>
+
+              <!-- Concentric Rings Canvas -->
+              <div class="orbital-wrap">
+                <div class="orbital-canvas">
+                  <!-- 3 Concentric Rings -->
+                  <div class="orbital-ring ring-3"></div>
+                  <div class="orbital-ring ring-2"></div>
+                  <div class="orbital-ring ring-1"></div>
+
+                  <!-- Elevated Center Disc -->
+                  <div class="orbital-disc">
+                    <svg class="disc-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                      <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path>
+                    </svg>
+                  </div>
+
+                  <!-- 4 Pastel Floating Badges Matching Attio Screenshot -->
+                  <div class="floating-tag tag-yellow">
+                    <span>Verified Sync</span>
+                  </div>
+
+                  <div class="floating-tag tag-mint">
+                    <span>Dr. Sarah: Free</span>
+                  </div>
+
+                  <div class="floating-tag tag-blue">
+                    <span>Slot Confirmed</span>
+                  </div>
+
+                  <div class="floating-tag tag-lavender">
+                    <span>100% Readback</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 2: Prevent clashes -->
+        <div class="tab-pane" id="tab-clashes" role="tabpanel" aria-labelledby="tab-btn-clashes">
+          <div class="split-pane">
+            <div class="split-col left-col">
+              <div class="col-head">
+                <h3 class="col-title">Real-time concurrency guard.</h3>
+                <p class="col-desc">Sara AI issues millisecond reservation tokens to lock appointment slots before writing.</p>
+              </div>
+              <div class="detail-box">
+                <div class="timeline-step">
+                  <div class="step-dot active"></div>
+                  <div class="step-body">
+                    <strong>1. Patient inquires at 02:14 AM</strong>
+                    <p>Sara AI reads available operatory chairs from workstation session.</p>
+                  </div>
+                </div>
+                <div class="timeline-step">
+                  <div class="step-dot lock"></div>
+                  <div class="step-body">
+                    <strong>2. Ephemeral lock placed (30s hold)</strong>
+                    <p>Prevents concurrent patient booking collision across all channels.</p>
+                  </div>
+                </div>
+                <div class="timeline-step">
+                  <div class="step-dot confirmed"></div>
+                  <div class="step-body">
+                    <strong>3. Slot booked into CMS calendar</strong>
+                    <p>Written via certified adapter with instant calendar visual confirmation.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="split-col right-col">
+              <div class="col-head">
+                <h3 class="col-title">Doctor shifts & break locks.</h3>
+                <p class="col-desc">Clinic staff block time directly in CMS; LamaniSync respects changes instantly.</p>
+              </div>
+              <div class="calendar-preview">
+                <div class="cal-block unavail">
+                  <span class="cal-time">12:00 PM - 01:00 PM</span>
+                  <span class="cal-status">Lunch Break Locked</span>
+                </div>
+                <div class="cal-block available">
+                  <span class="cal-time">01:00 PM - 02:00 PM</span>
+                  <span class="cal-status">Dr. Sarah (Dental Surgery)</span>
+                </div>
+                <div class="cal-block available booked">
+                  <span class="cal-time">02:00 PM - 03:00 PM</span>
+                  <span class="cal-status">Sara AI Booked: Dental Scaling</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 3: Automate check-ins -->
+        <div class="tab-pane" id="tab-checkins" role="tabpanel" aria-labelledby="tab-btn-checkins">
+          <div class="split-pane">
+            <div class="split-col left-col">
+              <div class="col-head">
+                <h3 class="col-title">Intelligent WhatsApp check-in.</h3>
+                <p class="col-desc">Patients receive localized WhatsApp confirmation with location and calendar invites.</p>
+              </div>
+              <div class="chat-bubble-container">
+                <div class="chat-bubble incoming">
+                  <p>Hi, I would like to book a dental checkup for tomorrow afternoon.</p>
+                  <span class="chat-time">02:14 AM</span>
+                </div>
+                <div class="chat-bubble outgoing">
+                  <p>Hello! Dr. Sarah has an opening tomorrow at <strong>02:00 PM</strong> at Sentosa branch. Shall I secure this slot for you?</p>
+                  <span class="chat-time">02:14 AM</span>
+                </div>
+                <div class="chat-bubble incoming">
+                  <p>Yes, please lock that in for me!</p>
+                  <span class="chat-time">02:15 AM</span>
+                </div>
+                <div class="chat-bubble outgoing confirmed">
+                  <p>Confirmed! Your appointment is recorded in the clinic calendar. See you tomorrow at 2:00 PM.</p>
+                  <span class="chat-time">02:15 AM</span>
+                </div>
+              </div>
+            </div>
+            <div class="split-col right-col">
+              <div class="col-head">
+                <h3 class="col-title">Front desk queue triage.</h3>
+                <p class="col-desc">Patient status automatically changes to "Checked-in" upon clinic arrival.</p>
+              </div>
+              <div class="triage-status-list">
+                <div class="triage-item">
+                  <span class="triage-name">Ahmad Zulkifli</span>
+                  <span class="triage-badge badge-green">Checked-In</span>
+                </div>
+                <div class="triage-item">
+                  <span class="triage-name">Rachel Tan</span>
+                  <span class="triage-badge badge-blue">Arriving (15m)</span>
+                </div>
+                <div class="triage-item">
+                  <span class="triage-name">Kavitha Nair</span>
+                  <span class="triage-badge badge-purple">Completed</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 4: Verify readbacks -->
+        <div class="tab-pane" id="tab-readbacks" role="tabpanel" aria-labelledby="tab-btn-readbacks">
+          <div class="split-pane">
+            <div class="split-col left-col">
+              <div class="col-head">
+                <h3 class="col-title">Dual-phase readback verification.</h3>
+                <p class="col-desc">Never trust a blind write. The synchronizer queries the CMS DOM after writing to confirm persistence.</p>
+              </div>
+              <div class="readback-flow">
+                <div class="flow-pill">
+                  <span class="flow-num">1</span>
+                  <span>Dispatch Write Command</span>
+                </div>
+                <div class="flow-arrow">↓</div>
+                <div class="flow-pill">
+                  <span class="flow-num">2</span>
+                  <span>Query Schedule Grid from CMS</span>
+                </div>
+                <div class="flow-arrow">↓</div>
+                <div class="flow-pill verified">
+                  <span class="flow-num">✓</span>
+                  <span>Slot Matches: Confirmed Verified</span>
+                </div>
+              </div>
+            </div>
+            <div class="split-col right-col">
+              <div class="col-head">
+                <h3 class="col-title">Audited sync telemetry.</h3>
+                <p class="col-desc">Every transaction leaves an immutable cryptographic verification hash.</p>
+              </div>
+              <div class="audit-log-box">
+                <div class="log-line"><code>[02:15:02] WRITE_APPT: Dentrix_Op2 #88412</code></div>
+                <div class="log-line"><code>[02:15:03] READBACK_QUERY: Op2 14:00</code></div>
+                <div class="log-line success"><code>[02:15:03] CONFIRMED: Match 100% (latency: 1.1s)</code></div>
+                <div class="log-line"><code>[02:15:03] ED25519_SIG: 8f4a...e12d verified</code></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 5: Zero-PHI security -->
+        <div class="tab-pane" id="tab-security" role="tabpanel" aria-labelledby="tab-btn-security">
+          <div class="split-pane">
+            <div class="split-col left-col">
+              <div class="col-head">
+                <h3 class="col-title">Pure in-memory execution.</h3>
+                <p class="col-desc">No patient data touches local disk or chrome.storage. Everything lives in volatile memory only.</p>
+              </div>
+              <div class="security-visual">
+                <div class="sec-item">
+                  <div class="sec-icon check">✓</div>
+                  <div class="sec-text">
+                    <strong>Zero Disk Storage:</strong> Patient identity disappears immediately after write.
+                  </div>
+                </div>
+                <div class="sec-item">
+                  <div class="sec-icon check">✓</div>
+                  <div class="sec-text">
+                    <strong>No Password Leaks:</strong> Session cookies and CMS passwords stay within the browser.
+                  </div>
+                </div>
+                <div class="sec-item">
+                  <div class="sec-icon check">✓</div>
+                  <div class="sec-text">
+                    <strong>Scoped Permissions:</strong> Manifest V3 strictly scoped to clinic portal domain.
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="split-col right-col">
+              <div class="col-head">
+                <h3 class="col-title">Hardware WebCrypto Ed25519.</h3>
+                <p class="col-desc">Workstation pairing keys are non-exportable and authenticated via public key cryptography.</p>
+              </div>
+              <div class="crypto-box">
+                <div class="crypto-header">
+                  <span class="crypto-dot"></span>
+                  <span>Non-Exportable Device Keypair</span>
+                </div>
+                <div class="crypto-key">SHA-256: 9b:3e:71:a4:8f:12:dc:01:99:43...</div>
+                <p class="crypto-note">Protected by Chrome MV3 sandbox and native WebCrypto API.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 5: Speed to booking section with 24px Dotted Canvas Holding 4 Live Metrics -->
+    <div class="speed-section">
+      <div class="speed-head">
+        <h2 class="speed-title">
+          <span class="heading-dark">Speed to booking, every time.</span>
+          <span class="heading-muted">New appointments get verified, read back, and routed to your CMS before the patient ever hangs up.</span>
+        </h2>
+      </div>
+
+      <div class="speed-canvas bg-dots-pattern">
+        <div class="speed-metrics-grid">
+          <div class="speed-card">
+            <div class="speed-number">&lt; 1.2s</div>
+            <div class="speed-label">Sub-Second Writeback</div>
+            <p class="speed-sub">Synchronized from WhatsApp chat to your clinic calendar</p>
+          </div>
+          <div class="speed-card">
+            <div class="speed-number">100%</div>
+            <div class="speed-label">Readback Verification</div>
+            <p class="speed-sub">Dual-phase re-query guarantees zero phantom bookings</p>
+          </div>
+          <div class="speed-card">
+            <div class="speed-number">0</div>
+            <div class="speed-label">Open Firewall Ports</div>
+            <p class="speed-sub">Operates over secure outbound HTTPS/WSS tunnels</p>
+          </div>
+          <div class="speed-card">
+            <div class="speed-number">Zero PHI</div>
+            <div class="speed-label">Local Workstation Storage</div>
+            <p class="speed-sub">Data processed in memory; zero patient info saved to disk</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  // Vanilla Client script to handle accessible tab switching
+  const tabButtons = Array.from(document.querySelectorAll('.platform-tabs .tab-btn'));
+  const tabPanes = Array.from(document.querySelectorAll('.platform-content .tab-pane'));
+  const subheadDesc = document.querySelector('#platform-subhead .subhead-desc');
+  const subheadTitle = document.querySelector('#platform-subhead .subhead-title');
+
+  const subheads: Record<string, { title: string; desc: string }> = {
+    'tab-sync': {
+      title: 'Your team, amplified.',
+      desc: 'Agents synchronize appointments and reach out when patients are looking, building a schedule of slots ready to treat.'
+    },
+    'tab-clashes': {
+      title: 'Your schedule, collision-free.',
+      desc: 'Sara AI locks slots in memory with millisecond reservation tokens to eliminate double bookings.'
+    },
+    'tab-checkins': {
+      title: 'Patient intake, automated.',
+      desc: 'Instant WhatsApp reminders, branch directions, and digital pre-intake before patients arrive.'
+    },
+    'tab-readbacks': {
+      title: 'Zero phantom records.',
+      desc: 'Dual-phase confirmation queries your clinic software DOM to verify the appointment exists before confirming.'
+    },
+    'tab-security': {
+      title: 'Healthcare privacy by design.',
+      desc: 'Zero local disk storage, non-exportable hardware WebCrypto keys, and strict host origin scoping.'
+    }
+  };
+
+  function selectTab(btn: Element) {
+    const targetId = btn.getAttribute('data-tab');
+    if (!targetId) return;
+
+    // Update buttons
+    tabButtons.forEach((b) => {
+      const isSelected = b === btn;
+      b.classList.toggle('active', isSelected);
+      b.setAttribute('aria-selected', String(isSelected));
+      b.setAttribute('tabindex', isSelected ? '0' : '-1');
+    });
+
+    // Update panes
+    tabPanes.forEach((pane) => {
+      pane.classList.toggle('active', pane.id === targetId);
+    });
+
+    // Update subhead text
+    if (subheads[targetId] && subheadTitle && subheadDesc) {
+      subheadTitle.textContent = subheads[targetId].title;
+      subheadDesc.textContent = subheads[targetId].desc;
+    }
+  }
+
+  tabButtons.forEach((btn, index) => {
+    btn.addEventListener('click', () => {
+      selectTab(btn);
+    });
+
+    // Keyboard navigation (Arrow keys)
+    btn.addEventListener('keydown', (e: Event) => {
+      const keyEvent = e as KeyboardEvent;
+      let nextIndex = index;
+
+      if (keyEvent.key === 'ArrowDown' || keyEvent.key === 'ArrowRight') {
+        keyEvent.preventDefault();
+        nextIndex = (index + 1) % tabButtons.length;
+      } else if (keyEvent.key === 'ArrowUp' || keyEvent.key === 'ArrowLeft') {
+        keyEvent.preventDefault();
+        nextIndex = (index - 1 + tabButtons.length) % tabButtons.length;
+      } else if (keyEvent.key === 'Home') {
+        keyEvent.preventDefault();
+        nextIndex = 0;
+      } else if (keyEvent.key === 'End') {
+        keyEvent.preventDefault();
+        nextIndex = tabButtons.length - 1;
+      }
+
+      if (nextIndex !== index) {
+        const nextBtn = tabButtons[nextIndex] as HTMLButtonElement;
+        nextBtn.focus();
+        selectTab(nextBtn);
+      }
+    });
+  });
+</script>
+
+<style>
+  .platform-section {
+    padding: 6rem 0 5rem 0;
+    background: #ffffff;
+  }
+
+  .platform-header {
+    text-align: left;
+    max-width: 980px;
+    margin-bottom: 3.5rem;
+  }
+
+  .platform-title {
+    font-size: clamp(2.2rem, 3.8vw, 3.4rem);
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: -0.03em;
+    margin-top: 1.25rem;
+  }
+
+  /* Hairline Framed Split Showcase Box (20px geometry) */
+  .platform-framed-box {
+    display: flex;
+    background: #ffffff;
+    border: 1px solid var(--border-hairline);
+    border-radius: var(--radius-container);
+    box-shadow: 0 16px 40px -10px rgba(15, 23, 42, 0.05);
+    overflow: hidden;
+    margin-bottom: 5.5rem;
+  }
+
+  /* Left Column: Vertical Tabs */
+  .platform-tabs {
+    width: 230px;
+    flex-shrink: 0;
+    border-right: 1px solid var(--border-hairline);
+    background: #ffffff;
+    display: flex;
+    flex-direction: column;
+    padding: 1.25rem 0;
+  }
+
+  .tab-btn {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 0.95rem 1.4rem 0.95rem 1.85rem;
+    min-height: 44px;
+    background: transparent;
+    border: none;
+    font-family: inherit;
+    font-size: 0.92rem;
+    font-weight: 500;
+    color: #64748b;
+    text-align: left;
+    cursor: pointer;
+    transition: color 0.15s ease, background 0.15s ease;
+  }
+
+  /* Subtle Tab Indicator */
+  .tab-indicator {
+    position: absolute;
+    left: 0.85rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 2px;
+    height: 16px;
+    border-radius: 9999px;
+    background: transparent;
+    transition: background 0.15s ease;
+  }
+
+  .tab-btn:hover {
+    color: #0f172a;
+    background: #fafafa;
+  }
+
+  .tab-btn.active {
+    color: #0f172a;
+    font-weight: 600;
+    background: #ffffff;
+  }
+
+  .tab-btn.active .tab-indicator {
+    background: var(--primary);
+  }
+
+  /* Right Column: Platform Content */
+  .platform-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  /* Subhead Banner */
+  .platform-subhead-banner {
+    padding: 1.5rem 2.25rem;
+    border-bottom: 1px solid var(--border-hairline);
+    background: #ffffff;
+    font-size: 1.02rem;
+    line-height: 1.55;
+  }
+
+  .subhead-title {
+    color: #0f172a;
+    font-weight: 700;
+    margin-right: 0.35rem;
+  }
+
+  .subhead-desc {
+    color: var(--text-muted);
+    font-weight: 400;
+  }
+
+  /* Tab Panes */
+  .tab-pane {
+    display: none;
+  }
+
+  .tab-pane.active {
+    display: block;
+    animation: fadeIn 0.2s ease-in-out;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(3px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Split Pane Layout */
+  .split-pane {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-height: 480px;
+  }
+
+  .split-col {
+    padding: 2.25rem;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .left-col {
+    border-right: 1px solid var(--border-hairline);
+  }
+
+  .col-head {
+    margin-bottom: 1.75rem;
+  }
+
+  .col-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #0f172a;
+    letter-spacing: -0.015em;
+    margin-bottom: 0.35rem;
+  }
+
+  .col-desc {
+    font-size: 0.88rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+
+  /* Prompt Bar */
+  .prompt-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #ffffff;
+    border: 1px solid var(--border-hairline);
+    border-radius: 8px;
+    padding: 0.65rem 0.85rem;
+    margin-bottom: 1.25rem;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
+  }
+
+  .prompt-placeholder {
+    font-size: 0.88rem;
+    color: #94a3b8;
+  }
+
+  .prompt-submit-btn {
+    min-width: 44px;
+    min-height: 44px;
+    border-radius: 6px;
+    background: #0f172a;
+    color: #ffffff;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background 0.15s;
+  }
+
+  .prompt-submit-btn:hover {
+    background: #1e293b;
+  }
+
+  .prompt-submit-btn svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  /* Synced Appointments List Box */
+  .sync-list-box {
+    background: #ffffff;
+    border: 1px solid var(--border-hairline);
+    border-radius: 12px;
+    padding: 1.2rem;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.02);
+  }
+
+  .sync-list-title {
+    font-size: 0.76rem;
+    font-weight: 600;
+    color: #64748b;
+    margin-bottom: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .sync-items {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .sync-item {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+  }
+
+  .item-icon {
+    width: 22px;
+    height: 22px;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.65rem;
+    font-weight: 700;
+    flex-shrink: 0;
+    background: #f8fafc;
+    border: 1px solid var(--border-hairline);
+    color: var(--text-main);
+  }
+
+  .item-icon.dentrix {
+    background: #f8fafc;
+    border: 1px solid var(--border-hairline);
+    color: var(--text-main);
+  }
+
+  .item-icon.ecw {
+    background: #f8fafc;
+    border: 1px solid var(--border-hairline);
+    color: var(--text-main);
+  }
+
+  .item-icon.pulse {
+    background: #fff1f3;
+    border: 1px solid #fecdd6;
+    color: var(--primary);
+  }
+
+  .item-text {
+    display: flex;
+    align-items: baseline;
+    gap: 0.45rem;
+    font-size: 0.82rem;
+    line-height: 1.35;
+    flex-wrap: wrap;
+  }
+
+  .item-name {
+    font-weight: 600;
+    color: #0f172a;
+  }
+
+  .item-detail {
+    color: #64748b;
+    font-size: 0.78rem;
+  }
+
+  /* Delicate Concentric Rings Canvas */
+  .orbital-wrap {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 290px;
+    width: 100%;
+  }
+
+  .orbital-canvas {
+    position: relative;
+    width: 280px;
+    height: 280px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .orbital-ring {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+  }
+
+  .ring-1 {
+    width: 130px;
+    height: 130px;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+  }
+
+  .ring-2 {
+    width: 195px;
+    height: 195px;
+    border: 1px solid rgba(15, 23, 42, 0.05);
+  }
+
+  .ring-3 {
+    width: 260px;
+    height: 260px;
+    border: 1px solid rgba(15, 23, 42, 0.03);
+  }
+
+  .orbital-disc {
+    position: relative;
+    z-index: 2;
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    background: #ffffff;
+    border: 1px solid var(--border-hairline);
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06), 0 0 0 5px rgba(255, 255, 255, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary);
+  }
+
+  .disc-icon {
+    width: 28px;
+    height: 28px;
+  }
+
+  /* Muted Pastel Floating Tags with 1px Border */
+  .floating-tag {
+    position: absolute;
+    z-index: 3;
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 0.3rem 0.75rem;
+    border-radius: 9999px;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+    white-space: nowrap;
+  }
+
+  /* Yellow: Top Right */
+  .tag-yellow {
+    top: 24px;
+    right: 18px;
+    background: #fefce8;
+    color: #713f12;
+    border: 1px solid #fef08a;
+  }
+
+  /* Mint: Top Left */
+  .tag-mint {
+    top: 55px;
+    left: 8px;
+    background: #f0fdf4;
+    color: #166534;
+    border: 1px solid #dcfce7;
+  }
+
+  /* Soft Blue: Bottom Left */
+  .tag-blue {
+    bottom: 45px;
+    left: 8px;
+    background: #f0f9ff;
+    color: #0369a1;
+    border: 1px solid #e0f2fe;
+  }
+
+  /* Lavender: Bottom Right */
+  .tag-lavender {
+    bottom: 24px;
+    right: 18px;
+    background: #faf5ff;
+    color: #6b21a8;
+    border: 1px solid #f3e8ff;
+  }
+
+  /* Tab 2 Details */
+  .detail-box {
+    background: #ffffff;
+    border: 1px solid var(--border-hairline);
+    border-radius: 12px;
+    padding: 1.5rem;
+  }
+
+  .timeline-step {
+    display: flex;
+    gap: 0.9rem;
+    margin-bottom: 1.25rem;
+  }
+  .timeline-step:last-child {
+    margin-bottom: 0;
+  }
+
+  .step-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-top: 0.4rem;
+    flex-shrink: 0;
+  }
+  .step-dot.active { background: var(--primary); }
+  .step-dot.lock { background: #f59e0b; }
+  .step-dot.confirmed { background: #10b981; }
+  .step-body strong { font-size: 0.88rem; color: #0f172a; display: block; margin-bottom: 0.2rem; }
+  .step-body p { font-size: 0.78rem; color: #64748b; line-height: 1.4; }
+
+  .calendar-preview {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    background: #ffffff;
+    border: 1px solid var(--border-hairline);
+    padding: 1.25rem;
+    border-radius: 12px;
+  }
+  .cal-block {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.7rem 0.9rem;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    font-weight: 500;
+  }
+  .cal-block.unavail {
+    background: #fef2f2;
+    color: #991b1b;
+    border: 1px solid #fee2e2;
+  }
+  .cal-block.available {
+    background: #f8fafc;
+    color: #334155;
+    border: 1px solid var(--border-hairline);
+  }
+  .cal-block.booked {
+    background: #f0fdf4;
+    color: #166534;
+    border: 1px solid #bbf7d0;
+  }
+
+  /* Tab 3 Chat */
+  .chat-bubble-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    background: #fafafa;
+    border: 1px solid var(--border-hairline);
+    border-radius: 12px;
+    padding: 1.25rem;
+  }
+  .chat-bubble {
+    max-width: 85%;
+    padding: 0.65rem 0.85rem;
+    border-radius: 10px;
+    font-size: 0.82rem;
+    line-height: 1.45;
+  }
+  .chat-bubble.incoming {
+    background: #ffffff;
+    border: 1px solid var(--border-hairline);
+    align-self: flex-start;
+    color: #334155;
+  }
+  .chat-bubble.outgoing {
+    background: #f0fdf4;
+    border: 1px solid #dcfce7;
+    color: #14532d;
+    align-self: flex-end;
+  }
+  .chat-time {
+    display: block;
+    font-size: 0.65rem;
+    color: #94a3b8;
+    margin-top: 0.25rem;
+    text-align: right;
+  }
+
+  .triage-status-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  .triage-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.85rem 1rem;
+    border: 1px solid var(--border-hairline);
+    border-radius: 10px;
+    background: #ffffff;
+  }
+  .triage-name { font-size: 0.86rem; font-weight: 600; color: #0f172a; }
+  .triage-badge {
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 0.2rem 0.6rem;
+    border-radius: 9999px;
+  }
+  .badge-green { background: #f0fdf4; color: #166534; border: 1px solid #dcfce7; }
+  .badge-blue { background: #f0f9ff; color: #0369a1; border: 1px solid #e0f2fe; }
+  .badge-purple { background: #faf5ff; color: #6b21a8; border: 1px solid #f3e8ff; }
+
+  /* Tab 4 Details */
+  .readback-flow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1.25rem;
+    background: #ffffff;
+    border: 1px solid var(--border-hairline);
+    border-radius: 12px;
+  }
+  .flow-pill {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    background: #f8fafc;
+    border: 1px solid var(--border-hairline);
+    padding: 0.6rem 1rem;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    width: 100%;
+  }
+  .flow-pill.verified {
+    background: #f0fdf4;
+    border-color: #bbf7d0;
+    color: #166534;
+  }
+  .flow-num {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #ffffff;
+    border: 1px solid var(--border-hairline);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    flex-shrink: 0;
+  }
+  .flow-arrow { color: #94a3b8; font-weight: bold; }
+
+  .audit-log-box {
+    background: #0f172a;
+    color: #f1f5f9;
+    padding: 1.2rem;
+    border-radius: 12px;
+    font-family: monospace;
+    font-size: 0.76rem;
+    line-height: 1.8;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    word-break: break-word;
+    border: 1px solid #1e293b;
+  }
+  .log-line.success { color: #4ade80; }
+
+  /* Tab 5 Details */
+  .security-visual {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    background: #ffffff;
+    border: 1px solid var(--border-hairline);
+    border-radius: 12px;
+    padding: 1.25rem;
+  }
+  .sec-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    font-size: 0.82rem;
+    line-height: 1.45;
+  }
+  .sec-icon.check {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #f0fdf4;
+    color: #166534;
+    border: 1px solid #dcfce7;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.68rem;
+    font-weight: bold;
+    flex-shrink: 0;
+  }
+  .crypto-box {
+    background: #ffffff;
+    border: 1px solid var(--border-hairline);
+    border-radius: 12px;
+    padding: 1.25rem;
+  }
+  .crypto-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.84rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 0.75rem;
+  }
+  .crypto-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #10b981;
+  }
+  .crypto-key {
+    font-family: monospace;
+    font-size: 0.74rem;
+    color: #334155;
+    background: #f8fafc;
+    border: 1px solid var(--border-hairline);
+    padding: 0.5rem;
+    border-radius: 6px;
+    margin-bottom: 0.75rem;
+    word-break: break-all;
+  }
+  .crypto-note {
+    font-size: 0.74rem;
+    color: #64748b;
+  }
+
+  /* Step 5: Speed Section */
+  .speed-section {
+    margin-top: 5rem;
+  }
+
+  .speed-head {
+    max-width: 960px;
+    margin-bottom: 2.75rem;
+  }
+
+  .speed-title {
+    font-size: clamp(2rem, 3.5vw, 3rem);
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    line-height: 1.25;
+  }
+
+  .speed-canvas {
+    background-color: #fafafa;
+    border: 1px solid var(--border-hairline);
+    border-radius: var(--radius-card);
+    padding: 3.5rem 2rem;
+  }
+
+  .speed-metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+  }
+
+  .speed-card {
+    background: #ffffff;
+    border: 1px solid var(--border-hairline);
+    border-radius: 12px;
+    padding: 1.8rem 1.4rem;
+    text-align: center;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.02);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .speed-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05);
+    border-color: #cbd5e1;
+  }
+
+  .speed-number {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: var(--primary);
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    margin-bottom: 0.4rem;
+  }
+
+  .speed-label {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 0.4rem;
+  }
+
+  .speed-sub {
+    font-size: 0.75rem;
+    color: #64748b;
+    line-height: 1.4;
+  }
+
+  @media (max-width: 960px) {
+    .platform-framed-box {
+      flex-direction: column;
+    }
+    .platform-tabs {
+      width: 100%;
+      flex-direction: row;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      border-right: none;
+      border-bottom: 1px solid var(--border-hairline);
+      padding: 0.4rem 0.5rem;
+      scrollbar-width: none;
+    }
+    .platform-tabs::-webkit-scrollbar {
+      display: none;
+    }
+    .tab-btn {
+      width: auto;
+      white-space: nowrap;
+      padding: 0.75rem 1rem;
+      min-height: 44px;
+      flex-shrink: 0;
+    }
+    .tab-indicator {
+      left: 1rem;
+      right: 1rem;
+      top: auto;
+      bottom: 0;
+      width: auto;
+      height: 2.5px;
+      transform: none;
+    }
+    .split-pane {
+      grid-template-columns: 1fr;
+      min-height: auto;
+    }
+    .left-col {
+      border-right: none;
+      border-bottom: 1px solid var(--border-hairline);
+    }
+    .split-col {
+      padding: 1.75rem 1.25rem;
+    }
+    .speed-metrics-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 600px) {
+    .speed-metrics-grid {
+      grid-template-columns: 1fr;
+    }
+    .platform-subhead-banner {
+      padding: 1.25rem 1rem;
+    }
+    .split-col {
+      padding: 1.25rem 0.75rem;
+    }
+    .orbital-canvas {
+      width: 240px;
+      height: 240px;
+    }
+    .ring-1 { width: 110px; height: 110px; }
+    .ring-2 { width: 170px; height: 170px; }
+    .ring-3 { width: 220px; height: 220px; }
+    .tag-mint { left: 0; }
+    .tag-blue { left: 0; }
+    .tag-yellow { right: 0; }
+    .tag-lavender { right: 0; }
+  }
+
+  @media (max-width: 380px) {
+    .orbital-canvas {
+      width: 210px;
+      height: 210px;
+    }
+    .ring-1 { width: 90px; height: 90px; }
+    .ring-2 { width: 140px; height: 140px; }
+    .ring-3 { width: 190px; height: 190px; }
+    .floating-tag {
+      font-size: 0.65rem;
+      padding: 0.2rem 0.5rem;
+    }
+  }
+</style>
