@@ -6,7 +6,9 @@
 **Target Category**: Productivity / Workflow & Planning  
 **Primary Language**: English  
 **Support Contact**: compliance@lamanify.com / support@lamanify.com  
-**Privacy Policy URL**: https://lamanify.com/privacy-policy  
+**Homepage URL**: https://lamanisync.com  
+**Support URL**: https://lamanisync.com/contact  
+**Privacy Policy URL**: https://lamanisync.com/privacy  
 
 ---
 
