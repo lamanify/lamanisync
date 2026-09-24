@@ -9,8 +9,8 @@
         <span>Platform</span>
       </div>
       <h2 class="platform-title">
-        <span class="heading-dark">The intelligent system that never sleeps.</span>
-        <span class="heading-muted">Reads real-time schedules at 2am. Catches booking clashes before they slip. Hands you the answer before you ask.</span>
+        <span class="heading-dark platform-title-single">The intelligent system that never sleeps.</span>
+        <span class="heading-muted platform-subtitle-two-lines">Reads real-time schedules at 2am. Catches booking clashes before they slip.<br class="break-desktop" />Hands you the answer before you ask.</span>
       </h2>
     </div>
 
@@ -530,16 +530,44 @@
 
   .platform-header {
     text-align: left;
-    max-width: 980px;
-    margin-bottom: 3.5rem;
+    max-width: 1080px;
+    margin-bottom: 3rem;
   }
 
   .platform-title {
-    font-size: clamp(2.2rem, 3.8vw, 3.4rem);
+    font-size: clamp(1.85rem, 3.2vw, 2.75rem);
     font-weight: 800;
-    line-height: 1.2;
+    line-height: 1.1;
     letter-spacing: -0.03em;
-    margin-top: 1.25rem;
+    margin-top: 1rem;
+  }
+
+  .platform-title-single {
+    white-space: nowrap;
+    line-height: 1.1;
+  }
+
+  @media (max-width: 992px) {
+    .platform-title-single {
+      white-space: normal;
+    }
+  }
+
+  .platform-subtitle-two-lines {
+    max-width: 760px;
+    line-height: 1.22 !important;
+    margin-top: 0.5rem !important;
+    font-size: clamp(1.15rem, 2vw, 1.45rem);
+  }
+
+  .break-desktop {
+    display: inline;
+  }
+
+  @media (max-width: 768px) {
+    .break-desktop {
+      display: none;
+    }
   }
 
   /* Hairline Framed Split Showcase Box (20px geometry) */
