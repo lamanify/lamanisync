@@ -70,19 +70,51 @@ const VIEWPORTS = [
   { width: 768, height: 1024, label: '768px (iPad / Tablet portrait)' },
 ];
 
-const PAGES = [
+const BASE_PAGES = [
   '/',
   '/what-is-synchronizer',
   '/why-we-dont-partner',
   '/features',
   '/blog',
+];
+
+const FOOTER_PAGES = [
+  '/contact',
+  '/privacy',
+];
+
+// Dynamically discover all blog post routes from dist/blog
+const ALL_14_BLOG_ROUTES = [
   '/blog/the-walled-garden-in-healthcare-cms',
   '/blog/why-readback-verification-is-mandatory',
   '/blog/manifest-v3-vs-background-windows-services',
   '/blog/connecting-whatsapp-ai-to-legacy-ehrs',
-  '/contact',
-  '/privacy',
+  '/blog/the-zero-disk-guarantee-ephemeral-memory',
+  '/blog/why-we-dont-trust-blind-writes-readback-verification',
+  '/blog/bank-grade-cryptography-webcrypto-ed25519-keys',
+  '/blog/zero-open-ports-clinic-network-security',
+  '/blog/zero-knowledge-session-hygiene-cms-passwords',
+  '/blog/double-booking-shield-idempotency-mutex-locks',
+  '/blog/surgical-permissions-manifest-v3-clinic-portal',
+  '/blog/data-sovereignty-medical-compliance-pdpa-hipaa',
+  '/blog/predefined-action-whitelists-zero-remote-code',
+  '/blog/cryptographic-receipt-sha-256-state-hashing',
 ];
+
+const blogDistDir = path.join(DIST_DIR, 'blog');
+const discoveredBlogRoutes = fs.existsSync(blogDistDir)
+  ? fs.readdirSync(blogDistDir, { withFileTypes: true })
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => `/blog/${entry.name}`)
+      .sort()
+  : ALL_14_BLOG_ROUTES;
+
+if (discoveredBlogRoutes.length < 14) {
+  console.error(`ERROR: Expected at least 14 blog routes in dist/blog, found ${discoveredBlogRoutes.length}. Please run "npm run build" in website/ first.`);
+  process.exit(1);
+}
+
+const PAGES = [...BASE_PAGES, ...discoveredBlogRoutes, ...FOOTER_PAGES];
 
 async function runAudit() {
   await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));

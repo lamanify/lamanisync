@@ -60,6 +60,14 @@ const renderedContent = renderMarkdown(post.content);
             <span class="author-role">{post.author.role}</span>
           </div>
         </div>
+
+        {post.tags && post.tags.length > 0 && (
+          <div class="article-tags">
+            {post.tags.map((tag) => (
+              <span class="article-tag">#{tag}</span>
+            ))}
+          </div>
+        )}
       </header>
 
       <!-- Content -->
@@ -226,6 +234,23 @@ const renderedContent = renderMarkdown(post.content);
   .author-role {
     font-size: 0.76rem;
     color: var(--text-muted);
+  }
+
+  .article-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1.5rem;
+  }
+
+  .article-tag {
+    font-size: 0.76rem;
+    font-weight: 600;
+    color: #475569;
+    background: #f1f5f9;
+    padding: 0.25rem 0.65rem;
+    border-radius: 9999px;
+    border: 1px solid #e2e8f0;
   }
 
   /* Body Prose Styling */
