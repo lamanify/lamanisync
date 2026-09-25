@@ -1,0 +1,176 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import CtaBanner from '../../components/CtaBanner.astro';
+---
+
+<Layout
+  title="Dental Clinic Management System Sync | LamaniSync for Dental Practices"
+  description="Seamless data synchronization for dental clinic management systems in Malaysia. Keep patient charts, appointment slots, and WhatsApp reminders in perfect lockstep."
+>
+  <section class="sync-hero">
+    <div class="bg-grid-pattern"></div>
+    <div class="hero-glow"></div>
+    <div class="container hero-content">
+      <div class="attio-badge crimson">
+        <svg style="width:12px; height:12px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <span>Specialized Dental Workflow</span>
+      </div>
+      <h1 class="hero-title">
+        <span class="heading-dark">Dental clinic management system sync.</span><br class="attio-br" />
+        <span class="heading-muted">Direct bridge between dental chairs and WhatsApp booking autopilot.</span>
+      </h1>
+      <p class="hero-subtitle">
+        Whether your dental practice runs Dentrix, Software of Excellence, Kreloses, or custom EHRs, LamaniSync synchronizes treatment chairs, dentist availability, and recall reminders automatically.
+      </p>
+      <div class="hero-actions">
+        <a href="/contact" class="btn-primary">Connect Your Dental Software</a>
+        <a href="/docs" class="btn-secondary">Explore Certified Adapters</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="section-header">
+        <div class="attio-badge">
+          <span>Precision Dental Scheduling</span>
+        </div>
+        <h2 class="attio-h2">
+          <span class="heading-dark">Built for chair time efficiency.</span><br class="attio-br" />
+          <span class="heading-muted">Eliminate empty chairs and manual appointment confirmations.</span>
+        </h2>
+      </div>
+
+      <div class="feature-grid">
+        <div class="feature-card">
+          <div class="card-icon">
+            <svg style="width:20px;height:20px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/></svg>
+          </div>
+          <h3>Dentist & Chair Scheduling</h3>
+          <p>Sync slots per dentist and operatory room. Routine scaling, complex restorations, and consultations are booked into the exact designated treatment chair.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="card-icon">
+            <svg style="width:20px;height:20px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          </div>
+          <h3>Automated Recall Sync</h3>
+          <p>LamaniSync detects patients due for 6-month dental checkups and triggers personalized WhatsApp recall messages via LamaniHub.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="card-icon">
+            <svg style="width:20px;height:20px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <h3>Malaysian PDPA Compliant</h3>
+          <p>Protected health information (PHI) never leaves your workstation unencrypted. Full compliance with Malaysian healthcare data standards.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <CtaBanner />
+</Layout>
+
+<style>
+  .sync-hero {
+    position: relative;
+    padding: 6.5rem 0 4.5rem 0;
+    text-align: center;
+    background: radial-gradient(circle at 50% 0%, rgba(233, 36, 81, 0.04) 0%, rgba(255, 255, 255, 0) 70%);
+  }
+
+  .hero-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .hero-title {
+    font-size: clamp(2.2rem, 4.5vw, 3.5rem);
+    font-weight: 500;
+    line-height: 1.15;
+    letter-spacing: -0.025em;
+    margin: 1.25rem 0 1.5rem 0;
+    max-width: 896px;
+    text-wrap: balance;
+  }
+
+  .hero-subtitle {
+    font-size: 1.1rem;
+    color: var(--color-black-700);
+    max-width: 680px;
+    line-height: 1.6;
+    margin-bottom: 2.25rem;
+    text-wrap: balance;
+  }
+
+  .hero-actions {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+  }
+
+  .section-header {
+    text-align: center;
+    margin-bottom: 3.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .attio-h2 {
+    font-size: clamp(1.8rem, 3.5vw, 2.5rem);
+    font-weight: 500;
+    line-height: 1.18;
+    letter-spacing: -0.025em;
+    margin-top: 1rem;
+    max-width: 896px;
+    text-wrap: balance;
+  }
+
+  .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+  }
+
+  .feature-card {
+    background: #ffffff;
+    border: 1px solid var(--border-hairline);
+    border-radius: var(--radius-lg);
+    padding: 2.25rem 1.75rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  }
+
+  .card-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    background: rgba(233, 36, 81, 0.08);
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.25rem;
+  }
+
+  .feature-card h3 {
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--color-black-100);
+    margin-bottom: 0.65rem;
+  }
+
+  .feature-card p {
+    font-size: 0.92rem;
+    color: var(--color-black-700);
+    line-height: 1.55;
+  }
+
+  @media (max-width: 850px) {
+    .feature-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
