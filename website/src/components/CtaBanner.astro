@@ -1,44 +1,49 @@
 ---
 ---
-<section class="section cta-section">
-  <div class="container">
+<section class="section cta-section border-t border-subtle">
+  <div class="attio-container border-x border-subtle">
     <div class="cta-box">
-      <div class="attio-badge">
-        <svg style="width:12px; height:12px; color: var(--primary);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-        <span>Instant Activation</span>
-      </div>
+      <!-- 80px Attio Pinstripes Background Pattern -->
+      <div class="cta-pinstripes" aria-hidden="true"></div>
 
-      <h2 class="cta-title">
-        <span class="block">Ready to automate your clinic bookings?</span>
-        <span class="block heading-muted">Put your appointment scheduling on complete autopilot.</span>
-      </h2>
-
-      <p class="cta-desc">
-        The right call is always in front of you. Connect your Clinic Management System directly to LamaniHub 24/7 WhatsApp triage and patient scheduling.
-      </p>
-
-      <div class="cta-actions">
-        <a href="https://lamanihub.com" target="_blank" rel="noopener noreferrer" class="btn-primary cta-btn-lg">
-          <span>Start with LamaniHub</span>
-          <svg style="width:14px; height:14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-        </a>
-        <a href="/contact" class="btn-secondary cta-btn-lg">
-          <span>Talk to Sales</span>
-        </a>
-      </div>
-
-      <div class="cta-trust-items">
-        <div class="trust-item">
-          <svg style="width:13px; height:13px; color:#10b981;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-          <span>Zero Server Setup</span>
+      <div class="cta-content">
+        <div class="attio-badge">
+          <svg style="width:12px; height:12px; color: #1c1d1f;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          <span>Instant Activation</span>
         </div>
-        <div class="trust-item">
-          <svg style="width:13px; height:13px; color:#10b981;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-          <span>100% Readback Verified</span>
+
+        <h2 class="cta-title">
+          <span class="block text-primary">Ready to automate your clinic bookings?</span>
+          <span class="block text-muted font-normal">Put your appointment scheduling on complete autopilot.</span>
+        </h2>
+
+        <p class="cta-desc">
+          The right call is always in front of you. Connect your Clinic Management System directly to LamaniHub 24/7 WhatsApp triage and patient scheduling.
+        </p>
+
+        <div class="cta-actions">
+          <a href="https://lamanihub.com" target="_blank" rel="noopener noreferrer" class="cta-btn-primary">
+            <span>Start with LamaniHub</span>
+            <svg style="width:13px; height:13px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+          <a href="/contact" class="cta-btn-secondary">
+            <span>Talk to Sales</span>
+          </a>
         </div>
-        <div class="trust-item">
-          <svg style="width:13px; height:13px; color:#10b981;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-          <span>Malaysian PDPA Compliant</span>
+
+        <div class="cta-trust-items">
+          <div class="trust-item">
+            <svg style="width:13px; height:13px; color:#10b981;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            <span>Zero Server Setup</span>
+          </div>
+          <div class="trust-item">
+            <svg style="width:13px; height:13px; color:#10b981;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            <span>100% Readback Verified</span>
+          </div>
+          <div class="trust-item">
+            <svg style="width:13px; height:13px; color:#10b981;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            <span>Malaysian PDPA Compliant</span>
+          </div>
         </div>
       </div>
     </div>
@@ -46,22 +51,47 @@
 </section>
 
 <style>
+  .border-t { border-top: 1px solid #e2e8f0; }
+  .border-x { border-left: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; }
+  .border-subtle { border-color: #e2e8f0; }
+
   .cta-section {
-    padding: 6rem 0 7rem 0;
+    padding: 0;
+    background: #ffffff;
+  }
+
+  .attio-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    position: relative;
     background: #ffffff;
   }
 
   .cta-box {
     position: relative;
     background: #fafafa;
-    border: 1px solid var(--border-subtle);
-    border-radius: 20px;
-    padding: 5rem 2rem;
+    overflow: hidden;
+    padding: 6.5rem 2rem;
     text-align: center;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  /* 80px Attio Pinstripes with Radial Mask */
+  .cta-pinstripes {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image: linear-gradient(to right, rgba(0, 0, 0, 0.035) 1px, transparent 1px);
+    background-size: 80px 100%;
+    mask-image: radial-gradient(circle at 50% 50%, black 50%, transparent 85%);
+  }
+
+  .cta-content {
+    position: relative;
+    z-index: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
   }
 
   .attio-badge {
@@ -69,12 +99,12 @@
     align-items: center;
     gap: 0.45rem;
     background: #ffffff;
-    border: 1px solid var(--border-subtle);
+    border: 1px solid #e2e8f0;
     padding: 0.35rem 0.85rem;
-    border-radius: 12px;
+    border-radius: 9999px;
     font-size: 0.8125rem;
     font-weight: 500;
-    color: var(--color-black-700);
+    color: #6f7988;
     margin-bottom: 1.5rem;
     box-shadow: 0 1px 2px rgba(0,0,0,0.02);
   }
@@ -89,22 +119,16 @@
     text-wrap: balance;
   }
 
-  .cta-title .block {
-    display: block;
-  }
-
-  .cta-title .heading-muted {
-    font-weight: 400;
-    color: var(--color-black-700);
-    margin-top: 0.2rem;
-  }
+  .text-primary { color: #1c1d1f; }
+  .text-muted { color: #6f7988; }
+  .cta-title .block { display: block; }
 
   .cta-desc {
     font-size: 1.0625rem;
-    color: var(--color-black-700);
+    color: #6f7988;
     max-width: 580px;
     line-height: 1.55;
-    margin: 0 0 2rem 0;
+    margin: 0 0 2.25rem 0;
     text-wrap: balance;
   }
 
@@ -113,22 +137,40 @@
     align-items: center;
     justify-content: center;
     gap: 0.75rem;
-    margin-bottom: 2.25rem;
+    margin-bottom: 2.5rem;
     flex-wrap: wrap;
   }
 
-  .cta-btn-lg {
-    padding: 0.65rem 1.35rem;
-    font-size: 0.875rem;
-    font-weight: 500;
-    border-radius: 10px;
-    min-height: 40px;
+  .cta-btn-primary {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
+    background: #1c1d1f;
+    color: #ffffff;
+    font-size: 0.875rem;
+    font-weight: 500;
+    padding: 0.65rem 1.4rem;
+    border-radius: 9999px;
     text-decoration: none;
-    transition: all 0.2s ease;
+    transition: background 0.15s ease;
   }
+  .cta-btn-primary:hover { background: #000000; }
+
+  .cta-btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #ffffff;
+    color: #1c1d1f;
+    font-size: 0.875rem;
+    font-weight: 500;
+    padding: 0.65rem 1.4rem;
+    border-radius: 9999px;
+    border: 1px solid #e2e8f0;
+    text-decoration: none;
+    transition: background 0.15s ease;
+  }
+  .cta-btn-secondary:hover { background: #f8fafc; }
 
   .cta-trust-items {
     display: flex;
@@ -148,32 +190,10 @@
   }
 
   @media (max-width: 640px) {
-    .cta-section {
-      padding: 3.5rem 0 4rem 0;
-    }
-    .cta-box {
-      padding: 3rem 1.25rem;
-      border-radius: 16px;
-    }
-    .cta-title {
-      font-size: 1.75rem;
-      line-height: 1.22;
-    }
-    .cta-desc {
-      font-size: 0.95rem;
-      margin-bottom: 1.75rem;
-    }
-    .cta-actions {
-      flex-direction: column;
-      width: 100%;
-    }
-    .cta-btn-lg {
-      width: 100%;
-      justify-content: center;
-    }
-    .cta-trust-items {
-      flex-direction: column;
-      gap: 0.65rem;
-    }
+    .cta-box { padding: 4rem 1.25rem; }
+    .cta-title { font-size: 1.75rem; line-height: 1.22; }
+    .cta-actions { flex-direction: column; width: 100%; }
+    .cta-btn-primary, .cta-btn-secondary { width: 100%; justify-content: center; }
+    .cta-trust-items { flex-direction: column; gap: 0.65rem; }
   }
 </style>
