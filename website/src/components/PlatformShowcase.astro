@@ -10,7 +10,7 @@
       </div>
       <h2 class="platform-title">
         <span class="heading-dark platform-title-single">The intelligent system that never sleeps.</span>
-        <span class="heading-muted platform-subtitle-two-lines">Reads real-time schedules at 2am. Catches booking clashes before they slip.<br class="break-desktop" />Hands you the answer before you ask.</span>
+        <span class="heading-muted platform-subtitle-two-lines"><span class="sub-line">Catches booking clashes in real time at 2am.</span><br class="break-desktop" /><span class="sub-line">Hands you the right answer before you ask.</span></span>
       </h2>
     </div>
 
@@ -536,15 +536,15 @@
 
   .platform-title {
     font-size: clamp(1.85rem, 3.2vw, 2.75rem);
-    font-weight: 800;
-    line-height: 1.1;
     letter-spacing: -0.03em;
     margin-top: 1rem;
+    line-height: 1.12;
   }
 
   .platform-title-single {
+    font-weight: 800;
     white-space: nowrap;
-    line-height: 1.1;
+    line-height: 1.12;
   }
 
   @media (max-width: 992px) {
@@ -554,10 +554,21 @@
   }
 
   .platform-subtitle-two-lines {
-    max-width: 760px;
-    line-height: 1.22 !important;
-    margin-top: 0.5rem !important;
-    font-size: clamp(1.15rem, 2vw, 1.45rem);
+    font-size: inherit !important;
+    font-weight: 400;
+    line-height: 1.15 !important;
+    margin-top: 0.4rem !important;
+    letter-spacing: -0.025em;
+  }
+
+  .sub-line {
+    white-space: nowrap;
+  }
+
+  @media (max-width: 992px) {
+    .sub-line {
+      white-space: normal;
+    }
   }
 
   .break-desktop {
