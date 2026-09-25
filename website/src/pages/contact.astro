@@ -6,132 +6,100 @@ import Layout from '../layouts/Layout.astro';
   title="Contact Support & Clinical Integrations | LamaniSync"
   description="Need technical support, workstation pairing assistance, or a custom Clinic Management System adapter for LamaniSync? Contact our team."
 >
-  <section class="contact-hero">
-    <div class="bg-grid-pattern"></div>
-    <div class="container contact-head-container">
-      <div class="attio-badge crimson">
-        <svg style="width:12px; height:12px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-        <span>Dedicated Clinical Support</span>
+  <section class="attio-section border-t border-subtle">
+    <div class="attio-container border-x border-subtle">
+      <header class="attio-section-head">
+        <div class="attio-head-inner">
+          <h1 class="attio-h2-inline">
+            <span class="text-primary">How can we help your clinic?</span>
+            <span class="text-muted font-normal"> Dedicated engineering and clinical workflow support.</span>
+          </h1>
+          <p class="attio-lead-desc">
+            Whether you need help pairing your front-desk workstations or need a custom adapter built for your proprietary clinic software, our integration engineers are ready to help.
+          </p>
+        </div>
+      </header>
+
+      <div class="attio-separator-wrap">
+        <div class="attio-dashed-line"></div>
       </div>
-      <h1 class="contact-title">
-        <span class="heading-dark">How can we help your clinic?</span>
-        <span class="heading-muted">Dedicated engineering and clinical workflow support.</span>
-      </h1>
-      <p class="contact-subtitle">
-        Whether you need help pairing your front-desk workstations or need a custom adapter built for your proprietary clinic software, our integration engineers are ready to help.
-      </p>
-    </div>
-  </section>
 
-  <section class="contact-section">
-    <div class="container contact-grid">
-      <!-- Left: Contact Form -->
-      <div class="form-card">
-        <h3 class="form-title">Send a message to our clinical operations team</h3>
-        <p class="form-desc">Fill out the details below. We typically respond within a few hours on clinical business days.</p>
+      <!-- Contact Body Grid with 1px Hairlines -->
+      <div class="contact-main-grid">
+        <!-- Left: Form -->
+        <div class="contact-form-cell">
+          <h3 class="form-title">Send a message to our clinical operations team</h3>
+          <p class="form-desc">Fill out the details below. Inbound requests route directly to our engineering team.</p>
 
-        <form id="contact-form" class="support-form">
-          <div class="form-row">
-            <div class="form-group">
-              <label for="name">Your Name <span class="req">*</span></label>
-              <input type="text" id="name" name="name" required placeholder="Dr. Siti Aminah / John Doe" />
+          <form id="contact-form" class="support-form">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="name">Your Name <span class="req">*</span></label>
+                <input type="text" id="name" name="name" required placeholder="Dr. Siti Aminah / John Doe" />
+              </div>
+              <div class="form-group">
+                <label for="email">Work Email <span class="req">*</span></label>
+                <input type="email" id="email" name="email" required placeholder="doctor@clinic.com.my" />
+              </div>
             </div>
-            <div class="form-group">
-              <label for="email">Work Email <span class="req">*</span></label>
-              <input type="email" id="email" name="email" required placeholder="dr.siti@klinikceria.com" />
-            </div>
-          </div>
 
-          <div class="form-row">
-            <div class="form-group">
-              <label for="clinicName">Clinic / Healthcare Practice Name <span class="req">*</span></label>
-              <input type="text" id="clinicName" name="clinicName" required placeholder="Klinik Gigi Ceria Bangsar" />
+            <div class="form-row">
+              <div class="form-group">
+                <label for="clinic">Clinic Name</label>
+                <input type="text" id="clinic" name="clinic" placeholder="Klinik Perubatan Central" />
+              </div>
+              <div class="form-group">
+                <label for="phone">Phone / WhatsApp</label>
+                <input type="tel" id="phone" name="phone" placeholder="+60 12-345 6789" />
+              </div>
             </div>
+
             <div class="form-group">
-              <label for="cms">Clinic Management System (CMS / EHR)</label>
+              <label for="cms">Current Clinic Management System (CMS)</label>
               <select id="cms" name="cms">
-                <option value="LamaniPulse EHR">LamaniPulse EHR</option>
-                <option value="Dentrix Ascend">Dentrix Ascend</option>
-                <option value="eClinicalWorks">eClinicalWorks</option>
-                <option value="Open Dental">Open Dental</option>
-                <option value="Clinic Pro">Clinic Pro</option>
-                <option value="Custom Proprietary Portal">Custom / Other Web Portal</option>
+                <option value="kreloses">Kreloses</option>
+                <option value="dentrix-ascend">Dentrix Ascend</option>
+                <option value="eclinicalworks">eClinicalWorks</option>
+                <option value="lamanipulse">LamaniPulse EHR</option>
+                <option value="plato">Plato Medical</option>
+                <option value="clinicmaster">Clinic Master</option>
+                <option value="other">Other / Custom Web Portal</option>
               </select>
             </div>
-          </div>
 
-          <div class="form-group">
-            <label for="inquiryType">Inquiry Type <span class="req">*</span></label>
-            <select id="inquiryType" name="inquiryType" required>
-              <option value="Workstation Pairing Assistance">Workstation Pairing / Extension Support</option>
-              <option value="Request New CMS Adapter">Request Custom CMS Adapter (48h Turnaround)</option>
-              <option value="Healthcare Privacy & HIPAA / PDPA">Healthcare Privacy, Security & Compliance</option>
-              <option value="General Question">General Inquiry / Integration Demo</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label for="message">Message <span class="req">*</span></label>
-            <textarea id="message" name="message" rows="4" required placeholder="Please describe your clinic setup, workstation count, or any questions you have..."></textarea>
-          </div>
-
-          <!-- Status Alerts -->
-          <div id="form-success" class="alert-box success hidden">
-            <svg style="width:20px; height:20px; flex-shrink:0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-            <div>
-              <strong>Message received!</strong>
-              <p>Thank you for reaching out. Our clinical support team has logged your inquiry and will contact you shortly.</p>
+            <div class="form-group">
+              <label for="message">How can we assist? <span class="req">*</span></label>
+              <textarea id="message" name="message" rows="4" required placeholder="Describe your clinic setup, workstation count, or custom adapter needs..."></textarea>
             </div>
-          </div>
 
-          <div id="form-error" class="alert-box error hidden">
-            <svg style="width:20px; height:20px; flex-shrink:0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-            <div>
-              <strong>Submission issue.</strong>
-              <p>Could not send message automatically. Please email our team directly at <a href="mailto:support@lamanify.com">support@lamanify.com</a>.</p>
-            </div>
-          </div>
-
-          <button type="submit" id="submit-btn" class="btn-primary form-submit-btn">
-            <span id="btn-text">Send Message</span>
-            <svg id="btn-arrow" style="width:16px; height:16px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-            <span id="btn-spinner" class="spinner hidden"></span>
-          </button>
-        </form>
-      </div>
-
-      <!-- Right: Direct Channels & Information -->
-      <div class="contact-info-col">
-        <div class="info-card">
-          <div class="info-icon-box">
-            <svg style="width:22px; height:22px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
-          </div>
-          <h4 class="info-card-title">Technical & Pairing Support</h4>
-          <p class="info-card-text">Need assistance connecting your workstation or pairing code?</p>
-          <a href="mailto:support@lamanify.com" class="info-link">support@lamanify.com</a>
+            <button type="submit" id="submit-btn" class="btn-dark-primary full-width">
+              <span>Send Message</span>
+            </button>
+            <div id="form-status" class="form-status"></div>
+          </form>
         </div>
 
-        <div class="info-card">
-          <div class="info-icon-box">
-            <svg style="width:22px; height:22px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <!-- Right: Telemetry & Contact Info -->
+        <div class="contact-info-cell">
+          <div class="info-block">
+            <div class="info-tag">[OPERATIONS SINK]</div>
+            <h4 class="info-title">Engineering Helpdesk</h4>
+            <p class="info-text">Our engineers specialize in browser-level extensions and clinic interoperability.</p>
+            <div class="info-meta"><code>support@lamanify.com</code></div>
           </div>
-          <h4 class="info-card-title">Privacy & Compliance Inquiries</h4>
-          <p class="info-card-text">For healthcare data protection, BAA agreements, or PDPA/HIPAA questions:</p>
-          <a href="mailto:compliance@lamanify.com" class="info-link">compliance@lamanify.com</a>
-        </div>
 
-        <div class="info-card">
-          <div class="info-icon-box">
-            <svg style="width:22px; height:22px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <div class="info-block">
+            <div class="info-tag">[COMMUNICATION]</div>
+            <h4 class="info-title">Direct WhatsApp Support</h4>
+            <p class="info-text">Active LamaniHub clinics can contact their dedicated account executive via priority WhatsApp group.</p>
+            <div class="info-meta"><code>Priority 24/7 SLA for Emergency Holds</code></div>
           </div>
-          <h4 class="info-card-title">Response Hours</h4>
-          <p class="info-card-text">Monday – Friday: 9:00 AM – 6:00 PM (GMT+8)</p>
-          <p class="info-card-sub">Urgent pairing tickets are triaged 24/7 for active LamaniHub clinical partners.</p>
-        </div>
 
-        <div class="official-pill-card">
-          <img src="https://res.cloudinary.com/lamanify/image/upload/v1790242929/LamaniSync_Logo.png" alt="LamaniSync" class="sidebar-logo">
-          <p>LamaniSync is developed and maintained by <strong>Lamanify Technologies</strong> exclusively for the <strong>LamaniHub</strong> healthcare automation network.</p>
+          <div class="info-block">
+            <div class="info-tag">[COMPLIANCE & PRIVACY]</div>
+            <h4 class="info-title">Zero-PHI Inbound Guarantee</h4>
+            <p class="info-text">Please do not submit patient names, identity numbers, or medical records through this form.</p>
+          </div>
         </div>
       </div>
     </div>
@@ -139,364 +107,169 @@ import Layout from '../layouts/Layout.astro';
 </Layout>
 
 <script>
-  const form = document.getElementById('contact-form') as HTMLFormElement | null;
-  const submitBtn = document.getElementById('submit-btn') as HTMLButtonElement | null;
-  const btnText = document.getElementById('btn-text');
-  const btnArrow = document.getElementById('btn-arrow');
-  const btnSpinner = document.getElementById('btn-spinner');
-  const successAlert = document.getElementById('form-success');
-  const errorAlert = document.getElementById('form-error');
+  const form = document.getElementById('contact-form') as HTMLFormElement;
+  const statusDiv = document.getElementById('form-status') as HTMLDivElement;
+  const submitBtn = document.getElementById('submit-btn') as HTMLButtonElement;
 
-  if (form && submitBtn) {
+  if (form) {
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
-
-      // UI Loading state
       submitBtn.disabled = true;
-      if (btnText) btnText.textContent = 'Sending...';
-      if (btnArrow) btnArrow.classList.add('hidden');
-      if (btnSpinner) btnSpinner.classList.remove('hidden');
-      if (successAlert) successAlert.classList.add('hidden');
-      if (errorAlert) errorAlert.classList.add('hidden');
+      submitBtn.innerText = 'Submitting...';
 
       const formData = new FormData(form);
       const payload = {
         name: formData.get('name'),
         email: formData.get('email'),
-        clinicName: formData.get('clinicName'),
+        clinic: formData.get('clinic'),
+        phone: formData.get('phone'),
         cms: formData.get('cms'),
-        inquiryType: formData.get('inquiryType'),
         message: formData.get('message'),
-        submittedAt: new Date().toISOString(),
-        source: 'lamanisync.com/contact'
+        source: 'lamanisync_contact'
       };
 
       try {
-        const response = await fetch('https://n8n.automation.lamanify.com/webhook/lamanisync', {
+        const res = await fetch('https://n8n.automation.lamanify.com/webhook/lamanisync', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
 
-        if (response.ok) {
+        if (res.ok) {
+          statusDiv.innerText = '✓ Thank you. Your message has been routed to our clinical engineering team.';
+          statusDiv.className = 'form-status success';
           form.reset();
-          if (successAlert) successAlert.classList.remove('hidden');
         } else {
-          if (errorAlert) errorAlert.classList.remove('hidden');
+          throw new Error('Server returned ' + res.status);
         }
       } catch (err) {
-        console.error('Submission error:', err);
-        if (errorAlert) errorAlert.classList.remove('hidden');
+        statusDiv.innerText = 'Unable to send message. Please email support@lamanify.com directly.';
+        statusDiv.className = 'form-status error';
       } finally {
         submitBtn.disabled = false;
-        if (btnText) btnText.textContent = 'Send Message';
-        if (btnArrow) btnArrow.classList.remove('hidden');
-        if (btnSpinner) btnSpinner.classList.add('hidden');
+        submitBtn.innerText = 'Send Message';
       }
     });
   }
 </script>
 
 <style>
-  .contact-hero {
-    position: relative;
-    padding: 5rem 0 3.5rem 0;
-    text-align: center;
-    background: #ffffff;
-    border-bottom: 1px solid var(--border-hairline);
-  }
+  .border-t { border-top: 1px solid #e2e8f0; }
+  .border-x { border-left: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; }
+  .border-subtle { border-color: #e2e8f0; }
 
-  .contact-head-container {
-    position: relative;
-    z-index: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    max-width: 780px;
-  }
+  .attio-section { background: #ffffff; position: relative; }
+  .attio-container { max-width: 1200px; margin: 0 auto; position: relative; background: #ffffff; }
 
-  .contact-title {
-    font-size: clamp(2.3rem, 4vw, 3.2rem);
-    font-weight: 800;
-    letter-spacing: -0.025em;
-    color: var(--text-main);
-    margin-top: 1rem;
-    margin-bottom: 0.8rem;
-  }
+  .attio-section-head { padding: 6rem 3.5rem 3rem 3.5rem; background: #ffffff; }
+  .attio-head-inner { max-width: 860px; }
 
-  .contact-subtitle {
-    font-size: 1.05rem;
-    color: var(--text-muted);
-    line-height: 1.6;
+  .attio-h2-inline {
+    font-size: clamp(2rem, 3.8vw, 3rem);
+    font-weight: 500;
+    letter-spacing: -0.03em;
+    line-height: 1.15;
+    margin: 0 0 1.25rem 0;
+    text-wrap: balance;
   }
+  .text-primary { color: #1c1d1f; }
+  .text-muted { color: #6f7988; }
+  .attio-lead-desc { font-size: 1.0625rem; color: #6f7988; line-height: 1.6; margin: 0; max-width: 680px; }
 
-  .contact-section {
-    padding: 4.5rem 0 6rem 0;
-    background: #ffffff;
-  }
-
-  .contact-grid {
-    display: grid;
-    grid-template-columns: 1.6fr 1fr;
-    gap: 3.5rem;
-    align-items: start;
-  }
-
-  .form-card {
-    background: #ffffff;
-    border: 1px solid var(--border-hairline);
-    border-radius: 16px;
-    padding: 3rem;
-    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
-  }
-
-  .form-title {
-    font-size: 1.35rem;
-    font-weight: 700;
-    color: var(--text-main);
-    margin-bottom: 0.4rem;
-    letter-spacing: -0.01em;
-  }
-
-  .form-desc {
-    font-size: 0.92rem;
-    color: var(--text-muted);
-    margin-bottom: 2rem;
-  }
-
-  .support-form {
-    display: flex;
-    flex-direction: column;
-    gap: 1.3rem;
-  }
-
-  .form-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1.2rem;
-  }
-
-  .form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
-  }
-
-  .form-group label {
-    font-size: 0.86rem;
-    font-weight: 600;
-    color: #334155;
-  }
-
-  .req {
-    color: var(--primary);
-  }
-
-  .form-group input,
-  .form-group select {
-    font-family: inherit;
-    font-size: 0.92rem;
-    padding: 0.75rem 1rem;
-    border: 1px solid var(--border-hairline);
-    border-radius: 8px;
-    background: #ffffff;
-    color: var(--text-main);
-    transition: border-color 0.15s, box-shadow 0.15s;
-    outline: none;
+  .attio-separator-wrap { position: relative; width: 100%; height: 1px; background: #e2e8f0; }
+  .attio-dashed-line {
     width: 100%;
-    max-width: 100%;
-    min-height: 44px;
-    box-sizing: border-box;
+    height: 1px;
+    background-image: linear-gradient(to right, #cbd5e1 50%, transparent 50%);
+    background-size: 8px 1px;
   }
 
-  .form-group textarea {
+  /* Main Contact Grid */
+  .contact-main-grid {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 1px;
+    background: #e2e8f0;
+  }
+
+  .contact-form-cell {
+    background: #ffffff;
+    padding: 3.5rem;
+  }
+  .form-title { font-size: 1.25rem; font-weight: 500; color: #1c1d1f; margin-bottom: 0.5rem; }
+  .form-desc { font-size: 0.875rem; color: #6f7988; margin-bottom: 2rem; }
+
+  .support-form { display: flex; flex-direction: column; gap: 1.25rem; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+  .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
+  .form-group label { font-size: 0.8125rem; font-weight: 500; color: #1c1d1f; }
+  .req { color: #dc2626; }
+  .form-group input, .form-group select, .form-group textarea {
+    padding: 0.65rem 0.85rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 0.875rem;
     font-family: inherit;
-    font-size: 0.92rem;
-    padding: 0.75rem 1rem;
-    border: 1px solid var(--border-hairline);
-    border-radius: 8px;
+    color: #1e293b;
     background: #ffffff;
-    color: var(--text-main);
-    transition: border-color 0.15s, box-shadow 0.15s;
+    transition: border-color 0.15s ease;
+  }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
     outline: none;
-    width: 100%;
-    max-width: 100%;
-    min-height: 90px;
-    box-sizing: border-box;
+    border-color: #1c1d1f;
   }
 
-  .form-group input:focus,
-  .form-group select:focus,
-  .form-group textarea:focus {
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(233, 36, 81, 0.1);
+  .btn-dark-primary {
+    background: #1c1d1f;
+    border: 1px solid #1c1d1f;
+    color: #ffffff;
+    font-size: 0.875rem;
+    font-weight: 500;
+    padding: 0.75rem 1.5rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.15s ease;
   }
+  .btn-dark-primary:hover { background: #000000; }
+  .btn-dark-primary.full-width { width: 100%; margin-top: 0.5rem; }
 
-  .form-submit-btn {
-    align-self: flex-start;
-    padding: 0.85rem 2rem;
-    min-height: 44px;
-    margin-top: 0.5rem;
-  }
+  .form-status { margin-top: 1rem; font-size: 0.85rem; border-radius: 6px; padding: 0.75rem; display: none; }
+  .form-status.success { display: block; background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+  .form-status.error { display: block; background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
 
-  .alert-box {
-    display: flex;
-    align-items: flex-start;
-    gap: 0.8rem;
-    padding: 1rem 1.2rem;
-    border-radius: 10px;
-    font-size: 0.88rem;
-    line-height: 1.5;
-  }
-
-  .alert-box.success {
-    background: #f0fdf4;
-    border: 1px solid #bbf7d0;
-    color: #166534;
-  }
-
-  .alert-box.error {
-    background: #fef2f2;
-    border: 1px solid #fecaca;
-    color: #991b1b;
-  }
-
-  .alert-box a {
-    color: inherit;
-    font-weight: 700;
-  }
-
-  .hidden {
-    display: none !important;
-  }
-
-  .spinner {
-    width: 14px;
-    height: 14px;
-    border: 2px solid #ffffff;
-    border-top-color: transparent;
-    border-radius: 50%;
-    animation: spin 0.6s linear infinite;
-  }
-
-  @keyframes spin {
-    to { transform: rotate(360deg); }
-  }
-
-  /* Right column */
-  .contact-info-col {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .info-card {
-    background: #ffffff;
-    border: 1px solid var(--border-hairline);
-    border-radius: 16px;
-    padding: 1.8rem;
-    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
-  }
-
-  .info-icon-box {
-    width: 44px;
-    height: 44px;
-    border-radius: 10px;
-    background: #f8fafc;
-    border: 1px solid var(--border-hairline);
-    color: var(--primary);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 1rem;
-  }
-
-  .info-card-title {
-    font-size: 1.05rem;
-    font-weight: 700;
-    color: var(--text-main);
-    margin-bottom: 0.35rem;
-  }
-
-  .info-card-text {
-    font-size: 0.88rem;
-    color: var(--text-muted);
-    line-height: 1.5;
-    margin-bottom: 0.6rem;
-  }
-
-  .info-card-sub {
-    font-size: 0.78rem;
-    color: #64748b;
-    margin-top: 0.4rem;
-  }
-
-  .info-link {
-    font-size: 0.92rem;
-    font-weight: 700;
-    color: var(--primary);
-    text-decoration: none;
-  }
-
-  .info-link:hover {
-    text-decoration: underline;
-  }
-
-  .official-pill-card {
+  /* Info Cell */
+  .contact-info-cell {
     background: #fafafa;
-    border: 1px solid var(--border-hairline);
-    border-radius: 16px;
-    padding: 1.8rem;
-    font-size: 0.85rem;
-    color: #475569;
-    line-height: 1.55;
+    padding: 3.5rem 2.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
   }
-
-  .sidebar-logo {
-    height: 32px;
-    width: auto;
-    object-fit: contain;
-    margin-bottom: 1rem;
+  .info-tag {
+    font-size: 0.72rem;
+    font-weight: 600;
+    font-family: ui-monospace, SFMono-Regular, monospace;
+    color: #94a3b8;
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.06em;
+  }
+  .info-title { font-size: 1.05rem; font-weight: 500; color: #1c1d1f; margin-bottom: 0.4rem; }
+  .info-text { font-size: 0.875rem; color: #6f7988; line-height: 1.55; margin: 0 0 0.65rem 0; }
+  .info-meta code {
+    font-size: 0.78rem;
+    font-family: ui-monospace, SFMono-Regular, monospace;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    color: #0f172a;
   }
 
   @media (max-width: 900px) {
-    .contact-grid {
-      grid-template-columns: 1fr;
-      gap: 2.5rem;
-    }
-    .form-row {
-      grid-template-columns: 1fr;
-    }
-    .form-card {
-      padding: 2rem 1.5rem;
-    }
-  }
-
-  @media (max-width: 600px) {
-    .contact-hero {
-      padding: 3.5rem 0 2.5rem 0;
-    }
-    .contact-section {
-      padding: 3rem 0 4rem 0;
-    }
-    .contact-title {
-      font-size: 2rem;
-    }
-    .form-card {
-      padding: 1.5rem 1rem;
-    }
-    .form-submit-btn {
-      width: 100%;
-      min-height: 44px;
-      justify-content: center;
-    }
-    .info-card {
-      padding: 1.5rem 1rem;
-    }
-    .official-pill-card {
-      padding: 1.5rem 1rem;
-    }
+    .contact-main-grid { grid-template-columns: 1fr; }
+    .contact-form-cell { padding: 2rem 1.5rem; }
+    .contact-info-cell { padding: 2.5rem 1.5rem; }
+    .form-row { grid-template-columns: 1fr; }
+    .attio-section-head { padding: 4rem 1.5rem 2.5rem 1.5rem; }
   }
 </style>
