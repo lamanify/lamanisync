@@ -9,8 +9,9 @@
         <span>Platform</span>
       </div>
       <h2 class="platform-title">
-        <span class="heading-dark platform-title-single">The intelligent system that never sleeps.</span>
-        <span class="heading-muted platform-subtitle-two-lines"><span class="sub-line">Catches booking clashes in real time at 2am.</span><br class="break-desktop" /><span class="sub-line">Hands you the right answer before you ask.</span></span>
+        <span class="platform-title-primary">The intelligent system that never sleeps.</span>
+        <br class="attio-br" />
+        <span class="platform-title-accent">Catches booking clashes in real time at 2am. Stops double-bookings before they slip. Hands you the answer before you ask.</span>
       </h2>
     </div>
 
@@ -530,53 +531,43 @@
 
   .platform-header {
     text-align: left;
-    max-width: 1080px;
-    margin-bottom: 3rem;
+    max-width: 896px;
+    margin-bottom: 3.5rem;
   }
 
   .platform-title {
-    font-size: clamp(1.85rem, 3.2vw, 2.75rem);
-    letter-spacing: -0.03em;
-    margin-top: 1rem;
+    font-size: clamp(2rem, 3.2vw, 2.5rem);
+    font-weight: 500;
     line-height: 1.12;
+    letter-spacing: -0.025em;
+    margin-top: 1.25rem;
+    text-wrap: balance;
   }
 
-  .platform-title-single {
-    font-weight: 800;
-    white-space: nowrap;
-    line-height: 1.12;
+  .platform-title-primary {
+    color: #1c1d1f;
+    font-weight: 500;
   }
 
-  @media (max-width: 992px) {
-    .platform-title-single {
-      white-space: normal;
-    }
-  }
-
-  .platform-subtitle-two-lines {
-    font-size: 0.88em !important;
+  .platform-title-accent {
+    color: #6f7988;
     font-weight: 400;
-    line-height: 1.25 !important;
-    margin-top: 0.5rem !important;
-    letter-spacing: -0.02em;
   }
 
-  .sub-line {
-    white-space: nowrap;
-  }
-
-  @media (max-width: 992px) {
-    .sub-line {
-      white-space: normal;
-    }
-  }
-
-  .break-desktop {
-    display: inline;
+  .attio-br {
+    display: block;
   }
 
   @media (max-width: 768px) {
-    .break-desktop {
+    .platform-header {
+      max-width: 100%;
+      margin-bottom: 2rem;
+    }
+    .platform-title {
+      font-size: 1.85rem;
+      line-height: 1.2;
+    }
+    .attio-br {
       display: none;
     }
   }
