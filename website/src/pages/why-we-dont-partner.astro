@@ -1,662 +1,226 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import CtaBanner from '../components/CtaBanner.astro';
+
+const manifestoPoints = [
+  {
+    num: "01",
+    title: "The Extortionate 'Partner Tax'",
+    desc: "Legacy CMS companies charge third-party developers up to $10,000 upfront plus 30% monthly royalties just to access an API that touches your own clinic data. We refuse to pass that cost to clinics."
+  },
+  {
+    num: "02",
+    title: "The 12-Month Red Tape Queue",
+    desc: "Partner programs are engineered to protect legacy CMS market share, not foster clinic agility. Clinics wait over a year for simple automated booking approvals. LamaniSync deploys in 60 seconds."
+  },
+  {
+    num: "03",
+    title: "Artificial API Throttling & Rate Limits",
+    desc: "Official APIs intentionally throttle requests during peak morning appointment rushes, causing WhatsApp booking drops. LamaniSync runs with workstation velocity directly in the active browser tab."
+  },
+  {
+    num: "04",
+    title: "The Dropbox Analogy: Sovereign Domain",
+    desc: "Dropbox didn't ask Microsoft for permission to sync files on Windows. Your clinic workstation is your sovereign hardware; staff have the absolute right to automate the software they legally pay for."
+  }
+];
 ---
 
 <Layout
   title="Why We Don't Partner | Clinic Data Sovereignty Manifesto | LamaniSync"
   description="Read why LamaniSync doesn't wait for legacy CMS vendor permission, pay partner taxes, or allow software cartels to hold your clinic's calendar hostage. The Dropbox Analogy and clinic data rights."
 >
-  <!-- Manifesto Hero -->
-  <section class="manifesto-hero">
-    <div class="bg-grid-pattern"></div>
-    <div class="hero-glow"></div>
-    <div class="container hero-content">
-      <div class="attio-badge crimson">
-        <svg style="width:12px; height:12px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
-        <span>A Manifesto on Healthcare Data Sovereignty</span>
-      </div>
-      <h1 class="hero-title">
-        <span class="heading-dark">Why We Don't Partner</span>
-        <span class="heading-muted">With Legacy CMS Vendors.</span>
-      </h1>
-      <p class="hero-subtitle">
-        We built LamaniSync because clinics deserve modern AI booking, sub-second WhatsApp scheduling, and total freedom over their own calendar data—without waiting 12 months for vendor approval or paying extortionate "partner taxes."
-      </p>
-
-      <div class="manifesto-author-pill">
-        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80" alt="Author" class="author-img" />
-        <div class="author-info">
-          <span class="author-name">The LamaniSync Founding Team</span>
-          <span class="author-meta">Published for independent clinics & healthcare practitioners</span>
+  <section class="attio-section border-t border-subtle">
+    <div class="attio-container border-x border-subtle">
+      <header class="attio-section-head">
+        <div class="attio-head-inner">
+          <h1 class="attio-h2-inline">
+            <span class="text-primary">Why we don't partner.</span>
+            <span class="text-muted font-normal"> A manifesto on healthcare data sovereignty for independent clinics.</span>
+          </h1>
+          <p class="attio-lead-desc">
+            We built LamaniSync because clinics deserve modern AI booking, sub-second WhatsApp scheduling, and total freedom over their own calendar data—without waiting 12 months for vendor approval or paying extortionate partner taxes.
+          </p>
+          <div class="manifesto-meta-pill">
+            <span class="pill-dot"></span>
+            <span>Published by the LamaniSync Founding Team for independent healthcare practitioners</span>
+          </div>
         </div>
+      </header>
+
+      <div class="attio-separator-wrap">
+        <div class="attio-dashed-line"></div>
       </div>
     </div>
   </section>
 
-  <!-- Core Thesis / Callout Section -->
-  <section class="section thesis-section">
-    <div class="container">
-      <div class="thesis-card">
-        <div class="quote-mark">“</div>
-        <p class="thesis-statement">
-          When you install Dropbox or Google Drive on your computer, you do not call Microsoft or Apple to ask for permission. You bought the computer. You own the files. <strong>The software on your front desk should serve your clinic, not the other way around.</strong>
-        </p>
-      </div>
-    </div>
-  </section>
-
-  <!-- Section 1: The Walled Garden Problem -->
-  <section class="section">
-    <div class="container">
-      <div class="section-head text-center">
-        <div class="attio-badge crimson">
-          <span>Problem Statement</span>
-        </div>
-        <h2 class="section-title">
-          <span class="heading-dark">The Walled Garden Problem</span><br />
-          <span class="heading-muted">How legacy healthcare vendors stifle innovation.</span>
-        </h2>
-        <p class="section-desc">
-          Legacy Clinic Management Systems (CMS / EHR) have maintained an artificial monopoly over medical practices for decades through three predatory practices.
-        </p>
-      </div>
-
-      <div class="tactic-grid">
-        <div class="tactic-card">
-          <div class="tactic-num">01</div>
-          <h3 class="tactic-title">The Extortionate "Partner Tax"</h3>
-          <p class="tactic-text">
-            Legacy vendors charge third-party innovators between $10,000 to $25,000 in upfront "certification fees", plus recurring monthly revenue shares. These costs are ultimately passed directly to your clinic in bloated monthly invoices.
-          </p>
-        </div>
-
-        <div class="tactic-card">
-          <div class="tactic-num">02</div>
-          <h3 class="tactic-title">The 12-Month Red Tape Queue</h3>
-          <p class="tactic-text">
-            When you request an integration for a modern tool like LamaniHub WhatsApp bookings, vendors intentionally drag paperwork out for 6 to 12 months. Their goal is simple: wear you down until you give up and settle for their own inferior add-on.
-          </p>
-        </div>
-
-        <div class="tactic-card">
-          <div class="tactic-num">03</div>
-          <h3 class="tactic-title">Artificial API Throttling</h3>
-          <p class="tactic-text">
-            Even when vendors offer official APIs, they frequently throttle sync to once every 4 hours or disable real-time slot checking. They do this deliberately so outside tools cannot provide instant 24/7 patient booking.
-          </p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Section 2: The Dropbox Analogy -->
-  <section class="section bg-light">
-    <div class="container">
-      <div class="analogy-box">
-        <div class="analogy-badge">The Technical Analogy</div>
-        <h2 class="analogy-title">
-          <span class="heading-dark">The Dropbox Analogy</span><br />
-          <span class="heading-muted">Why your workstation is your sovereign domain.</span>
-        </h2>
-        
-        <div class="analogy-content">
-          <p>
-            Consider how cloud storage revolutionised personal computing in 2008. When Dropbox launched, they didn't wait for Windows or macOS to grant them an "exclusive partner license." 
-          </p>
-          <p>
-            Instead, Dropbox built a desktop client that simply watched the folder on your hard drive. As the owner of the machine, <strong>you</strong> gave Dropbox permission to sync your files. Microsoft didn't get a veto, and Apple didn't get to block your access.
-          </p>
-          <p>
-            <strong>The web browser is the modern operating system of your clinic.</strong> 
-          </p>
-          <p>
-            Your front-desk computer belongs to your healthcare practice. Your receptionists log in using legitimate clinic credentials. When LamaniSync runs as a Chrome Extension inside that browser tab, it is acting as your clinic's authorized digital assistant. 
-          </p>
-          <p class="analogy-highlight">
-            You do not need permission from your CMS vendor to read your own clinic's calendar, just like you do not need permission from Dell or HP to open a document on your screen.
-          </p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Section 3: Vendor FUD Debunked -->
-  <section class="section">
-    <div class="container">
-      <div class="section-head text-center">
-        <div class="attio-badge crimson">
-          <span>Myth Busting</span>
-        </div>
-        <h2 class="section-title">
-          <span class="heading-dark">Debunking Vendor FUD</span><br />
-          <span class="heading-muted">Fear, Uncertainty, and Doubt vs Engineering Reality.</span>
-        </h2>
-        <p class="section-desc">
-          When legacy vendors lose their monopoly over your clinic, they deploy aggressive scare tactics. Here is the technical and legal reality.
-        </p>
-      </div>
-
-      <div class="fud-grid">
-        <!-- Row 1 -->
-        <div class="fud-card">
-          <div class="fud-myth">
-            <span class="fud-label myth">Vendor FUD</span>
-            <h4>"This integration is unauthorized and violates our policy!"</h4>
-            <p>Vendors send scary letters claiming that connecting third-party tools violates their terms.</p>
-          </div>
-          <div class="fud-arrow">→</div>
-          <div class="fud-reality">
-            <span class="fud-label reality">Legal Reality</span>
-            <h4>"Unauthorized" simply means without paying vendor tax</h4>
-            <p>Under the <strong>Malaysian PDPA</strong> and the US <strong>21st Century Cures Act</strong>, blocking a healthcare provider from accessing or porting their own patient appointment data is illegal <em>information blocking</em>. You are the legal data custodian.</p>
-          </div>
-        </div>
-
-        <!-- Row 2 -->
-        <div class="fud-card">
-          <div class="fud-myth">
-            <span class="fud-label myth">Vendor FUD</span>
-            <h4>"It poses a massive security breach and data leak risk!"</h4>
-            <p>Vendors imply that browser extensions expose patient records to the open internet.</p>
-          </div>
-          <div class="fud-arrow">→</div>
-          <div class="fud-reality">
-            <span class="fud-label reality">Engineering Reality</span>
-            <h4>Far more secure than legacy on-premise Windows agents</h4>
-            <p>LamaniSync operates inside Chrome's Manifest V3 sandbox with <strong>zero open inbound ports</strong>, hardware-backed <strong>WebCrypto Ed25519 device signatures</strong>, and exact-origin scoping. It never stores raw PHI in local storage.</p>
-          </div>
-        </div>
-
-        <!-- Row 3 -->
-        <div class="fud-card">
-          <div class="fud-myth">
-            <span class="fud-label myth">Vendor FUD</span>
-            <h4>"Writing data directly will corrupt the clinic database!"</h4>
-            <p>Vendors warn that appointments inserted without their blessing will break calendar tables.</p>
-          </div>
-          <div class="fud-arrow">→</div>
-          <div class="fud-reality">
-            <span class="fud-label reality">Engineering Reality</span>
-            <h4>Zero direct database injection; 100% readback verified</h4>
-            <p>LamaniSync never touches raw SQL tables. It writes exclusively through the CMS's own front-end application layer with native validation, followed by <strong>cryptographic read-after-write verification</strong>.</p>
+  <!-- Manifesto Pillars in 1px Hairline Grid -->
+  <section class="attio-section shaded-bg">
+    <div class="attio-container border-x border-subtle">
+      <div class="attio-hatch-container">
+        <div class="attio-hatch-bg" aria-hidden="true"></div>
+        <div class="attio-grid-wrap">
+          <div class="manifesto-grid">
+            {manifestoPoints.map((item) => (
+              <div class="manifesto-cell">
+                <div class="cell-overline">[{item.num}]</div>
+                <h3 class="cell-title">{item.title}</h3>
+                <p class="cell-desc">{item.desc}</p>
+              </div>
+            ))}
           </div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Section 4: The 4 Pillars of Clinic Data Sovereignty -->
-  <section class="section bg-light">
-    <div class="container">
-      <div class="section-head text-center">
-        <div class="attio-badge blue">
-          <span>Our Guiding Principles</span>
-        </div>
-        <h2 class="section-title">
-          <span class="heading-dark">The 4 Pillars</span>
-          <span class="heading-muted">of Clinic Data Sovereignty.</span>
-        </h2>
-      </div>
-
-      <div class="pillars-container">
-        <div class="p-card">
-          <div class="p-num">01</div>
-          <h3>Clinics Own the Data, Not Software Vendors</h3>
-          <p>The patient records, operatory calendars, and doctor schedules belong to your healthcare practice and the patients you serve. Software vendors are mere electronic custodians.</p>
-        </div>
-
-        <div class="p-card">
-          <div class="p-num">02</div>
-          <h3>The Workstation is Sovereign</h3>
-          <p>Any software you authorize to run in your clinic's browser on your hardware is your decision. You do not need third-party approval to orchestrate your own workflows.</p>
-        </div>
-
-        <div class="p-card">
-          <div class="p-num">03</div>
-          <h3>Zero-Trust Sandboxing Over Vendor Secrecy</h3>
-          <p>Security is achieved through verifiable cryptography, exact-origin sandboxing, and ephemeral memory execution—not through vendor lock-in disguised as "compliance."</p>
-        </div>
-
-        <div class="p-card">
-          <div class="p-num">04</div>
-          <h3>100% Readback-Verified Writes</h3>
-          <p>We hold our software to clinical-grade reliability standards: an appointment is never promised to a patient until verified directly from the primary calendar store.</p>
-        </div>
+  <!-- Quote Section -->
+  <section class="attio-section border-t border-subtle">
+    <div class="attio-container border-x border-subtle">
+      <div class="quote-box">
+        <blockquote class="serif-quote">
+          "If your clinic pays for software and staff enter the data, your clinic owns that data. An ambient browser bridge is not an intrusion—it is an exercise of your fundamental digital property rights."
+        </blockquote>
+        <div class="quote-author">— The LamaniSync Architecture Working Group</div>
       </div>
     </div>
   </section>
 
-  <!-- CTA Banner -->
   <CtaBanner />
 </Layout>
 
 <style>
-  .manifesto-hero {
-    position: relative;
-    padding: 5.5rem 0 3.5rem 0;
-    overflow: hidden;
-    background: #ffffff;
-  }
+  .border-t { border-top: 1px solid #e2e8f0; }
+  .border-x { border-left: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; }
+  .border-subtle { border-color: #e2e8f0; }
 
-  .hero-glow {
-    position: absolute;
-    top: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: min(700px, 100%);
-    max-width: 100%;
-    height: 380px;
-    background: radial-gradient(circle, rgba(15, 23, 42, 0.025) 0%, rgba(255, 255, 255, 0) 70%);
-    pointer-events: none;
-  }
+  .attio-section { background: #ffffff; position: relative; }
+  .attio-section.shaded-bg { background: #fafafa; }
+  .attio-container { max-width: 1200px; margin: 0 auto; position: relative; background: #ffffff; }
 
-  .hero-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    position: relative;
-    z-index: 1;
-  }
+  .attio-section-head { padding: 6rem 3.5rem 3rem 3.5rem; background: #ffffff; }
+  .attio-head-inner { max-width: 860px; }
 
-  .hero-title {
-    font-size: clamp(1.9rem, 4.5vw, 3.8rem);
-    font-weight: 800;
-    line-height: 1.15;
+  .attio-h2-inline {
+    font-size: clamp(2rem, 3.8vw, 3rem);
+    font-weight: 500;
     letter-spacing: -0.03em;
-    margin-top: 1.25rem;
-    margin-bottom: 1.25rem;
-    max-width: 900px;
-    overflow-wrap: break-word;
+    line-height: 1.15;
+    margin: 0 0 1.25rem 0;
+    text-wrap: balance;
   }
+  .text-primary { color: #1c1d1f; }
+  .text-muted { color: #6f7988; }
+  .attio-lead-desc { font-size: 1.0625rem; color: #6f7988; line-height: 1.6; margin: 0; max-width: 680px; }
 
-  .hero-subtitle {
-    font-size: 1.15rem;
-    color: var(--text-muted);
-    max-width: 760px;
-    line-height: 1.6;
-    margin-bottom: 2rem;
-  }
-
-  .manifesto-author-pill {
+  .manifesto-meta-pill {
     display: inline-flex;
     align-items: center;
-    gap: 0.75rem;
+    gap: 0.5rem;
     background: #f8fafc;
-    border: 1px solid var(--border-hairline);
-    padding: 0.45rem 1rem 0.45rem 0.5rem;
-    border-radius: 9999px;
-    max-width: 100%;
-    box-sizing: border-box;
+    border: 1px solid #e2e8f0;
+    padding: 0.35rem 0.85rem;
+    border-radius: 6px;
+    font-size: 0.78rem;
+    color: #64748b;
+    margin-top: 1.75rem;
+  }
+  .pill-dot { width: 6px; height: 6px; border-radius: 50%; background: #10b981; }
+
+  .attio-separator-wrap { position: relative; width: 100%; height: 1px; background: #e2e8f0; }
+  .attio-dashed-line {
+    width: 100%;
+    height: 1px;
+    background-image: linear-gradient(to right, #cbd5e1 50%, transparent 50%);
+    background-size: 8px 1px;
   }
 
-  .author-img {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    object-fit: cover;
-  }
-
-  .author-info {
-    text-align: left;
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-  }
-
-  .author-name {
-    font-size: 0.8rem;
-    font-weight: 700;
-    color: #0a0a0a;
-  }
-
-  .author-meta {
-    font-size: 0.7rem;
-    color: var(--text-muted);
-    word-break: break-word;
-  }
-
-  @media (max-width: 480px) {
-    .manifesto-author-pill {
-      border-radius: 12px;
-      padding: 0.5rem 0.75rem;
-    }
-    .author-meta {
-      font-size: 0.68rem;
-    }
-  }
-
-  /* Thesis Callout */
-  .thesis-section {
-    padding: 2rem 0;
-  }
-
-  .thesis-card {
-    background: #0f172a;
-    border: 1px solid #1e293b;
-    color: #ffffff;
-    border-radius: var(--radius-container);
-    padding: 3.5rem 3rem;
+  /* Hatch Container */
+  .attio-hatch-container {
     position: relative;
+    background-color: #fafafa;
     overflow: hidden;
-    box-shadow: 0 8px 30px rgba(15, 23, 42, 0.08);
+    padding: 0 2rem;
   }
-
-  .quote-mark {
+  .attio-hatch-bg {
     position: absolute;
-    top: -20px;
-    left: 20px;
-    font-size: 10rem;
-    font-family: serif;
-    color: rgba(255, 255, 255, 0.05);
-    line-height: 1;
+    inset: 0;
     pointer-events: none;
+    background-image: repeating-linear-gradient(125deg, transparent, transparent 6px, rgba(15, 23, 42, 0.035) 6px, rgba(15, 23, 42, 0.035) 7px);
   }
-
-  .thesis-statement {
-    font-size: clamp(1.2rem, 2.2vw, 1.65rem);
-    font-weight: 500;
-    line-height: 1.5;
+  .attio-grid-wrap {
     position: relative;
     z-index: 1;
-    max-width: 950px;
-    margin: 0 auto;
-    text-align: center;
-    color: #f1f5f9;
+    border-left: 1px solid #e2e8f0;
+    border-right: 1px solid #e2e8f0;
   }
 
-  .thesis-statement strong {
-    color: #ffffff;
-    font-weight: 700;
-  }
-
-  /* Tactics Grid */
-  .section {
-    padding: 5rem 0;
-  }
-
-  .section.bg-light {
-    background: #fafafa;
-    border-top: 1px solid var(--border-hairline);
-    border-bottom: 1px solid var(--border-hairline);
-  }
-
-  .section-head.text-center {
-    text-align: center;
-    margin-bottom: 3.5rem;
-  }
-
-  .section-head .attio-badge {
-    margin-bottom: 1rem;
-  }
-
-  .section-title {
-    font-size: clamp(1.8rem, 3.2vw, 2.75rem);
-    font-weight: 800;
-    line-height: 1.2;
-    letter-spacing: -0.025em;
-    margin-bottom: 1rem;
-  }
-
-  .section-desc {
-    font-size: 1.05rem;
-    color: var(--text-muted);
-    max-width: 680px;
-    line-height: 1.6;
-    margin: 0 auto;
-  }
-
-  .tactic-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1.5rem;
-  }
-
-  .tactic-card {
-    background: #ffffff;
-    border: 1px solid var(--border-hairline);
-    border-radius: var(--radius-card);
-    padding: 2.25rem 2rem;
-    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.02);
-    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s;
-  }
-
-  .tactic-card:hover {
-    transform: translateY(-2px);
-    border-color: #cbd5e1;
-    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05);
-  }
-
-  .tactic-num {
-    font-size: 1.75rem;
-    font-weight: 800;
-    color: var(--primary);
-    margin-bottom: 1rem;
-    letter-spacing: -0.02em;
-  }
-
-  .tactic-title {
-    font-size: 1.2rem;
-    font-weight: 700;
-    color: #0f172a;
-    margin-bottom: 0.75rem;
-  }
-
-  .tactic-text {
-    font-size: 0.9rem;
-    color: var(--text-muted);
-    line-height: 1.6;
-  }
-
-  /* Analogy Box */
-  .analogy-box {
-    background: #ffffff;
-    border: 1px solid var(--border-hairline);
-    border-radius: var(--radius-container);
-    padding: 3.5rem 3rem;
-    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.03);
-    max-width: 900px;
-    margin: 0 auto;
-  }
-
-  .analogy-badge {
-    display: inline-block;
-    font-size: 0.74rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    padding: 0.3rem 0.75rem;
-    border-radius: 6px;
-    background: #fff1f3;
-    color: var(--primary);
-    border: 1px solid #fecdd6;
-    margin-bottom: 1.25rem;
-  }
-
-  .analogy-title {
-    font-size: clamp(1.8rem, 3vw, 2.5rem);
-    font-weight: 800;
-    line-height: 1.2;
-    margin-bottom: 2rem;
-    letter-spacing: -0.02em;
-  }
-
-  .analogy-content {
-    display: flex;
-    flex-direction: column;
-    gap: 1.25rem;
-    font-size: 1.05rem;
-    color: #334155;
-    line-height: 1.7;
-  }
-
-  .analogy-highlight {
-    background: #f8fafc;
-    border-left: 2px solid var(--primary);
-    padding: 1.25rem 1.5rem;
-    border-radius: 0 8px 8px 0;
-    font-weight: 600;
-    color: #0f172a;
-    margin-top: 0.5rem;
-  }
-
-  /* FUD Grid */
-  .fud-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-    max-width: 1050px;
-    margin: 0 auto;
-  }
-
-  .fud-card {
-    display: grid;
-    grid-template-columns: 1fr auto 1.2fr;
-    align-items: center;
-    background: #ffffff;
-    border: 1px solid var(--border-hairline);
-    border-radius: var(--radius-card);
-    padding: 2rem;
-    gap: 1.5rem;
-    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.02);
-  }
-
-  .fud-label {
-    display: inline-block;
-    font-size: 0.7rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    padding: 0.2rem 0.6rem;
-    border-radius: 4px;
-    margin-bottom: 0.75rem;
-    border: 1px solid transparent;
-  }
-
-  .fud-label.myth {
-    background: #fef2f2;
-    color: #991b1b;
-    border-color: #fee2e2;
-  }
-
-  .fud-label.reality {
-    background: #f0fdf4;
-    color: #166534;
-    border-color: #dcfce7;
-  }
-
-  .fud-myth h4 {
-    font-size: 1.05rem;
-    font-weight: 700;
-    color: #0f172a;
-    margin-bottom: 0.4rem;
-  }
-
-  .fud-myth p {
-    font-size: 0.86rem;
-    color: var(--text-muted);
-    line-height: 1.5;
-  }
-
-  .fud-arrow {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: #94a3b8;
-  }
-
-  .fud-reality h4 {
-    font-size: 1.05rem;
-    font-weight: 700;
-    color: #0f172a;
-    margin-bottom: 0.4rem;
-  }
-
-  .fud-reality p {
-    font-size: 0.86rem;
-    color: #334155;
-    line-height: 1.5;
-  }
-
-  /* Pillars */
-  .pillars-container {
+  .manifesto-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 1.5rem;
+    gap: 1px;
+    background: #e2e8f0;
   }
-
-  .p-card {
+  .manifesto-cell {
     background: #ffffff;
-    border: 1px solid var(--border-hairline);
-    border-radius: var(--radius-card);
-    padding: 2.25rem 2rem;
-    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.02);
-    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s;
+    padding: 3.5rem 2.5rem;
+    display: flex;
+    flex-direction: column;
+    transition: background 0.15s ease;
   }
+  .manifesto-cell:hover { background: #fafafa; }
 
-  .p-card:hover {
-    transform: translateY(-2px);
-    border-color: #cbd5e1;
-    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05);
-  }
-
-  .p-num {
+  .cell-overline {
     font-size: 0.75rem;
-    font-weight: 700;
-    color: var(--primary);
-    text-transform: uppercase;
+    font-weight: 600;
+    color: #94a3b8;
     letter-spacing: 0.08em;
-    margin-bottom: 0.5rem;
+    font-family: ui-monospace, SFMono-Regular, monospace;
+    margin-bottom: 1.5rem;
   }
-
-  .p-card h3 {
+  .cell-title {
     font-size: 1.2rem;
-    font-weight: 700;
-    color: #0f172a;
-    margin-bottom: 0.65rem;
+    font-weight: 500;
+    color: #1c1d1f;
+    letter-spacing: -0.015em;
+    margin-bottom: 0.85rem;
   }
+  .cell-desc { font-size: 0.875rem; color: #6f7988; line-height: 1.6; margin: 0; }
 
-  .p-card p {
-    font-size: 0.9rem;
-    color: var(--text-muted);
-    line-height: 1.6;
+  /* Quote Box */
+  .quote-box {
+    padding: 5rem 3.5rem;
+    background: #ffffff;
+    text-align: center;
+    max-width: 860px;
+    margin: 0 auto;
+  }
+  .serif-quote {
+    font-family: Georgia, Cambria, 'Times New Roman', Times, serif;
+    font-size: clamp(1.25rem, 2.2vw, 1.65rem);
+    font-style: italic;
+    color: #1c1d1f;
+    line-height: 1.5;
+    margin: 0 0 1.5rem 0;
+  }
+  .quote-author {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #64748b;
+    font-family: ui-monospace, SFMono-Regular, monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
   }
 
   @media (max-width: 900px) {
-    .tactic-grid,
-    .pillars-container {
-      grid-template-columns: 1fr;
-    }
-    .fud-card {
-      grid-template-columns: 1fr;
-      gap: 1rem;
-    }
-    .fud-arrow {
-      display: none;
-    }
-    .thesis-card,
-    .analogy-box {
-      padding: 2rem 1.5rem;
-    }
+    .manifesto-grid { grid-template-columns: 1fr; }
+    .attio-section-head { padding: 4rem 1.5rem 2.5rem 1.5rem; }
+    .quote-box { padding: 3.5rem 1.5rem; }
+    .attio-hatch-container { padding: 0 1rem; }
   }
 
   @media (max-width: 640px) {
-    .manifesto-hero {
-      padding: 4rem 0 2.5rem 0;
-    }
-    .fud-card {
-      padding: 1.5rem 1rem;
-    }
-    .analogy-box,
-    .thesis-card {
-      padding: 1.5rem 1rem;
-    }
-    .tactic-card,
-    .p-card {
-      padding: 1.5rem 1rem;
-    }
-    .section {
-      padding: 3.5rem 0;
-    }
+    .attio-hatch-container { padding: 0; }
+    .attio-grid-wrap { border-left: none; border-right: none; }
   }
 </style>
