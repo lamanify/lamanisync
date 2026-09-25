@@ -59,48 +59,117 @@ const cards = [
         </div>
       </header>
 
-      <!-- Contextual Interactive Kreloses Diagram -->
+            <!-- Contextual Interactive Kreloses Real-Time Calendar Sync Diagram -->
       <div class="hero-diagram-frame">
         <div class="diagram-canvas">
           <svg class="diagram-svg-layer" viewBox="0 0 960 480" fill="none" preserveAspectRatio="xMidYMid meet">
-            <path d="M 230 110 C 340 110, 360 230, 480 230" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="4 4" />
-            <circle class="pulse-particle" r="3.5" fill="#10b981">
-              <animateMotion dur="2.8s" repeatCount="indefinite" path="M 230 110 C 340 110, 360 230, 480 230" />
-            </circle>
+            <!-- Left WhatsApp to Center Calendar -->
+            <path d="M 230 240 L 370 240" stroke="#10b981" stroke-width="2" />
+            <!-- Center Calendar to Mutex Shield -->
+            <path d="M 590 190 L 730 140" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="4 4" />
+            <!-- Center Calendar to Readback Receipt -->
+            <path d="M 590 290 L 730 340" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="4 4" />
 
-            <path d="M 730 110 C 620 110, 600 230, 480 230" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="4 4" />
-            <circle class="pulse-particle" r="3.5" fill="#6366f1">
-              <animateMotion dur="3.2s" repeatCount="indefinite" path="M 730 110 C 620 110, 600 230, 480 230" />
+            <circle class="pulse-particle" r="4" fill="#10b981">
+              <animateMotion dur="1.8s" repeatCount="indefinite" path="M 230 240 L 590 240" />
             </circle>
-
-            <path d="M 480 250 C 370 250, 340 370, 230 370" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="4 4" />
             <circle class="pulse-particle" r="3.5" fill="#3b82f6">
-              <animateMotion dur="3.6s" repeatCount="indefinite" path="M 480 250 C 370 250, 340 370, 230 370" />
+              <animateMotion dur="2.4s" repeatCount="indefinite" path="M 590 290 L 730 340" />
             </circle>
-
-            <path d="M 480 250 C 590 250, 620 370, 730 370" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="4 4" />
-            <circle class="pulse-particle" r="3.5" fill="#f59e0b">
-              <animateMotion dur="3.0s" repeatCount="indefinite" path="M 480 250 C 590 250, 620 370, 730 370" />
-            </circle>
-
-            <circle cx="480" cy="240" r="5" fill="#ffffff" stroke="#1c1d1f" stroke-width="2" />
           </svg>
 
-          <!-- Node 1: WhatsApp Patient Booking -->
-          <div class="schema-card node-top-left">
+          <!-- Node 1: Left - Inbound WhatsApp Booking Card -->
+          <div class="schema-card node-kre-chat">
             <div class="card-head">
               <div class="entity-icon bg-emerald">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
               </div>
-              <span class="entity-name">Patient WhatsApp</span>
-              <span class="entity-badge badge-blue">Chat Bot</span>
+              <span class="entity-name">WhatsApp AI Bot</span>
+              <span class="entity-badge badge-green">INCOMING</span>
             </div>
             <div class="card-attrs">
+              <div class="attr-row highlight-row"><span class="attr-bullet active"></span><span class="attr-label">Patient: Sarah Tan (IC OK)</span></div>
               <div class="attr-row"><span class="attr-bullet"></span><span class="attr-label">Requested: 3:00 PM Scaling</span></div>
-              <div class="attr-row"><span class="attr-bullet"></span><span class="attr-label">Pre-Consultation Triaged</span></div>
-              <div class="attr-more">Instant Triage</div>
+              <div class="attr-row"><span class="attr-bullet"></span><span class="attr-label">Doctor: Dr. Bryan (Roster OK)</span></div>
+              <div class="attr-more">Triaged in 450ms</div>
             </div>
           </div>
+
+          <!-- Node 2: Center - Simulated Kreloses UI Schedule Grid -->
+          <div class="kreloses-calendar-mockup">
+            <div class="mockup-header">
+              <div class="mockup-dots">
+                <span class="mock-dot red"></span>
+                <span class="mock-dot yellow"></span>
+                <span class="mock-dot green"></span>
+              </div>
+              <span class="mockup-title">Kreloses Portal • Operatory 1 Calendar</span>
+              <span class="mockup-status">LIVE DOM ATTACHED</span>
+            </div>
+            <div class="calendar-slot-list">
+              <div class="cal-row booked">
+                <span class="time-col">02:00 PM</span>
+                <span class="slot-name">Ahmad Faiz — Extraction</span>
+                <span class="slot-status">Checked In</span>
+              </div>
+              <div class="cal-row active-injection">
+                <span class="time-col">03:00 PM</span>
+                <div class="injection-info">
+                  <span class="slot-name-injected">Sarah Tan — Scaling & Polish</span>
+                  <span class="injected-tag">⚡ LAMANISYNC WRITTEN</span>
+                </div>
+                <span class="slot-status-confirmed">Verified (0.9s)</span>
+              </div>
+              <div class="cal-row vacant">
+                <span class="time-col">04:00 PM</span>
+                <span class="slot-name muted">Available Slot (Dr. Bryan)</span>
+                <span class="slot-status-vacant">Open</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Node 3: Right Top - Double Booking Mutex Lock -->
+          <div class="schema-card node-kre-mutex">
+            <div class="card-head">
+              <div class="entity-icon bg-purple">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              </div>
+              <span class="entity-name">Atomic Mutex Shield</span>
+              <span class="entity-badge badge-blue">PROTECTED</span>
+            </div>
+            <div class="card-attrs">
+              <div class="attr-row"><span class="attr-bullet active"></span><span class="attr-label">0 Overlapping slots</span></div>
+              <div class="attr-row"><span class="attr-bullet"></span><span class="attr-label">Workstation-level lock</span></div>
+              <div class="attr-more">100% Conflict Proof</div>
+            </div>
+          </div>
+
+          <!-- Node 4: Right Bottom - Readback Receipt -->
+          <div class="schema-card node-kre-receipt">
+            <div class="card-head">
+              <div class="entity-icon bg-amber">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+              </div>
+              <span class="entity-name">Readback Receipt</span>
+              <span class="entity-badge badge-green">SHA-256</span>
+            </div>
+            <div class="card-attrs">
+              <div class="attr-row"><span class="attr-bullet active"></span><span class="attr-label">DOM re-queried: Match</span></div>
+              <div class="attr-row"><span class="attr-bullet"></span><span class="attr-label">Zero phantom records</span></div>
+              <div class="attr-more">Receipt logged to cloud</div>
+            </div>
+          </div>
+
+          <!-- Contextual Floating Pill -->
+          <div class="floating-query-pill">
+            <div class="pill-sparkle">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            </div>
+            <span class="pill-text">Live Kreloses DOM attached • 0 credential leakage • sub-second slot injection</span>
+            <div class="pill-status-dot"></div>
+          </div>
+        </div>
+      </div>
 
           <!-- Node 2: Kreloses Schedule Grid -->
           <div class="schema-card node-top-right">
@@ -316,6 +385,48 @@ const cards = [
   .btn-attio-secondary:hover { background-color: #f8fafc; border-color: #cbd5e1; }
   .down-arrow { transition: transform 0.15s ease; }
   .btn-attio-secondary:hover .down-arrow { transform: translateY(2px); }
+
+  
+  .node-kre-chat { top: 50%; left: 35px; transform: translateY(-50%); width: 220px; }
+  .kreloses-calendar-mockup {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 320px;
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+    z-index: 2;
+    overflow: hidden;
+  }
+  .mockup-header { background: #f8fafc; padding: 0.55rem 0.85rem; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; }
+  .mockup-dots { display: flex; gap: 4px; }
+  .mock-dot { width: 7px; height: 7px; border-radius: 50%; }
+  .mock-dot.red { background: #fca5a5; }
+  .mock-dot.yellow { background: #fcd34d; }
+  .mock-dot.green { background: #86efac; }
+  .mockup-title { font-size: 0.68rem; font-weight: 600; color: #475569; font-family: ui-monospace, monospace; }
+  .mockup-status { font-size: 0.58rem; font-weight: 700; color: #15803d; background: #dcfce7; padding: 0.1rem 0.35rem; border-radius: 4px; }
+
+  .calendar-slot-list { display: flex; flex-direction: column; }
+  .cal-row { display: flex; align-items: center; padding: 0.6rem 0.85rem; border-bottom: 1px solid #f1f5f9; font-size: 0.72rem; }
+  .cal-row:last-child { border-bottom: none; }
+  .time-col { width: 62px; font-weight: 600; color: #94a3b8; font-family: ui-monospace, monospace; }
+  .slot-name { color: #334155; font-weight: 500; flex: 1; }
+  .slot-name.muted { color: #94a3b8; font-style: italic; }
+  .slot-status { font-size: 0.65rem; color: #64748b; background: #f1f5f9; padding: 0.1rem 0.35rem; border-radius: 4px; }
+
+  .active-injection { background: #f0fdf4; border-top: 1px solid #bbf7d0; border-bottom: 1px solid #bbf7d0; }
+  .injection-info { flex: 1; display: flex; flex-direction: column; gap: 0.15rem; }
+  .slot-name-injected { color: #166534; font-weight: 600; }
+  .injected-tag { font-size: 0.58rem; color: #15803d; font-weight: 700; font-family: ui-monospace, monospace; }
+  .slot-status-confirmed { font-size: 0.65rem; color: #166534; font-weight: 600; }
+  .slot-status-vacant { font-size: 0.65rem; color: #94a3b8; }
+
+  .node-kre-mutex { top: 65px; right: 35px; width: 210px; }
+  .node-kre-receipt { bottom: 65px; right: 35px; width: 210px; }
 
   /* Diagram Frame & Dot Matrix Canvas */
   .hero-diagram-frame { position: relative; padding: 0 2rem 5rem 2rem; }
