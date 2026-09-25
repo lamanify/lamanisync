@@ -33,10 +33,9 @@ const securityPillars = [
 ];
 ---
 
-<section id="security" class="attio-section border-t border-subtle">
+<section id="security" class="attio-section shaded-bg border-t border-subtle">
   <div class="attio-container border-x border-subtle">
     
-    <!-- Attio Left-Aligned Structural Header (no badges, tight typography) -->
     <header class="attio-section-head">
       <div class="attio-head-inner">
         <h2 class="attio-h2-inline">
@@ -49,22 +48,24 @@ const securityPillars = [
       </div>
     </header>
 
-    <!-- Structural Hairline Separator with Dashed Connector Line -->
     <div class="attio-separator-wrap">
       <div class="attio-dashed-line"></div>
     </div>
 
-    <!-- 1px Gap Grid on Subtle Stroke Canvas (Attio Architectural Layout) -->
-    <div class="attio-grid-canvas">
-      <div class="attio-dot-bg"></div>
-      <div class="attio-pillars-grid">
-        {securityPillars.map((item) => (
-          <div class="attio-cell">
-            <div class="cell-overline">[{item.num}]</div>
-            <h3 class="cell-title">{item.title}</h3>
-            <p class="cell-desc">{item.desc}</p>
-          </div>
-        ))}
+    <!-- Diagonal Hatch Outer Gutters Frame -->
+    <div class="attio-hatch-container">
+      <div class="attio-hatch-bg" aria-hidden="true"></div>
+
+      <div class="attio-grid-wrap">
+        <div class="attio-pillars-grid">
+          {securityPillars.map((item) => (
+            <div class="attio-cell">
+              <div class="cell-overline">[{item.num}]</div>
+              <h3 class="cell-title">{item.title}</h3>
+              <p class="cell-desc">{item.desc}</p>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
 
@@ -72,39 +73,16 @@ const securityPillars = [
 </section>
 
 <style>
-  .border-t {
-    border-top: 1px solid #e2e8f0;
-  }
-  .border-x {
-    border-left: 1px solid #e2e8f0;
-    border-right: 1px solid #e2e8f0;
-  }
-  .border-subtle {
-    border-color: #e2e8f0;
-  }
+  .border-t { border-top: 1px solid #e2e8f0; }
+  .border-x { border-left: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; }
+  .border-subtle { border-color: #e2e8f0; }
 
-  .attio-section {
-    background: #ffffff;
-    position: relative;
-  }
+  .attio-section { background: #ffffff; position: relative; }
+  .attio-section.shaded-bg { background: #fafafa; }
+  .attio-container { max-width: 1200px; margin: 0 auto; position: relative; background: #ffffff; }
 
-  .attio-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    position: relative;
-    background: #ffffff;
-  }
-
-  /* Attio Left-Aligned Structural Header (no badges, tight typography) */
-  .attio-section-head {
-    padding: 6rem 3.5rem 3rem 3.5rem;
-    background: #ffffff;
-  }
-
-  .attio-head-inner {
-    max-width: 860px;
-  }
-
+  .attio-section-head { padding: 6rem 3.5rem 3rem 3.5rem; background: #ffffff; }
+  .attio-head-inner { max-width: 860px; }
   .attio-h2-inline {
     font-size: clamp(2rem, 3.8vw, 3rem);
     font-weight: 500;
@@ -113,31 +91,11 @@ const securityPillars = [
     margin: 0 0 1.25rem 0;
     text-wrap: balance;
   }
+  .text-primary { color: #1c1d1f; }
+  .text-muted { color: #6f7988; }
+  .attio-lead-desc { font-size: 1.0625rem; color: #6f7988; line-height: 1.6; margin: 0; max-width: 680px; }
 
-  .text-primary {
-    color: #1c1d1f;
-  }
-
-  .text-muted {
-    color: #6f7988;
-  }
-
-  .attio-lead-desc {
-    font-size: 1.0625rem;
-    color: #6f7988;
-    line-height: 1.6;
-    margin: 0;
-    max-width: 680px;
-  }
-
-  /* Dashed Divider Line */
-  .attio-separator-wrap {
-    position: relative;
-    width: 100%;
-    height: 1px;
-    background: #e2e8f0;
-  }
-
+  .attio-separator-wrap { position: relative; width: 100%; height: 1px; background: #e2e8f0; }
   .attio-dashed-line {
     width: 100%;
     height: 1px;
@@ -145,32 +103,33 @@ const securityPillars = [
     background-size: 8px 1px;
   }
 
-  /* Canvas with Dotted Pattern & 1px Gap Border Grid */
-  .attio-grid-canvas {
+  /* Diagonal Hatch Gutters Container */
+  .attio-hatch-container {
     position: relative;
-    background: #fafafa;
+    background-color: #fafafa;
     overflow: hidden;
+    padding: 0 2rem;
   }
 
-  /* Attio Signature Dotted Matrix */
-  .attio-dot-bg {
+  .attio-hatch-bg {
     position: absolute;
     inset: 0;
     pointer-events: none;
-    background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
-    background-size: 20px 20px;
-    opacity: 0.55;
+    background-image: repeating-linear-gradient(125deg, transparent, transparent 6px, rgba(15, 23, 42, 0.035) 6px, rgba(15, 23, 42, 0.035) 7px);
   }
 
-  /* Attio Border Gap Grid: 1px gap background creates perfect hairlines */
-  .attio-pillars-grid {
+  .attio-grid-wrap {
     position: relative;
     z-index: 1;
+    border-left: 1px solid #e2e8f0;
+    border-right: 1px solid #e2e8f0;
+  }
+
+  .attio-pillars-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 1px;
     background: #e2e8f0;
-    border-bottom: 1px solid #e2e8f0;
   }
 
   .attio-cell {
@@ -180,10 +139,7 @@ const securityPillars = [
     flex-direction: column;
     transition: background 0.15s ease;
   }
-
-  .attio-cell:hover {
-    background: #fafafa;
-  }
+  .attio-cell:hover { background: #fafafa; }
 
   .cell-overline {
     font-size: 0.75rem;
@@ -203,35 +159,18 @@ const securityPillars = [
     margin: 0 0 0.85rem 0;
   }
 
-  .cell-desc {
-    font-size: 0.875rem;
-    color: #6f7988;
-    line-height: 1.6;
-    margin: 0;
-  }
+  .cell-desc { font-size: 0.875rem; color: #6f7988; line-height: 1.6; margin: 0; }
 
   @media (max-width: 960px) {
-    .attio-section-head {
-      padding: 4rem 1.5rem 2.5rem 1.5rem;
-    }
-    .attio-pillars-grid {
-      grid-template-columns: repeat(2, 1fr);
-    }
-    .attio-cell {
-      padding: 2.25rem 1.5rem;
-    }
+    .attio-pillars-grid { grid-template-columns: repeat(2, 1fr); }
+    .attio-section-head { padding: 4rem 1.5rem 2.5rem 1.5rem; }
+    .attio-cell { padding: 2.25rem 1.5rem; }
+    .attio-hatch-container { padding: 0 1rem; }
   }
 
   @media (max-width: 640px) {
-    .attio-pillars-grid {
-      grid-template-columns: 1fr;
-    }
-    .border-x {
-      border-left: none;
-      border-right: none;
-    }
-    .attio-section-head {
-      padding: 3.5rem 1.25rem 2rem 1.25rem;
-    }
+    .attio-pillars-grid { grid-template-columns: 1fr; }
+    .attio-hatch-container { padding: 0; }
+    .attio-grid-wrap { border-left: none; border-right: none; }
   }
 </style>
