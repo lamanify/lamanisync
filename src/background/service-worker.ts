@@ -87,51 +87,73 @@ export const commandExecutor = new CommandExecutor({
   echoSuppressor,
   actionDispatcher: async (actionId, correlationId, parameters) => {
     const session = await coordinator.getSession();
-    const targetOrigin = session?.targetOrigin || 'https://app.lamanipulse.com';
+    const targetOrigin = session?.targetOrigin;
+    if (!targetOrigin) {
+      throw new Error('No active pairing session with valid targetOrigin found');
+    }
     const tabs = await chrome.tabs.query({ url: `${targetOrigin}/*` });
     if (!tabs || tabs.length === 0 || !tabs[0].id) {
       throw new Error(`No active tab found for CMS origin ${targetOrigin}`);
     }
     const tabId = tabs[0].id;
-    let response: { success: boolean; result?: unknown; error?: string } | undefined;
-    try {
-      response = (await chrome.tabs.sendMessage(tabId, {
+
+    const sendAction = async () => {
+      return (await chrome.tabs.sendMessage(tabId, {
         type: 'EXECUTE_PAGE_ACTION',
         actionId,
         correlationId,
         parameters,
-      })) as { success: boolean; result?: unknown; error?: string };
+      })) as { success: boolean; result?: unknown; error?: string; code?: string };
+    };
+
+    const injectScripts = async () => {
+      if (!chrome.scripting?.executeScript) return;
+      try {
+        await chrome.scripting.executeScript({
+          target: { tabId },
+          files: ['content-script.js'],
+        });
+        await chrome.scripting.executeScript({
+          target: { tabId },
+          world: 'MAIN',
+          files: ['page-world.js'],
+        });
+      } catch (err) {
+        console.warn('[LamaniSync SW] Dynamic script injection notice:', err);
+      }
+    };
+
+    let response: { success: boolean; result?: unknown; error?: string; code?: string } | undefined;
+    let needsInjection = false;
+
+    try {
+      response = await sendAction();
     } catch (err: unknown) {
       const errMsg = (err as Error)?.message || '';
       if (errMsg.includes('Receiving end does not exist') || errMsg.includes('Could not establish connection')) {
-        if (chrome.scripting?.executeScript) {
-          try {
-            await chrome.scripting.executeScript({
-              target: { tabId },
-              files: ['content-script.js'],
-            });
-            await chrome.scripting.executeScript({
-              target: { tabId },
-              world: 'MAIN',
-              files: ['page-world.js'],
-            });
-            await new Promise((r) => setTimeout(r, 300));
-            response = (await chrome.tabs.sendMessage(tabId, {
-              type: 'EXECUTE_PAGE_ACTION',
-              actionId,
-              correlationId,
-              parameters,
-            })) as { success: boolean; result?: unknown; error?: string };
-          } catch (injectErr) {
-            throw new Error(`Failed to inject into tab: ${(injectErr as Error)?.message || String(injectErr)}`);
-          }
-        } else {
-          throw err;
-        }
+        needsInjection = true;
       } else {
         throw err;
       }
     }
+
+    if (needsInjection || (!response?.success && (response?.code === 'HANDSHAKE_NOT_READY' || response?.error?.includes('Handshake')))) {
+      await injectScripts();
+      // Retry sending action with backoff up to 3.5s for dynamic handshake completion
+      const start = Date.now();
+      while (Date.now() - start < 3500) {
+        await new Promise((r) => setTimeout(r, 250));
+        try {
+          response = await sendAction();
+          if (response?.success || (response?.code && response.code !== 'HANDSHAKE_NOT_READY')) {
+            break;
+          }
+        } catch {
+          // Content script port still initializing, continue waiting
+        }
+      }
+    }
+
     if (!response || !response.success) {
       throw new Error(response?.error || 'Action execution failed in page world');
     }
@@ -393,10 +415,11 @@ export async function ensureServiceWorkerRestored(): Promise<void> {
     }
 
     await killSwitch.restore();
-    const activeLease = await leaseCoordinator.restore();
     await echoSuppressor.restoreFromStorage();
     const record = await coordinator.restoreState();
     const session = await coordinator.getSession();
+    const activeLease = await leaseCoordinator.restore(session?.connectionId);
+
     if (session) {
       batchUploader.setInstallationId(session.installationId);
       referenceSync.setTargetOrigin(session.targetOrigin);
@@ -424,7 +447,7 @@ export async function ensureServiceWorkerRestored(): Promise<void> {
       outboxPoller.stop();
       return record as unknown as void;
     }
-    if (activeLease) {
+    if (activeLease && session && activeLease.connectionId === session.connectionId) {
       coordinator.setActiveLease({
         connectionId: activeLease.connectionId,
         leaseId: activeLease.leaseId,
@@ -449,6 +472,7 @@ export async function ensureServiceWorkerRestored(): Promise<void> {
       outboxPoller.setConnectionId(activeLease.connectionId);
       outboxPoller.start();
     } else if (session?.connectionId && session?.installationId) {
+      outboxPoller.setConnectionId(session.connectionId);
       leaseCoordinator.acquire(session.connectionId, session.installationId, 120).catch((err) => {
         console.warn('[LamaniSync SW] Failed to auto-acquire leader lease on restore:', err);
       });
@@ -503,7 +527,9 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   if (message?.type === 'PAIR') {
     coordinator
       .pair(message.pairingCode, message.deviceName, message.targetOrigin)
-      .then((result) => {
+      .then(async (result) => {
+        outboxPoller.setConnectionId(result.connectionId);
+        await leaseCoordinator.purge().catch(() => {});
         if (typeof chrome !== 'undefined' && chrome.alarms?.create) {
           try {
             chrome.alarms.create(TOKEN_RENEWAL_ALARM_NAME, {
@@ -534,7 +560,8 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   if (message?.type === 'UNPAIR') {
     coordinator
       .unpair(message.reason)
-      .then(() => {
+      .then(async () => {
+        await leaseCoordinator.purge().catch(() => {});
         if (typeof chrome !== 'undefined' && chrome.alarms?.clear) {
           try {
             chrome.alarms.clear(TOKEN_RENEWAL_ALARM_NAME);

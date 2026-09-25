@@ -32,6 +32,7 @@ export class MainWorldRunner {
   private allowedApiOrigins?: string[];
   private adapterApiOrigin?: string;
   private handshakeToken: string | null = null;
+  private challengeNonce: string | null = null;
   private observerHandle: NetworkObserverHandle | null = null;
   private messageListener?: (event: MessageEvent) => void;
 
@@ -75,9 +76,10 @@ export class MainWorldRunner {
     }
   }
 
-  requestHandshake(): void {
-    if (!this.targetOrigin || this.targetOrigin === '*') return;
+  requestHandshake(): string {
+    if (!this.targetOrigin || this.targetOrigin === '*') return '';
     const nonce = (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : `${Date.now()}`;
+    this.challengeNonce = nonce;
     const req = {
       channel: BRIDGE_CHANNEL,
       source: SOURCE_MAIN,
@@ -85,6 +87,7 @@ export class MainWorldRunner {
       payload: { nonce },
     };
     this.targetWindow.postMessage(req, this.targetOrigin);
+    return nonce;
   }
 
   private async handleMessage(event: MessageEvent): Promise<void> {
@@ -107,12 +110,16 @@ export class MainWorldRunner {
     const message = result.message;
 
     if (message.type === 'HANDSHAKE_INIT') {
-      // Guard against rogue handshake overwrite once established
-      if (this.handshakeToken && this.handshakeToken !== message.token) {
-        console.warn('[LamaniSync Runner] Ignored duplicate HANDSHAKE_INIT with different token');
+      const isChallengeResponse = Boolean(this.challengeNonce && message.payload.nonce === this.challengeNonce);
+
+      // Guard against rogue handshake overwrite once established unless answering our active challenge
+      if (this.handshakeToken && this.handshakeToken !== message.token && !isChallengeResponse) {
+        console.warn('[LamaniSync Runner] Unverified HANDSHAKE_INIT with different token; issuing challenge');
+        this.requestHandshake();
         return;
       }
 
+      this.challengeNonce = null;
       this.handshakeToken = message.token;
 
       // Acknowledge handshake
@@ -176,6 +183,11 @@ export class MainWorldRunner {
 
 // Self-instantiate when running directly in browser MAIN world
 if (typeof window !== 'undefined') {
+  const win = window as unknown as { __LAMANISYNC_MAIN_RUNNER__?: MainWorldRunner };
+  if (win.__LAMANISYNC_MAIN_RUNNER__) {
+    win.__LAMANISYNC_MAIN_RUNNER__.stop();
+  }
   const runner = new MainWorldRunner();
+  win.__LAMANISYNC_MAIN_RUNNER__ = runner;
   runner.start();
 }

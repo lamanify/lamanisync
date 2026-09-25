@@ -59,6 +59,7 @@ export class IsolatedContentBridge {
   private messageListener?: (event: MessageEvent) => void;
   private runtimeListener?: MessageListenerCallback;
   private actionTimeoutMs: number;
+  private handshakeTimeoutMs: number;
 
   constructor(options: IsolatedBridgeOptions = {}) {
     this.targetWindow = options.targetWindow || (typeof window !== 'undefined' ? window : ({} as Window));
@@ -74,6 +75,7 @@ export class IsolatedContentBridge {
     this.chromeRuntime = options.chromeRuntime || (typeof chrome !== 'undefined' && chrome.runtime ? chrome.runtime : undefined);
     this.handshakeToken = (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : `hs-${Date.now()}-${Math.random()}`;
     this.actionTimeoutMs = options.actionTimeoutMs || 10000;
+    this.handshakeTimeoutMs = options.handshakeTimeoutMs !== undefined ? options.handshakeTimeoutMs : 3000;
   }
 
   getHandshakeToken(): string {
@@ -81,6 +83,22 @@ export class IsolatedContentBridge {
   }
 
   isHandshakeReady(): boolean {
+    return this.isHandshakeEstablished;
+  }
+
+  async ensureHandshake(timeoutMs = this.handshakeTimeoutMs): Promise<boolean> {
+    if (this.isHandshakeEstablished) return true;
+    this.sendHandshakeInit();
+    const start = Date.now();
+    let lastSent = start;
+    while (Date.now() - start < timeoutMs) {
+      if (this.isHandshakeEstablished) return true;
+      if (Date.now() - lastSent > 400) {
+        this.sendHandshakeInit();
+        lastSent = Date.now();
+      }
+      await new Promise((r) => setTimeout(r, 40));
+    }
     return this.isHandshakeEstablished;
   }
 
@@ -212,33 +230,35 @@ export class IsolatedContentBridge {
         return false;
       }
 
-      if (!this.isHandshakeEstablished) {
-        sendResponse({
-          success: false,
-          error: 'Handshake with page-world runner is not established',
-          code: 'HANDSHAKE_NOT_READY',
-        });
-        return false;
-      }
+      this.ensureHandshake(this.handshakeTimeoutMs).then((ready) => {
+        if (!ready) {
+          sendResponse({
+            success: false,
+            error: 'Handshake with page-world runner is not established',
+            code: 'HANDSHAKE_NOT_READY',
+          });
+          return;
+        }
 
-      const activeCorrId = correlationId || ((typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : `act-${Date.now()}`);
+        const activeCorrId = correlationId || ((typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : `act-${Date.now()}`);
 
-      this.executeActionInPage(actionId, activeCorrId, parameters)
-        .then((result: unknown) => {
-          const res = result as Record<string, unknown> | undefined;
-          if (res && res.status === 'SUCCESS') {
-            sendResponse({ success: true, result: res });
-          } else {
-            const errObj = res?.error as Record<string, unknown> | undefined;
-            sendResponse({
-              success: false,
-              code: errObj?.code || res?.status || 'ACTION_FAILED',
-              error: errObj?.message || `Action execution returned ${String(res?.status)}`,
-              result: res,
-            });
-          }
-        })
-        .catch((err) => sendResponse({ success: false, error: err.message, code: err.code }));
+        this.executeActionInPage(actionId, activeCorrId, parameters)
+          .then((result: unknown) => {
+            const res = result as Record<string, unknown> | undefined;
+            if (res && res.status === 'SUCCESS') {
+              sendResponse({ success: true, result: res });
+            } else {
+              const errObj = res?.error as Record<string, unknown> | undefined;
+              sendResponse({
+                success: false,
+                code: errObj?.code || res?.status || 'ACTION_FAILED',
+                error: errObj?.message || `Action execution returned ${String(res?.status)}`,
+                result: res,
+              });
+            }
+          })
+          .catch((err) => sendResponse({ success: false, error: err.message, code: err.code }));
+      });
 
       return true; // async response
     }
@@ -289,7 +309,12 @@ export class IsolatedContentBridge {
 
 // Self-instantiate when running directly as a Chrome content script in browser
 if (typeof window !== 'undefined' && typeof chrome !== 'undefined' && chrome.runtime?.id) {
+  const win = window as unknown as { __LAMANISYNC_ISOLATED_BRIDGE__?: IsolatedContentBridge };
+  if (win.__LAMANISYNC_ISOLATED_BRIDGE__) {
+    win.__LAMANISYNC_ISOLATED_BRIDGE__.stop();
+  }
   const bridge = new IsolatedContentBridge();
+  win.__LAMANISYNC_ISOLATED_BRIDGE__ = bridge;
   bridge.start();
 }
 
