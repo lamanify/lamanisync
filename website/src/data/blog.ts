@@ -563,7 +563,7 @@ By strictly enforcing volatile-only memory processing, LamaniSync gives healthca
   },
   {
     slug: "why-we-dont-trust-blind-writes-readback-verification",
-    title: "Why We Don't Trust Blind Writes: How Two-Phase Readback Verification Eliminates Dropped Bookings",
+    title: "Why We Don't Trust Blind Writes in Clinic Management System Integration",
     excerpt: "In medical scheduling, assuming a write succeeded is a recipe for patient chaos. Learn how LamaniSync uses two-phase readback verification to eliminate dropped bookings.",
     description: "In medical scheduling, assuming a write succeeded is a recipe for patient chaos. Learn how LamaniSync uses two-phase readback verification to eliminate dropped bookings.",
     date: "September 20, 2026",
@@ -907,7 +907,7 @@ With LamaniSync, your clinic enjoys instant, real-time synchronization between W
   },
   {
     slug: "zero-knowledge-session-hygiene-cms-passwords",
-    title: "Zero-Knowledge Session Hygiene: Why LamaniSync Never Sees, Copies, or Transmits Your CMS Passwords",
+    title: "Zero-Knowledge Session Hygiene: Protecting Clinic Management System Logins",
     excerpt: "Clinic staff often worry that extensions will harvest their login credentials. Learn how LamaniSync's ambient session architecture ensures your CMS passwords and tokens never leave your browser.",
     description: "Clinic staff often worry that extensions will harvest their login credentials. Learn how LamaniSync's ambient session architecture ensures your CMS passwords and tokens never leave your browser.",
     date: "September 22, 2026",
@@ -1026,7 +1026,7 @@ By enforcing strict zero-knowledge session hygiene, LamaniSync guarantees that y
   },
   {
     slug: "double-booking-shield-idempotency-mutex-locks",
-    title: "The Double-Booking Shield: How Idempotency Tokens and Mutex Locks Protect Doctor Schedules",
+    title: "Double-Booking Shield: Mutex Locks for Clinic Management System Schedules",
     excerpt: "When two patients attempt to book the last available 3:00 PM slot simultaneously, what prevents a collision? Explore LamaniSync's distributed lease locking and cryptographic idempotency.",
     description: "When two patients attempt to book the last available 3:00 PM slot simultaneously, what prevents a collision? Explore LamaniSync's distributed lease locking and cryptographic idempotency.",
     date: "September 22, 2026",
@@ -1151,7 +1151,7 @@ Through distributed lease mutexes and cryptographic idempotency tokens, LamaniSy
   },
   {
     slug: "surgical-permissions-manifest-v3-clinic-portal",
-    title: "Surgical Permissions: Why Manifest V3 Scopes LamaniSync Strictly to Your Paired Clinic Portal",
+    title: "Surgical Manifest V3 Permissions for Clinic Management System Portals",
     excerpt: "Many browser extensions ask for permission to \"Read and change all data on all websites.\" Learn why LamaniSync rejects broad permissions and scopes access exclusively to your exact CMS domain.",
     description: "Many browser extensions ask for permission to \"Read and change all data on all websites.\" Learn why LamaniSync rejects broad permissions and scopes access exclusively to your exact CMS domain.",
     date: "September 23, 2026",
@@ -1281,7 +1281,7 @@ By scoping permissions with surgical precision, LamaniSync guarantees that your 
   },
   {
     slug: "data-sovereignty-medical-compliance-pdpa-hipaa",
-    title: "Data Sovereignty & Medical Compliance: How LamaniSync Aligns with Malaysian PDPA and HIPAA Standards",
+    title: "Healthcare Data Sovereignty: PDPA and HIPAA Compliance in CMS Data Sync",
     excerpt: "Navigating healthcare regulations can be overwhelming. Learn how LamaniSync's architecture complies with the Malaysian PDPA (2024 Amendments) and US HIPAA Security Rules by design.",
     description: "Navigating healthcare regulations can be overwhelming. Learn how LamaniSync's architecture complies with the Malaysian PDPA (2024 Amendments) and US HIPAA Security Rules by design.",
     date: "September 23, 2026",
@@ -1540,7 +1540,7 @@ By enforcing strict action whitelisting and eliminating dynamic remote code, Lam
   },
   {
     slug: "cryptographic-receipt-sha-256-state-hashing",
-    title: "The Cryptographic Receipt: How SHA-256 State Hashing Proves Every Appointment Was Written Correctly",
+    title: "Cryptographic State Receipts: SHA-256 Hashing in Clinic EMR Sync",
     excerpt: "How does a clinic know an automated booking wasn't corrupted or altered in transit? Explore how LamaniSync uses SHA-256 state hashing to provide immutable mathematical proof of every write.",
     description: "How does a clinic know an automated booking wasn't corrupted or altered in transit? Explore how LamaniSync uses SHA-256 state hashing to provide immutable mathematical proof of every write.",
     date: "September 24, 2026",
