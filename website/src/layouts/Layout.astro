@@ -6,12 +6,68 @@ import '../styles/global.css';
 interface Props {
   title?: string;
   description?: string;
+  canonicalURL?: string;
+  type?: string;
 }
 
 const {
   title = "LamaniSync | The Dedicated Clinic Management System Bridge for LamaniHub",
-  description = "Connect your clinic management system (Dentrix, eClinicalWorks, LamaniPulse) directly to LamaniHub WhatsApp booking automation in real-time. Zero local server setup, 100% automated."
+  description = "Connect your clinic management system (Dentrix, eClinicalWorks, Kreloses, LamaniPulse) directly to LamaniHub WhatsApp booking automation in real-time. Zero local server setup, 100% automated.",
+  canonicalURL = Astro.url.href,
+  type = "website"
 } = Astro.props;
+
+// Ensure clean canonical URL without trailing query params
+const cleanCanonical = canonicalURL.split('?')[0].replace(/\/$/, '') || 'https://lamanisync.com';
+
+// Structured Data (JSON-LD) for Search Engines & LLM Context
+const organizationSchema = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://lamanisync.com/#organization",
+      "name": "LamaniSync",
+      "url": "https://lamanisync.com",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://res.cloudinary.com/lamanify/image/upload/v1790242929/LamaniSync_Logo.png"
+      },
+      "parentOrganization": {
+        "@type": "Organization",
+        "name": "Lamanify",
+        "url": "https://lamanify.com"
+      },
+      "description": "High-reliability healthcare data synchronization engine connecting legacy Clinic Management Systems to WhatsApp AI booking automation.",
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "contactType": "technical support",
+        "url": "https://lamanisync.com/contact"
+      }
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://lamanisync.com/#website",
+      "url": "https://lamanisync.com",
+      "name": "LamaniSync",
+      "publisher": {
+        "@id": "https://lamanisync.com/#organization"
+      }
+    },
+    {
+      "@type": "SoftwareApplication",
+      "@id": "https://lamanisync.com/#software",
+      "name": "LamaniSync Bridge",
+      "applicationCategory": "HealthApplication",
+      "operatingSystem": "Cross-platform (Chromium Manifest V3)",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      }
+    }
+  ]
+};
 ---
 
 <!DOCTYPE html>
@@ -24,26 +80,36 @@ const {
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
-    <meta name="theme-color" content="#e92451" />
+    <meta name="theme-color" content="#1c1d1f" />
     <meta name="generator" content={Astro.generator} />
+
+    <!-- Crawlers, GEO & Indexing -->
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
+    <link rel="help" type="text/plain" href="/llms.txt" />
 
     <!-- SEO Meta Tags -->
     <title>{title}</title>
     <meta name="description" content={description} />
-    <link rel="canonical" href="https://lamanisync.com" />
+    <link rel="canonical" href={cleanCanonical} />
 
     <!-- Open Graph / Social -->
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://lamanisync.com" />
+    <meta property="og:type" content={type} />
+    <meta property="og:url" content={cleanCanonical} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:image" content="https://res.cloudinary.com/lamanify/image/upload/v1790242929/LamaniSync_Logo.png" />
+    <meta property="og:site_name" content="LamaniSync" />
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content={cleanCanonical} />
     <meta property="twitter:title" content={title} />
     <meta property="twitter:description" content={description} />
     <meta property="twitter:image" content="https://res.cloudinary.com/lamanify/image/upload/v1790242929/LamaniSync_Logo.png" />
+
+    <!-- JSON-LD Structured Data for Search Engines & LLMs -->
+    <script type="application/ld+json" set:html={JSON.stringify(organizationSchema)} />
 
     <!-- Inter Google Font Preconnect -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
