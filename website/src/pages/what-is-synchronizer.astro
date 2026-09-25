@@ -1,764 +1,265 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import CtaBanner from '../components/CtaBanner.astro';
+
+const domains = [
+  {
+    num: "01",
+    title: "Appointment Schedules & Calendar Slots",
+    desc: "Bi-directional slot availability, chair allocation, emergency holds, and practitioner rosters synchronized in sub-seconds."
+  },
+  {
+    num: "02",
+    title: "Patient Intake & Demographic Profiles",
+    desc: "National ID numbers, WhatsApp contact, emergency contacts, and demographic intake written directly to clinic charts."
+  },
+  {
+    num: "03",
+    title: "Operatory & Doctor Chair Logistics",
+    desc: "Physical chair availability, operatory turnaround buffers, and specialist room assignments managed automatically."
+  },
+  {
+    num: "04",
+    title: "Audit Records & Readback Logs",
+    desc: "Cryptographic SHA-256 state hashing and two-step verification receipts logged for complete medical auditability."
+  }
+];
 ---
 
 <Layout
   title="What is Synchronizer? | LamaniSync Universal Healthcare Bridge"
   description="Learn how LamaniSync functions as a universal translation layer connecting any Clinic Management System (Dentrix, eClinicalWorks, LamaniPulse) to LamaniHub WhatsApp automation."
 >
-  <!-- Hero Section -->
-  <section class="sync-hero">
-    <div class="bg-grid-pattern"></div>
-    <div class="hero-glow"></div>
-    <div class="container hero-content">
-      <div class="attio-badge crimson">
-        <svg style="width:12px; height:12px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
-        <span>The Universal Translation Layer</span>
-      </div>
-      <h1 class="hero-title">
-        <span class="heading-dark">What is LamaniSync?</span>
-        <span class="heading-muted">The universal translation layer for modern clinics.</span>
-      </h1>
-      <p class="hero-subtitle">
-        LamaniSync connects your existing Clinic Management System (Dentrix, eClinicalWorks, LamaniPulse) directly to LamaniHub WhatsApp booking automation in real time. Zero local server installation, zero open firewall ports, and 100% readback-verified.
-      </p>
+  <section class="attio-section border-t border-subtle">
+    <div class="attio-container border-x border-subtle">
+      <header class="attio-section-head">
+        <div class="attio-head-inner">
+          <h1 class="attio-h2-inline">
+            <span class="text-primary">What is LamaniSync?</span>
+            <span class="text-muted font-normal"> The universal translation layer for modern clinic workflows.</span>
+          </h1>
+          <p class="attio-lead-desc">
+            LamaniSync connects your existing Clinic Management System (Dentrix, eClinicalWorks, LamaniPulse, Kreloses) directly to LamaniHub WhatsApp booking automation in real time. Zero local server installation, zero open firewall ports, and 100% readback-verified.
+          </p>
+          <div class="hero-actions-wrap">
+            <a href="#architecture" class="btn-dark-primary">Explore architecture</a>
+            <a href="#domains" class="btn-dark-secondary">The 4 Data Domains</a>
+          </div>
+        </div>
+      </header>
 
-      <div class="hero-actions">
-        <a href="#architecture" class="btn-primary">
-          <span>Explore Architecture</span>
-          <svg style="width:14px; height:14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-        </a>
-        <a href="#domains" class="btn-secondary">
-          <span>The 4 Data Domains</span>
-        </a>
+      <div class="attio-separator-wrap">
+        <div class="attio-dashed-line"></div>
       </div>
     </div>
   </section>
 
-  <!-- Interactive Topology Canvas -->
-  <section class="canvas-section" id="architecture">
-    <div class="container">
-      <div class="sync-canvas">
-        <div class="sync-canvas-header">
-          <div class="sync-canvas-dots">
-            <span class="mac-dot red"></span>
-            <span class="mac-dot yellow"></span>
-            <span class="mac-dot green"></span>
-          </div>
-          <div class="sync-canvas-title">
-            <svg style="width:14px; height:14px; color: var(--primary);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-            <span>Universal End-to-End Execution Pipeline</span>
-          </div>
-          <div class="sync-canvas-status">
-            <span class="ping-circle"></span>
-            <span>Real-time Active Bridge</span>
-          </div>
+  <!-- Architecture Comparison Section -->
+  <section class="attio-section shaded-bg" id="architecture">
+    <div class="attio-container border-x border-subtle">
+      <header class="attio-section-head">
+        <div class="attio-head-inner">
+          <h2 class="attio-h2-inline">
+            <span class="text-primary">Workstation bridge vs legacy server.</span>
+            <span class="text-muted font-normal"> Why ambient browser execution eliminates maintenance downtime.</span>
+          </h2>
+          <p class="attio-lead-desc">
+            Legacy healthcare integrations rely on dedicated server boxes, open inbound ports, and brittle VPN tunnels. LamaniSync shifts execution entirely into the browser session staff already use.
+          </p>
         </div>
+      </header>
 
-        <div class="pipeline-flow">
-          <!-- Stage 1 -->
-          <div class="flow-card">
-            <div class="step-num">01</div>
-            <div class="flow-icon wa">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+      <div class="attio-separator-wrap">
+        <div class="attio-dashed-line"></div>
+      </div>
+
+      <div class="attio-hatch-container">
+        <div class="attio-hatch-bg" aria-hidden="true"></div>
+        <div class="attio-grid-wrap">
+          <div class="compare-grid">
+            <div class="compare-card legacy">
+              <div class="card-tag">[LEGACY LOCAL SERVER]</div>
+              <h3 class="card-title">Fragile On-Premise Infrastructure</h3>
+              <ul class="compare-list">
+                <li>❌ Requires dedicated physical server or constantly running PC</li>
+                <li>❌ Inbound firewall ports exposed to the public internet</li>
+                <li>❌ Expensive IT consultant deployment and VPN management</li>
+                <li>❌ Breaks completely when clinic IP or DNS leases renew</li>
+                <li>❌ Blind write execution with zero UI verification</li>
+              </ul>
             </div>
-            <h4>Patient Chat</h4>
-            <p>Patient requests appointment via LamaniHub on WhatsApp 24/7</p>
-            <span class="flow-tag">Natural Language</span>
-          </div>
 
-          <div class="flow-arrow">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-          </div>
-
-          <!-- Stage 2 -->
-          <div class="flow-card">
-            <div class="step-num">02</div>
-            <div class="flow-icon ai">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 1 0 10 10H12V2z"/><path d="M12 12 2.1 12.05"/></svg>
+            <div class="compare-card modern">
+              <div class="card-tag active">[LAMANISYNC MV3 BRIDGE]</div>
+              <h3 class="card-title">Ambient Workstation Execution</h3>
+              <ul class="compare-list">
+                <li>✅ Runs seamlessly inside Google Chrome on front-desk PCs</li>
+                <li>✅ Zero open inbound ports; 100% outbound encrypted WSS tunnels</li>
+                <li>✅ 60-second setup by receptionist without IT assistance</li>
+                <li>✅ Automatic multi-workstation failover redundancy</li>
+                <li>✅ Dual-phase readback verification guarantees zero phantom slots</li>
+              </ul>
             </div>
-            <h4>LamaniHub Automation</h4>
-            <p>Triages symptoms, chooses treatment, queries real-time availability</p>
-            <span class="flow-tag">LamaniHub Cloud</span>
-          </div>
-
-          <div class="flow-arrow">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-          </div>
-
-          <!-- Stage 3 -->
-          <div class="flow-card highlight">
-            <div class="step-num">03</div>
-            <div class="flow-icon bridge">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
-            </div>
-            <h4>LamaniSync MV3</h4>
-            <p>Translates canonical slot intent into native CMS DOM / RPC recipe</p>
-            <span class="flow-tag active">Workstation Bridge</span>
-          </div>
-
-          <div class="flow-arrow">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-          </div>
-
-          <!-- Stage 4 -->
-          <div class="flow-card">
-            <div class="step-num">04</div>
-            <div class="flow-icon cms">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
-            </div>
-            <h4>Primary CMS</h4>
-            <p>Writes booking directly into Dentrix, eCW, or LamaniPulse calendar</p>
-            <span class="flow-tag">Staff Authenticated</span>
-          </div>
-
-          <div class="flow-arrow">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-          </div>
-
-          <!-- Stage 5 -->
-          <div class="flow-card verified">
-            <div class="step-num">05</div>
-            <div class="flow-icon check">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-            </div>
-            <h4>Readback Verified</h4>
-            <p>Reads back record from calendar; delivers confirmed WhatsApp receipt</p>
-            <span class="flow-tag verified">100% Guaranteed</span>
           </div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Deep Architecture Breakdown: MV3 vs Local Server -->
-  <section class="section">
-    <div class="container">
-      <div class="section-head text-center">
-        <div class="attio-badge crimson">
-          <span>Architectural Paradigm</span>
+  <!-- 4 Data Domains Section -->
+  <section class="attio-section border-t border-subtle" id="domains">
+    <div class="attio-container border-x border-subtle">
+      <header class="attio-section-head">
+        <div class="attio-head-inner">
+          <h2 class="attio-h2-inline">
+            <span class="text-primary">The 4 core data domains.</span>
+            <span class="text-muted font-normal"> Orchestrated and validated across your clinic software.</span>
+          </h2>
+          <p class="attio-lead-desc">
+            From patient demographic profiles to physical operatory chair availability, LamaniSync enforces strict data boundaries.
+          </p>
         </div>
-        <h2 class="section-title">
-          <span class="heading-dark">Workstation MV3 Bridge</span>
-          <span class="heading-muted">vs Legacy On-Premise Server.</span>
-        </h2>
-        <p class="section-desc">
-          Why running in-browser with Chrome Manifest V3 isolation outperforms fragile Windows background services, open firewall ports, and direct SQL connectors.
-        </p>
-      </div>
+      </header>
 
-      <div class="comparison-grid">
-        <!-- Legacy Way -->
-        <div class="comparison-card legacy">
-          <div class="card-status-badge bad">Legacy On-Premise Integrations</div>
-          <h3 class="card-heading">The Fragile Local Server Approach</h3>
-          <p class="card-sub">Used by 20-year-old integrators: installs heavy Windows services with elevated system privileges.</p>
-
-          <ul class="spec-list">
-            <li>
-              <div class="spec-icon bad">✕</div>
-              <div>
-                <strong>Invasive Administrator Privileges</strong>
-                <p>Requires running as NT AUTHORITY\SYSTEM with full machine disk and network permissions.</p>
-              </div>
-            </li>
-            <li>
-              <div class="spec-icon bad">✕</div>
-              <div>
-                <strong>Dangerous Open Inbound Ports</strong>
-                <p>Demands router port forwarding (e.g. 1433/3306) and static IP configuration, exposing clinic LANs to ransomware.</p>
-              </div>
-            </li>
-            <li>
-              <div class="spec-icon bad">✕</div>
-              <div>
-                <strong>Silent Service Crashes</strong>
-                <p>Windows updates, anti-virus quarantines, and sleep states silently terminate background sync without notice.</p>
-              </div>
-            </li>
-            <li>
-              <div class="spec-icon bad">✕</div>
-              <div>
-                <strong>Unchecked Direct SQL Injection</strong>
-                <p>Writing directly to raw database tables bypasses CMS business validation and risks corrupting patient ledgers.</p>
-              </div>
-            </li>
-          </ul>
-        </div>
-
-        <!-- LamaniSync Modern Way -->
-        <div class="comparison-card modern">
-          <div class="card-status-badge good">The LamaniSync Standard</div>
-          <h3 class="card-heading">The Ambient Workstation Bridge (MV3)</h3>
-          <p class="card-sub">Runs inside Google Chrome on the exact workstation your reception team already uses every day.</p>
-
-          <ul class="spec-list">
-            <li>
-              <div class="spec-icon good">✓</div>
-              <div>
-                <strong>Sandboxed User-Space Execution</strong>
-                <p>Zero admin rights needed. Runs in Chrome's sandboxed environment with strict origin boundaries.</p>
-              </div>
-            </li>
-            <li>
-              <div class="spec-icon good">✓</div>
-              <div>
-                <strong>Zero Inbound Firewall Ports</strong>
-                <p>All traffic is strictly outbound encrypted TLS / WSS. Fully invisible to external network port scanners.</p>
-              </div>
-            </li>
-            <li>
-              <div class="spec-icon good">✓</div>
-              <div>
-                <strong>Ephemeral Service Worker Architecture</strong>
-                <p>Consumes zero memory when idle. Auto-resumes instantaneously on incoming sync leases or calendar mutations.</p>
-              </div>
-            </li>
-            <li>
-              <div class="spec-icon good">✓</div>
-              <div>
-                <strong>Native Application Layer Writes</strong>
-                <p>Executes through your CMS's validated frontend layer, preserving all internal billing, doctor, and operatory rules.</p>
-              </div>
-            </li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- The 4 Core Data Domains -->
-  <section class="section bg-light" id="domains">
-    <div class="container">
-      <div class="section-head">
-        <div class="attio-badge blue">
-          <span>Data Taxonomy</span>
-        </div>
-        <h2 class="section-title">
-          <span class="heading-dark">The 4 Core Data Domains</span>
-          <span class="heading-muted">orchestrated by LamaniSync.</span>
-        </h2>
-        <p class="section-desc">
-          LamaniSync standardizes messy, proprietary clinic software records into four canonical operational data streams.
-        </p>
+      <div class="attio-separator-wrap">
+        <div class="attio-dashed-line"></div>
       </div>
 
       <div class="domains-grid">
-        <!-- Domain 1 -->
-        <div class="domain-card">
-          <div class="domain-icon-box">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        {domains.map((d) => (
+          <div class="domain-card">
+            <div class="domain-num">[{d.num}]</div>
+            <h3 class="domain-title">{d.title}</h3>
+            <p class="domain-desc">{d.desc}</p>
           </div>
-          <span class="domain-number">Domain 01</span>
-          <h3 class="domain-title">Operatory & Chair Logistics</h3>
-          <p class="domain-text">
-            Physical clinics are constrained by surgical chairs, room equipment, and doctor rosters. LamaniSync continuously models room capacity, chair suction/laser tooling capabilities, doctor shifts, and sanitization intervals.
-          </p>
-          <div class="domain-pills">
-            <span>Operatory Mapping</span>
-            <span>Chair Constraints</span>
-            <span>Turnaround Buffers</span>
-          </div>
-        </div>
-
-        <!-- Domain 2 -->
-        <div class="domain-card">
-          <div class="domain-icon-box">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-          </div>
-          <span class="domain-number">Domain 02</span>
-          <h3 class="domain-title">Real-Time Slot Availability</h3>
-          <p class="domain-text">
-            Sub-second availability querying without polling lag. LamaniSync queries the live calendar grid directly from your staff-authenticated CMS tab, instantly accounting for walk-ins, emergency holds, and sudden schedule changes.
-          </p>
-          <div class="domain-pills">
-            <span>Sub-Second Probing</span>
-            <span>Zero Double-Booking</span>
-            <span>Dynamic Gap Filling</span>
-          </div>
-        </div>
-
-        <!-- Domain 3 -->
-        <div class="domain-card">
-          <div class="domain-icon-box">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-          </div>
-          <span class="domain-number">Domain 03</span>
-          <h3 class="domain-title">LamaniHub WhatsApp Bookings</h3>
-          <p class="domain-text">
-            LamaniHub handles patient conversations 24/7 on WhatsApp in natural English, Bahasa Malaysia, and Chinese. Patient intake, triage questionnaires, and slot selections are converted automatically into verified CMS calendar writes.
-          </p>
-          <div class="domain-pills">
-            <span>24/7 Autonomous Triage</span>
-            <span>Multilingual Intake</span>
-            <span>WhatsApp Confirmation</span>
-          </div>
-        </div>
-
-        <!-- Domain 4 -->
-        <div class="domain-card">
-          <div class="domain-icon-box">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
-          </div>
-          <span class="domain-number">Domain 04</span>
-          <h3 class="domain-title">Readback Verification</h3>
-          <p class="domain-text">
-            The unbreakable guarantee. LamaniSync never confirms a booking to a patient until an independent probe reads the appointment back from the primary CMS calendar. No ghost bookings, zero dropped writes, 100% confidence.
-          </p>
-          <div class="domain-pills">
-            <span>Read-After-Write</span>
-            <span>Signed Audit Receipts</span>
-            <span>Zero Ghost Appointments</span>
-          </div>
-        </div>
+        ))}
       </div>
     </div>
   </section>
 
-  <!-- Supported CMS Deployments -->
-  <section class="section">
-    <div class="container">
-      <div class="section-head text-center">
-        <div class="attio-badge crimson">
-          <span>Universal Deployment</span>
-        </div>
-        <h2 class="section-title">
-          <span class="heading-dark">Works with Any Web-Based CMS</span><br />
-          <span class="heading-muted">Cloud SaaS, Local Intranets, and Legacy Web Portals.</span>
-        </h2>
-        <p class="section-desc">
-          Because LamaniSync bridges at the browser presentation layer, it seamlessly supports every architecture style.
-        </p>
-      </div>
-
-      <div class="deploy-grid">
-        <div class="deploy-card">
-          <div class="deploy-tag">Architecture 01</div>
-          <h3>Modern Cloud SaaS EHRs</h3>
-          <p>Dentrix Ascend, eClinicalWorks Cloud, Curve Dental, and modern cloud healthcare platforms.</p>
-          <ul class="check-items">
-            <li>Immediate DOM / RPC recipe injection</li>
-            <li>Zero local IT infrastructure</li>
-            <li>Works from any clinic Mac or PC</li>
-          </ul>
-        </div>
-
-        <div class="deploy-card">
-          <div class="deploy-tag">Architecture 02</div>
-          <h3>Local On-Premise Web Servers</h3>
-          <p>Clinic systems hosted on local clinic server boxes (e.g. <code>http://192.168.1.100:8080</code>).</p>
-          <ul class="check-items">
-            <li>No public IP or port forwarding required</li>
-            <li>Bridges via receptionist's Chrome browser</li>
-            <li>Zero external firewall configuration</li>
-          </ul>
-        </div>
-
-        <div class="deploy-card">
-          <div class="deploy-tag">Architecture 03</div>
-          <h3>Hybrid Portals & LamaniPulse</h3>
-          <p>Custom proprietary web portals, regional EHRs, and LamaniPulse EHR native clinical modules.</p>
-          <ul class="check-items">
-            <li>Custom adapter generated in under 48 hours</li>
-            <li>Multi-branch workstation lease failover</li>
-            <li>Zero-PHI in-memory compliance</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- CTA Banner -->
   <CtaBanner />
 </Layout>
 
 <style>
-  .sync-hero {
-    position: relative;
-    padding: 5rem 0 3.5rem 0;
-    overflow: hidden;
-    background: #ffffff;
-  }
+  .border-t { border-top: 1px solid #e2e8f0; }
+  .border-x { border-left: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; }
+  .border-subtle { border-color: #e2e8f0; }
 
-  .hero-glow {
-    position: absolute;
-    top: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: min(700px, 100%);
-    max-width: 100%;
-    height: 380px;
-    background: radial-gradient(circle, rgba(15, 23, 42, 0.025) 0%, rgba(255, 255, 255, 0) 70%);
-    pointer-events: none;
-  }
+  .attio-section { background: #ffffff; position: relative; }
+  .attio-section.shaded-bg { background: #fafafa; }
+  .attio-container { max-width: 1200px; margin: 0 auto; position: relative; background: #ffffff; }
 
-  .hero-content {
+  .attio-section-head { padding: 6rem 3.5rem 3rem 3.5rem; background: #ffffff; }
+  .attio-head-inner { max-width: 860px; }
+
+  .attio-h2-inline {
+    font-size: clamp(2rem, 3.8vw, 3rem);
+    font-weight: 500;
+    letter-spacing: -0.03em;
+    line-height: 1.15;
+    margin: 0 0 1.25rem 0;
+    text-wrap: balance;
+  }
+  .text-primary { color: #1c1d1f; }
+  .text-muted { color: #6f7988; }
+  .attio-lead-desc { font-size: 1.0625rem; color: #6f7988; line-height: 1.6; margin: 0; max-width: 680px; }
+
+  .hero-actions-wrap {
     display: flex;
-    flex-direction: column;
     align-items: center;
-    text-align: center;
+    gap: 0.75rem;
+    margin-top: 2rem;
+  }
+
+  .btn-dark-primary {
+    background: #1c1d1f;
+    border: 1px solid #1c1d1f;
+    color: #ffffff;
+    font-size: 0.875rem;
+    font-weight: 500;
+    padding: 0.6rem 1.25rem;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: background 0.15s ease;
+  }
+  .btn-dark-primary:hover { background: #000000; }
+
+  .btn-dark-secondary {
+    background: transparent;
+    border: 1px solid #e2e8f0;
+    color: #1c1d1f;
+    font-size: 0.875rem;
+    font-weight: 500;
+    padding: 0.6rem 1.25rem;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: background 0.15s ease;
+  }
+  .btn-dark-secondary:hover { background: #f8fafc; }
+
+  .attio-separator-wrap { position: relative; width: 100%; height: 1px; background: #e2e8f0; }
+  .attio-dashed-line {
+    width: 100%;
+    height: 1px;
+    background-image: linear-gradient(to right, #cbd5e1 50%, transparent 50%);
+    background-size: 8px 1px;
+  }
+
+  /* Hatch Container */
+  .attio-hatch-container {
+    position: relative;
+    background-color: #fafafa;
+    overflow: hidden;
+    padding: 0 2rem;
+  }
+  .attio-hatch-bg {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image: repeating-linear-gradient(125deg, transparent, transparent 6px, rgba(15, 23, 42, 0.035) 6px, rgba(15, 23, 42, 0.035) 7px);
+  }
+  .attio-grid-wrap {
     position: relative;
     z-index: 1;
+    border-left: 1px solid #e2e8f0;
+    border-right: 1px solid #e2e8f0;
   }
 
-  .hero-title {
-    font-size: clamp(1.9rem, 4.5vw, 3.8rem);
-    font-weight: 800;
-    line-height: 1.15;
-    letter-spacing: -0.03em;
-    margin-top: 1.25rem;
-    margin-bottom: 1.25rem;
-    max-width: 900px;
-    overflow-wrap: break-word;
-  }
-
-  .hero-subtitle {
-    font-size: 1.15rem;
-    color: var(--text-muted);
-    max-width: 720px;
-    line-height: 1.6;
-    margin-bottom: 2rem;
-  }
-
-  .hero-actions {
-    display: flex;
-    gap: 0.85rem;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-
-  /* Topology Canvas */
-  .canvas-section {
-    padding: 1.5rem 0 4rem 0;
-  }
-
-  .sync-canvas {
-    background: #ffffff;
-    border: 1px solid var(--border-hairline);
-    border-radius: var(--radius-container);
-    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
-    overflow: hidden;
-  }
-
-  .sync-canvas-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0.85rem 1.25rem;
-    background: #fafafa;
-    border-bottom: 1px solid var(--border-hairline);
-    flex-wrap: wrap;
-    gap: 0.5rem;
-  }
-
-  .sync-canvas-dots {
-    display: flex;
-    gap: 6px;
-  }
-
-  .mac-dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-  }
-
-  .mac-dot.red { background: #ff5f56; }
-  .mac-dot.yellow { background: #ffbd2e; }
-  .mac-dot.green { background: #27c93f; }
-
-  .sync-canvas-title {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 0.82rem;
-    font-weight: 600;
-    color: #334155;
-  }
-
-  .sync-canvas-status {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    font-size: 0.74rem;
-    font-weight: 600;
-    color: #10b981;
-    background: #ecfdf5;
-    padding: 0.2rem 0.6rem;
-    border-radius: 9999px;
-    border: 1px solid #d1fae5;
-  }
-
-  .ping-circle {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: #10b981;
-  }
-
-  .pipeline-flow {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 2.5rem 1.5rem;
-    gap: 0.75rem;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .flow-card {
-    flex: 1;
-    min-width: 180px;
-    background: #ffffff;
-    border: 1px solid var(--border-hairline);
-    border-radius: 14px;
-    padding: 1.25rem 1rem;
-    text-align: center;
-    position: relative;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
-  }
-
-  .flow-card.highlight {
-    border-color: var(--primary);
-    background: #ffffff;
-    box-shadow: 0 4px 16px rgba(233, 36, 81, 0.08);
-  }
-
-  .flow-card.verified {
-    border-color: #10b981;
-    background: #f0fdf4;
-  }
-
-  .step-num {
-    position: absolute;
-    top: 8px;
-    left: 10px;
-    font-size: 0.7rem;
-    font-weight: 800;
-    color: #94a3b8;
-  }
-
-  .flow-icon {
-    width: 44px;
-    height: 44px;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0.25rem auto 0.75rem auto;
-    background: #f8fafc;
-    border: 1px solid var(--border-hairline);
-    color: var(--text-main);
-  }
-
-  .flow-icon svg {
-    width: 22px;
-    height: 22px;
-  }
-
-  .flow-icon.wa { background: #f8fafc; color: #0f172a; }
-  .flow-icon.ai { background: #f8fafc; color: #0f172a; }
-  .flow-icon.bridge { background: #fff1f3; border-color: #fecdd6; color: var(--primary); }
-  .flow-icon.cms { background: #f8fafc; color: #0f172a; }
-  .flow-icon.check { background: #f0fdf4; border-color: #dcfce7; color: #166534; }
-
-  .flow-card h4 {
-    font-size: 0.92rem;
-    font-weight: 700;
-    color: #0f172a;
-    margin-bottom: 0.35rem;
-  }
-
-  .flow-card p {
-    font-size: 0.76rem;
-    color: var(--text-muted);
-    line-height: 1.4;
-    margin-bottom: 0.75rem;
-  }
-
-  .flow-tag {
-    display: inline-block;
-    font-size: 0.68rem;
-    font-weight: 600;
-    background: #f8fafc;
-    border: 1px solid var(--border-hairline);
-    color: #475569;
-    padding: 0.2rem 0.5rem;
-    border-radius: 6px;
-  }
-
-  .flow-tag.active {
-    background: #fff1f3;
-    border-color: #fecdd6;
-    color: var(--primary);
-  }
-
-  .flow-tag.verified {
-    background: #f0fdf4;
-    border-color: #dcfce7;
-    color: #166534;
-  }
-
-  .flow-arrow {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #94a3b8;
-    flex-shrink: 0;
-  }
-
-  .flow-arrow svg {
-    width: 20px;
-    height: 20px;
-  }
-
-  /* Section Headings */
-  .section {
-    padding: 5rem 0;
-  }
-
-  .section.bg-light {
-    background: #fafafa;
-    border-top: 1px solid var(--border-hairline);
-    border-bottom: 1px solid var(--border-hairline);
-  }
-
-  .section-head {
-    margin-bottom: 3.5rem;
-  }
-
-  .section-head.text-center {
-    text-align: center;
-  }
-
-  .section-head.text-center .attio-badge {
-    margin-bottom: 1rem;
-  }
-
-  .section-title {
-    font-size: clamp(1.8rem, 3.2vw, 2.75rem);
-    font-weight: 800;
-    line-height: 1.2;
-    letter-spacing: -0.025em;
-    margin-bottom: 1rem;
-  }
-
-  .section-desc {
-    font-size: 1.05rem;
-    color: var(--text-muted);
-    max-width: 680px;
-    line-height: 1.6;
-    margin: 0 auto;
-  }
-
-  /* Comparison Grid */
-  .comparison-grid {
+  .compare-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 2rem;
+    gap: 1px;
+    background: #e2e8f0;
   }
-
-  .comparison-card {
+  .compare-card {
     background: #ffffff;
-    border: 1px solid var(--border-hairline);
-    border-radius: var(--radius-container);
-    padding: 2.5rem 2rem;
-    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.02);
+    padding: 3.5rem 2.5rem;
   }
-
-  .comparison-card.modern {
-    border-color: var(--border-hairline);
-    background: #ffffff;
-    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
-  }
-
-  .card-status-badge {
-    display: inline-block;
-    font-size: 0.74rem;
+  .card-tag {
+    font-size: 0.75rem;
     font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    padding: 0.3rem 0.75rem;
-    border-radius: 6px;
-    margin-bottom: 1.25rem;
+    color: #94a3b8;
+    font-family: ui-monospace, SFMono-Regular, monospace;
+    letter-spacing: 0.08em;
+    margin-bottom: 1.5rem;
   }
-
-  .card-status-badge.bad {
-    background: #fef2f2;
-    color: #991b1b;
-    border: 1px solid #fee2e2;
-  }
-
-  .card-status-badge.good {
-    background: #fff1f3;
-    color: var(--primary);
-    border: 1px solid #fecdd6;
-  }
-
-  .card-heading {
-    font-size: 1.4rem;
-    font-weight: 800;
-    color: #0f172a;
-    margin-bottom: 0.5rem;
+  .card-tag.active { color: #15803d; }
+  .card-title {
+    font-size: 1.25rem;
+    font-weight: 500;
+    color: #1c1d1f;
     letter-spacing: -0.015em;
+    margin-bottom: 1.5rem;
   }
-
-  .card-sub {
-    font-size: 0.92rem;
-    color: var(--text-muted);
-    margin-bottom: 2rem;
-    line-height: 1.5;
-  }
-
-  .spec-list {
+  .compare-list {
     list-style: none;
+    padding: 0;
+    margin: 0;
     display: flex;
     flex-direction: column;
-    gap: 1.35rem;
-  }
-
-  .spec-list li {
-    display: flex;
     gap: 1rem;
-    align-items: flex-start;
-  }
-
-  .spec-icon {
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.8rem;
-    font-weight: 700;
-    flex-shrink: 0;
-    margin-top: 0.15rem;
-  }
-
-  .spec-icon.bad {
-    background: #f8fafc;
-    border: 1px solid var(--border-hairline);
-    color: #94a3b8;
-  }
-
-  .spec-icon.good {
-    background: #f0fdf4;
-    border: 1px solid #dcfce7;
-    color: #166534;
-  }
-
-  .spec-list strong {
-    font-size: 0.92rem;
-    font-weight: 700;
-    color: #0f172a;
-    display: block;
-    margin-bottom: 0.2rem;
-  }
-
-  .spec-list p {
-    font-size: 0.84rem;
-    color: var(--text-muted);
+    font-size: 0.88rem;
+    color: #475569;
     line-height: 1.5;
   }
 
@@ -766,194 +267,49 @@ import CtaBanner from '../components/CtaBanner.astro';
   .domains-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 1.5rem;
+    gap: 1px;
+    background: #e2e8f0;
   }
-
   .domain-card {
     background: #ffffff;
-    border: 1px solid var(--border-hairline);
-    border-radius: var(--radius-card);
-    padding: 2rem;
-    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.02);
-    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s;
-  }
-
-  .domain-card:hover {
-    transform: translateY(-2px);
-    border-color: #cbd5e1;
-    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05);
-  }
-
-  .domain-icon-box {
-    width: 44px;
-    height: 44px;
-    border-radius: 10px;
-    background: #f8fafc;
-    border: 1px solid var(--border-hairline);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #0f172a;
-    margin-bottom: 1.25rem;
-  }
-
-  .domain-icon-box svg {
-    width: 22px;
-    height: 22px;
-  }
-
-  .domain-number {
-    font-size: 0.72rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--primary);
-    display: block;
-    margin-bottom: 0.4rem;
-  }
-
-  .domain-title {
-    font-size: 1.25rem;
-    font-weight: 800;
-    color: #0f172a;
-    margin-bottom: 0.75rem;
-    letter-spacing: -0.015em;
-  }
-
-  .domain-text {
-    font-size: 0.9rem;
-    color: var(--text-muted);
-    line-height: 1.6;
-    margin-bottom: 1.5rem;
-  }
-
-  .domain-pills {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-  }
-
-  .domain-pills span {
-    font-size: 0.76rem;
-    font-weight: 600;
-    background: #f8fafc;
-    border: 1px solid var(--border-hairline);
-    color: #334155;
-    padding: 0.25rem 0.65rem;
-    border-radius: 6px;
-  }
-
-  /* Deployment Cards */
-  .deploy-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1.5rem;
-  }
-
-  .deploy-card {
-    background: #ffffff;
-    border: 1px solid var(--border-hairline);
-    border-radius: var(--radius-card);
-    padding: 2rem 1.75rem;
-    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.02);
-  }
-
-  .deploy-tag {
-    font-size: 0.72rem;
-    font-weight: 700;
-    color: var(--primary);
-    letter-spacing: 0.06em;
-    margin-bottom: 0.75rem;
-  }
-
-  .deploy-card h3 {
-    font-size: 1.15rem;
-    font-weight: 800;
-    color: #0f172a;
-    margin-bottom: 0.65rem;
-  }
-
-  .deploy-card p {
-    font-size: 0.86rem;
-    color: var(--text-muted);
-    line-height: 1.5;
-    margin-bottom: 1.5rem;
-  }
-
-  .check-items {
-    list-style: none;
+    padding: 3rem 2.5rem;
     display: flex;
     flex-direction: column;
-    gap: 0.6rem;
+    transition: background 0.15s ease;
   }
-
-  .check-items li {
-    position: relative;
-    padding-left: 1.4rem;
-    font-size: 0.82rem;
-    color: #334155;
-    line-height: 1.4;
+  .domain-card:hover { background: #fafafa; }
+  .domain-num {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #94a3b8;
+    letter-spacing: 0.08em;
+    font-family: ui-monospace, SFMono-Regular, monospace;
+    margin-bottom: 1.5rem;
   }
-
-  .check-items li::before {
-    content: "✓";
-    position: absolute;
-    left: 0;
-    color: #10b981;
-    font-weight: 800;
+  .domain-title {
+    font-size: 1.15rem;
+    font-weight: 500;
+    color: #1c1d1f;
+    letter-spacing: -0.015em;
+    margin-bottom: 0.75rem;
+  }
+  .domain-desc {
+    font-size: 0.875rem;
+    color: #6f7988;
+    line-height: 1.6;
+    margin: 0;
   }
 
   @media (max-width: 900px) {
-    .comparison-grid,
-    .domains-grid,
-    .deploy-grid {
-      grid-template-columns: 1fr;
-    }
+    .compare-grid { grid-template-columns: 1fr; }
+    .domains-grid { grid-template-columns: 1fr; }
+    .attio-section-head { padding: 4rem 1.5rem 2.5rem 1.5rem; }
+    .attio-hatch-container { padding: 0 1rem; }
   }
 
-  @media (max-width: 768px) {
-    .pipeline-flow {
-      flex-direction: column;
-      align-items: stretch;
-      gap: 1rem;
-      padding: 1.5rem 1rem;
-      overflow-x: visible;
-    }
-    .flow-arrow {
-      transform: rotate(90deg);
-      padding: 0.35rem 0;
-      justify-content: center;
-    }
-    .flow-card {
-      min-width: 0;
-      width: 100%;
-    }
-  }
-
-  @media (max-width: 600px) {
-    .sync-hero {
-      padding: 4rem 0 2.5rem 0;
-    }
-    .hero-actions {
-      flex-direction: column;
-      width: 100%;
-    }
-    .hero-actions .btn-primary,
-    .hero-actions .btn-secondary {
-      width: 100%;
-      min-height: 44px;
-    }
-    .comparison-card {
-      padding: 1.5rem 1rem;
-    }
-    .domain-card {
-      padding: 1.5rem 1rem;
-    }
-    .deploy-card {
-      padding: 1.5rem 1rem;
-    }
-    .section {
-      padding: 3.5rem 0;
-    }
+  @media (max-width: 640px) {
+    .attio-hatch-container { padding: 0; }
+    .attio-grid-wrap { border-left: none; border-right: none; }
+    .hero-actions-wrap { flex-direction: column; align-items: stretch; }
   }
 </style>
