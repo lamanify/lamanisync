@@ -1,405 +1,199 @@
 ---
+const steps = [
+  {
+    num: "01",
+    time: "15 Seconds",
+    title: "Add LamaniSync to Google Chrome",
+    desc: "Install LamaniSync on the front-desk workstation staff already use to open your clinic management portal. Operates within the browser toolbar with zero impact on PC performance."
+  },
+  {
+    num: "02",
+    time: "30 Seconds",
+    title: "Enter Your LamaniHub Workstation Key",
+    desc: "Generate your one-time clinic pairing code in LamaniHub. LamaniSync establishes a hardware-isolated WebCrypto Ed25519 encrypted tunnel. Zero server setup."
+  },
+  {
+    num: "03",
+    time: "Autopilot",
+    title: "WhatsApp Bookings Sync Automatically",
+    desc: "Open your clinic management system as usual. When a patient books via LamaniHub WhatsApp, LamaniSync reads schedule availability, writes the appointment, and readback verifies."
+  }
+];
 ---
-<section id="how-it-works" class="section how-section">
-  <div class="container">
-    <div class="section-head">
-      <div class="attio-badge blue">
-        <svg style="width:12px; height:12px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-        <span>Simple 3-Step Setup</span>
+
+<section id="how-it-works" class="attio-section border-t border-subtle">
+  <div class="attio-container border-x border-subtle">
+
+    <header class="attio-section-head">
+      <div class="attio-head-inner">
+        <h2 class="attio-h2-inline">
+          <span class="text-primary">How it works.</span>
+          <span class="text-muted font-normal"> Up and running on your front-desk workstation in under 2 minutes.</span>
+        </h2>
+        <p class="attio-lead-desc">
+          No IT consultants or server deployments required. If your reception team can use Google Chrome, they can set up LamaniSync for your entire clinic practice.
+        </p>
       </div>
-      <h2 class="section-title">
-        <span class="heading-dark">How it works.</span>
-        <br class="attio-br" />
-        <span class="heading-muted">Up and running on your front-desk workstation in under 2 minutes.</span>
-      </h2>
-      <p class="section-desc">
-        No technical skills or IT technicians required. If you know how to use Google Chrome, you can set up LamaniSync for your entire clinic.
-      </p>
+    </header>
+
+    <div class="attio-separator-wrap">
+      <div class="attio-dashed-line"></div>
     </div>
 
-    <div class="steps-flow">
-      <!-- Step 1 -->
-      <div class="step-card">
-        <div class="step-number-col">
-          <div class="step-num">01</div>
-          <div class="step-connector-line"></div>
-        </div>
-        <div class="step-content">
-          <div class="step-tag">Step 1 — 15 Seconds</div>
-          <h3 class="step-heading">Add LamaniSync to Google Chrome</h3>
-          <p class="step-body">
-            Install LamaniSync on the front-desk workstation or laptop that staff already use to access your clinic management portal. It runs quietly in the browser toolbar with zero impact on computer performance.
-          </p>
-          <div class="step-preview-box">
-            <div class="preview-chrome-badge">
-              <svg style="width:18px; height:18px; color:#10b981;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
-              <span>Chrome Web Store Verified • Manifest V3</span>
-            </div>
-          </div>
-        </div>
-      </div>
+    <!-- 3-Column Interactive Step Canvas -->
+    <div class="attio-steps-canvas">
+      <div class="attio-dot-bg"></div>
 
-      <!-- Step 2 -->
-      <div class="step-card">
-        <div class="step-number-col">
-          <div class="step-num">02</div>
-          <div class="step-connector-line"></div>
-        </div>
-        <div class="step-content">
-          <div class="step-tag">Step 2 — 30 Seconds</div>
-          <h3 class="step-heading">Enter Your LamaniHub Pairing Code</h3>
-          <p class="step-body">
-            Log in to your <strong>LamaniHub</strong> dashboard, click <em>Integrations &rarr; LamaniSync</em>, and copy your clinic's one-time 6-digit pairing code. Paste it into the extension popup. LamaniSync automatically generates hardware-isolated WebCrypto keys to establish an encrypted tunnel.
-          </p>
-          <div class="step-preview-box">
-            <div class="pairing-box-mock">
-              <div class="pairing-label">LamaniHub Workstation Key</div>
-              <div class="pairing-digits">
-                <span class="p-digit">8</span>
-                <span class="p-digit">4</span>
-                <span class="p-digit">2</span>
-                <span class="p-dash">-</span>
-                <span class="p-digit">9</span>
-                <span class="p-digit">1</span>
-                <span class="p-digit">5</span>
-              </div>
-              <div class="pairing-status">
-                <svg style="width:14px; height:14px; color:#10b981;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                <span>Ed25519 Cryptographic Handshake Verified</span>
-              </div>
+      <div class="attio-steps-grid">
+        {steps.map((step) => (
+          <div class="attio-step-cell">
+            <div class="step-meta">
+              <span class="step-num">[{step.num}]</span>
+              <span class="step-time">{step.time}</span>
             </div>
+            <h3 class="step-title">{step.title}</h3>
+            <p class="step-desc">{step.desc}</p>
           </div>
-        </div>
-      </div>
-
-      <!-- Step 3 -->
-      <div class="step-card">
-        <div class="step-number-col">
-          <div class="step-num active-pulse">03</div>
-        </div>
-        <div class="step-content">
-          <div class="step-tag active">Step 3 — 100% Automated</div>
-          <h3 class="step-heading">Sit Back & Watch WhatsApp Bookings Flow</h3>
-          <p class="step-body">
-            Open your clinic management system as normal. When a patient confirms an appointment via LamaniHub on WhatsApp, LamaniSync automatically reads the schedule, writes the appointment record, verifies it was saved, and alerts the patient. No staff action needed!
-          </p>
-          <div class="step-preview-box">
-            <div class="live-activity-stream">
-              <div class="stream-item">
-                <span class="stream-time">14:02:11</span>
-                <span class="stream-badge whatsapp">WhatsApp</span>
-                <span class="stream-desc">LamaniHub: New dental scaling request from +6012-345-6789</span>
-              </div>
-              <div class="stream-item highlight">
-                <span class="stream-time">14:02:12</span>
-                <span class="stream-badge sync">LamaniSync</span>
-                <span class="stream-desc">Writing Dr. Azman slot (Tomorrow 10:30 AM) to CMS...</span>
-              </div>
-              <div class="stream-item success">
-                <span class="stream-time">14:02:13</span>
-                <span class="stream-badge cms">Verified</span>
-                <span class="stream-desc">Schedule readback confirmed #APPT-9082. WhatsApp confirmation sent!</span>
-              </div>
-            </div>
-          </div>
-        </div>
+        ))}
       </div>
     </div>
+
+    <!-- Live Status Console Ribbon (Attio Architectural Terminal Bar) -->
+    <div class="attio-console-strip">
+      <div class="console-item">
+        <span class="console-dot green"></span>
+        <span class="console-label">Handshake:</span>
+        <span class="console-val">WebCrypto Ed25519 Active</span>
+      </div>
+      <div class="console-item">
+        <span class="console-dot blue"></span>
+        <span class="console-label">Channel:</span>
+        <span class="console-val">WSS Encrypted Tunnel</span>
+      </div>
+      <div class="console-item">
+        <span class="console-dot purple"></span>
+        <span class="console-label">Verification:</span>
+        <span class="console-val">Two-Step Readback Guarantee</span>
+      </div>
+    </div>
+
   </div>
 </section>
 
 <style>
-  .how-section {
-    padding: 6rem 0;
-    background: #fafafa;
-    border-top: 1px solid var(--border-hairline);
-  }
+  .border-t { border-top: 1px solid #e2e8f0; }
+  .border-x { border-left: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; }
+  .border-subtle { border-color: #e2e8f0; }
+  .attio-section { background: #ffffff; position: relative; }
+  .attio-container { max-width: 1200px; margin: 0 auto; position: relative; background: #ffffff; }
 
-  .section-head {
-    text-align: center;
-    max-width: 840px;
-    margin: 0 auto 3.5rem auto;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .section-title {
-    font-size: clamp(2rem, 3.5vw, 2.75rem);
+  .attio-section-head { padding: 6rem 3.5rem 3rem 3.5rem; background: #ffffff; }
+  .attio-head-inner { max-width: 860px; }
+  .attio-h2-inline {
+    font-size: clamp(2rem, 3.8vw, 3rem);
     font-weight: 500;
-    line-height: 1.22;
-    letter-spacing: -0.025em;
-    margin-top: 1.25rem;
-    margin-bottom: 1.2rem;
+    letter-spacing: -0.03em;
+    line-height: 1.15;
+    margin: 0 0 1.25rem 0;
+    text-wrap: balance;
+  }
+  .text-primary { color: #1c1d1f; }
+  .text-muted { color: #6f7988; }
+  .attio-lead-desc { font-size: 1.0625rem; color: #6f7988; line-height: 1.6; margin: 0; max-width: 680px; }
+
+  .attio-separator-wrap { position: relative; width: 100%; height: 1px; background: #e2e8f0; }
+  .attio-dashed-line {
+    width: 100%;
+    height: 1px;
+    background-image: linear-gradient(to right, #cbd5e1 50%, transparent 50%);
+    background-size: 8px 1px;
   }
 
-  .section-desc {
-    font-size: 1.05rem;
-    color: var(--text-muted);
-    line-height: 1.6;
+  .attio-steps-canvas { position: relative; background: #fafafa; overflow: hidden; }
+  .attio-dot-bg {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+    background-size: 20px 20px;
+    opacity: 0.55;
   }
 
-  .steps-flow {
-    display: flex;
-    flex-direction: column;
-    gap: 1.75rem;
-    max-width: 900px;
-    margin: 0 auto;
+  .attio-steps-grid {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: #e2e8f0;
   }
 
-  .step-card {
-    display: flex;
-    gap: 2rem;
+  .attio-step-cell {
     background: #ffffff;
-    border: 1px solid var(--border-hairline);
-    border-radius: var(--radius-card);
-    padding: 2.2rem;
-    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.02);
-    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s, box-shadow 0.2s;
-  }
-
-  .step-card:hover {
-    transform: translateY(-2px);
-    border-color: #cbd5e1;
-    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05);
-  }
-
-  .step-number-col {
+    padding: 3.5rem 2.5rem;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    flex-shrink: 0;
+    transition: background 0.15s ease;
   }
+  .attio-step-cell:hover { background: #fafafa; }
 
+  .step-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.75rem;
+  }
   .step-num {
-    width: 44px;
-    height: 44px;
-    border-radius: 10px;
-    background: #f8fafc;
-    border: 1px solid var(--border-hairline);
-    color: var(--text-main);
-    font-size: 1.15rem;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #94a3b8;
+    letter-spacing: 0.08em;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   }
-
-  .step-num.active-pulse {
-    background: #fff1f3;
-    border: 1px solid #fecdd6;
-    color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(233, 36, 81, 0.08);
-  }
-
-  .step-connector-line {
-    flex: 1;
-    width: 1px;
-    background: var(--border-hairline);
-    margin: 0.85rem 0;
-    min-height: 40px;
-  }
-
-  .step-content {
-    flex: 1;
-  }
-
-  .step-tag {
+  .step-time {
     font-size: 0.72rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: var(--primary);
-    margin-bottom: 0.4rem;
-  }
-
-  .step-tag.active {
-    color: #059669;
-  }
-
-  .step-heading {
-    font-size: 1.3rem;
-    font-weight: 700;
-    color: #0f172a;
-    margin-bottom: 0.6rem;
-    letter-spacing: -0.015em;
-  }
-
-  .step-body {
-    font-size: 0.92rem;
-    color: var(--text-muted);
-    line-height: 1.6;
-    margin-bottom: 1.4rem;
-  }
-
-  .step-preview-box {
-    background: #fafafa;
-    border: 1px solid var(--border-hairline);
-    border-radius: 8px;
-    padding: 1.1rem;
-  }
-
-  .preview-chrome-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.6rem;
-    font-size: 0.86rem;
-    font-weight: 600;
-    color: #334155;
-  }
-
-  .pairing-box-mock {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.6rem;
-    text-align: center;
-  }
-
-  .pairing-label {
-    font-size: 0.76rem;
-    font-weight: 600;
+    font-weight: 500;
     color: #64748b;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-
-  .pairing-digits {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-  }
-
-  .p-digit {
-    background: #ffffff;
-    border: 1px solid var(--border-hairline);
-    border-radius: 6px;
-    width: 36px;
-    height: 42px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.2rem;
-    font-weight: 700;
-    color: #0f172a;
-    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
-  }
-
-  .p-dash {
-    font-size: 1.2rem;
-    font-weight: 700;
-    color: #94a3b8;
-  }
-
-  .pairing-status {
-    display: flex;
-    align-items: center;
-    gap: 0.45rem;
-    font-size: 0.76rem;
-    font-weight: 600;
-    color: #059669;
-    margin-top: 0.2rem;
-  }
-
-  .live-activity-stream {
-    display: flex;
-    flex-direction: column;
-    gap: 0.55rem;
-    font-family: monospace;
-    font-size: 0.8rem;
-  }
-
-  .stream-item {
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-    padding: 0.45rem 0.75rem;
-    background: #ffffff;
-    border: 1px solid var(--border-hairline);
-    border-radius: 6px;
-    color: #334155;
-    flex-wrap: wrap;
-  }
-
-  .stream-item.highlight {
-    background: #fff1f3;
-    border-color: #fecdd6;
-    color: var(--primary-dark);
-  }
-
-  .stream-item.success {
-    background: #f0fdf4;
-    border-color: #bbf7d0;
-    color: #15803d;
-  }
-
-  .stream-time {
-    color: #94a3b8;
-    font-size: 0.72rem;
-  }
-
-  .stream-badge {
-    padding: 0.1rem 0.35rem;
+    background: #f1f5f9;
+    padding: 0.15rem 0.5rem;
     border-radius: 4px;
-    font-size: 0.68rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    border: 1px solid transparent;
+    border: 1px solid #e2e8f0;
   }
 
-  .stream-badge.whatsapp {
-    background: #f8fafc;
-    border-color: var(--border-hairline);
-    color: #0f172a;
+  .step-title {
+    font-size: 1.18rem;
+    font-weight: 500;
+    color: #1c1d1f;
+    letter-spacing: -0.015em;
+    line-height: 1.35;
+    margin: 0 0 0.85rem 0;
   }
+  .step-desc { font-size: 0.88rem; color: #6f7988; line-height: 1.6; margin: 0; }
 
-  .stream-badge.sync {
-    background: var(--primary);
-    color: #ffffff;
+  /* Console ribbon */
+  .attio-console-strip {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    padding: 1.25rem 2rem;
+    background: #ffffff;
+    border-top: 1px solid #e2e8f0;
+    border-bottom: 1px solid #e2e8f0;
+    flex-wrap: wrap;
+    gap: 1.5rem;
   }
+  .console-item { display: flex; align-items: center; gap: 0.5rem; font-size: 0.8125rem; font-family: ui-monospace, SFMono-Regular, monospace; }
+  .console-dot { width: 7px; height: 7px; border-radius: 50%; }
+  .console-dot.green { background: #10b981; }
+  .console-dot.blue { background: #3b82f6; }
+  .console-dot.purple { background: #8b5cf6; }
+  .console-label { color: #94a3b8; font-weight: 500; }
+  .console-val { color: #334155; font-weight: 600; }
 
-  .stream-badge.cms {
-    background: #f0fdf4;
-    border-color: #dcfce7;
-    color: #166534;
-  }
-
-  @media (max-width: 680px) {
-    .how-section {
-      padding: 4rem 0;
-    }
-    .step-card {
-      flex-direction: column;
-      gap: 1.2rem;
-      padding: 1.5rem 1.15rem;
-    }
-    .step-connector-line {
-      display: none;
-    }
-  }
-
-  @media (max-width: 440px) {
-    .step-card {
-      padding: 1.25rem 0.85rem;
-    }
-    .step-preview-box {
-      padding: 0.85rem 0.5rem;
-    }
-    .pairing-digits {
-      gap: 0.2rem;
-    }
-    .p-digit {
-      width: 27px;
-      height: 36px;
-      font-size: 1rem;
-    }
-    .p-dash {
-      font-size: 1rem;
-    }
-    .stream-item {
-      font-size: 0.72rem;
-      padding: 0.35rem 0.5rem;
-      word-break: break-word;
-    }
+  @media (max-width: 900px) {
+    .attio-steps-grid { grid-template-columns: 1fr; }
+    .attio-section-head { padding: 4rem 1.5rem 2.5rem 1.5rem; }
+    .attio-step-cell { padding: 2.25rem 1.5rem; }
+    .attio-console-strip { flex-direction: column; align-items: flex-start; gap: 0.75rem; padding: 1.25rem 1.5rem; }
   }
 </style>
