@@ -1,6 +1,6 @@
 ---
 ---
-<footer class="footer">
+<footer class="footer-dark">
   <div class="container footer-container">
     <div class="footer-top">
       <div class="footer-brand">
@@ -53,19 +53,20 @@
 </footer>
 
 <style>
-  .footer {
-    background: #fafafa;
-    border-top: 1px solid var(--border-hairline);
-    padding: 4.5rem 0 2.5rem 0;
+  .footer-dark {
+    background: #08090a;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 5rem 0 3rem 0;
     margin-top: auto;
+    color: #94a3b8;
   }
 
   .footer-top {
     display: grid;
     grid-template-columns: 1.5fr 1fr 1fr 1fr;
     gap: 2.5rem;
-    padding-bottom: 3rem;
-    border-bottom: 1px solid var(--border-hairline);
+    padding-bottom: 3.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   }
 
   .footer-logo {
@@ -73,54 +74,57 @@
     width: auto;
     object-fit: contain;
     margin-bottom: 1.25rem;
+    filter: brightness(0) invert(1);
+    opacity: 0.92;
   }
 
   .footer-desc {
-    font-size: 0.88rem;
-    color: var(--text-muted);
+    font-size: 0.875rem;
+    color: #64748b;
     max-width: 400px;
     line-height: 1.6;
   }
 
   .links-title {
-    font-size: 0.8rem;
-    font-weight: 700;
+    font-size: 0.75rem;
+    font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    color: #0a0a0a;
+    color: #f1f5f9;
     margin-bottom: 1.25rem;
   }
 
   .footer-link {
     display: block;
-    font-size: 0.88rem;
-    color: var(--text-muted);
+    font-size: 0.875rem;
+    color: #64748b;
     text-decoration: none;
-    margin-bottom: 0.65rem;
+    margin-bottom: 0.7rem;
     transition: color 0.15s ease;
   }
 
   .footer-link:hover {
-    color: var(--primary);
+    color: #ffffff;
   }
 
   .footer-bottom {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding-top: 2rem;
-    font-size: 0.82rem;
-    color: var(--text-muted);
+    padding-top: 2.5rem;
+    font-size: 0.8125rem;
+    color: #64748b;
   }
 
   .copyright a {
-    color: #0a0a0a;
-    font-weight: 600;
+    color: #f1f5f9;
+    font-weight: 500;
     text-decoration: none;
+    transition: color 0.15s ease;
   }
 
   .copyright a:hover {
-    color: var(--primary);
+    color: #ffffff;
   }
 
   .compliance-tags {
@@ -130,18 +134,18 @@
   }
 
   .compliance-tags span {
-    background: #ffffff;
-    border: 1px solid var(--border-hairline);
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     padding: 0.25rem 0.65rem;
     border-radius: 6px;
-    font-size: 0.74rem;
-    font-weight: 600;
-    color: var(--text-muted);
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #94a3b8;
     white-space: nowrap;
   }
 
   @media (max-width: 768px) {
-    .footer {
+    .footer-dark {
       padding: 3.5rem 0 2rem 0;
     }
     .footer-top {
@@ -150,7 +154,7 @@
       padding-bottom: 2rem;
     }
     .footer-link {
-      padding: 0.5rem 0;
+      padding: 0.4rem 0;
       min-height: 44px;
       display: inline-flex;
       align-items: center;
