@@ -30,32 +30,163 @@ const domains = [
   title="What is Synchronizer? | LamaniSync Universal Healthcare Bridge"
   description="Learn how LamaniSync functions as a universal translation layer connecting any Clinic Management System (Dentrix, eClinicalWorks, LamaniPulse) to LamaniHub WhatsApp automation."
 >
-  <section class="attio-section border-t border-subtle">
+  <!-- Architectural Hero Section -->
+  <section class="attio-hero-section border-t border-subtle">
     <div class="attio-container border-x border-subtle">
-      <header class="attio-section-head">
-        <div class="attio-head-inner">
-          <h1 class="attio-h2-inline">
-            <span class="text-primary">What is LamaniSync?</span>
-            <span class="text-muted font-normal"> The universal translation layer for modern clinic workflows.</span>
+      <header class="hero-header">
+        <div class="eyebrow-wrapper">
+          <h1 class="hero-eyebrow">
+            <span class="eyebrow-dot"></span>
+            <span>Universal Translation Layer</span>
           </h1>
-          <p class="attio-lead-desc">
-            LamaniSync connects your existing Clinic Management System (Dentrix, eClinicalWorks, LamaniPulse, Kreloses) directly to LamaniHub WhatsApp booking automation in real time. Zero local server installation, zero open firewall ports, and 100% readback-verified.
-          </p>
-          <div class="hero-actions-wrap">
-            <a href="#architecture" class="btn-dark-primary">Explore architecture</a>
-            <a href="#domains" class="btn-dark-secondary">The 4 Data Domains</a>
-          </div>
+        </div>
+
+        <h2 class="hero-headline">
+          Bridge software. Skip servers.
+        </h2>
+
+        <p class="hero-description">
+          <span>Connect any Clinic Management System to WhatsApp without servers or open ports.</span>
+          <br class="hidden sm:inline" />
+          <span>Ambient browser execution verified with cryptographic receipts on every single write.</span>
+        </p>
+
+        <div class="hero-cta-group">
+          <a href="/contact" class="btn-attio-primary">
+            <span>Contact for integration</span>
+          </a>
+          <a href="#architecture" class="btn-attio-secondary">
+            <span>Explore architecture</span>
+            <svg class="down-arrow" width="12" height="12" viewBox="0 0 12 12" fill="none">
+              <path d="M6 2.5V9.5M6 9.5L2.5 6M6 2.5L9.5 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </a>
         </div>
       </header>
 
-      <div class="attio-separator-wrap">
-        <div class="attio-dashed-line"></div>
+      <!-- Contextual Interactive Translation Canvas -->
+      <div class="hero-diagram-frame">
+        <div class="diagram-canvas">
+          <svg class="diagram-svg-layer" viewBox="0 0 960 480" fill="none" preserveAspectRatio="xMidYMid meet">
+            <path d="M 230 110 C 340 110, 360 230, 480 230" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="4 4" />
+            <circle class="pulse-particle" r="3.5" fill="#10b981">
+              <animateMotion dur="2.8s" repeatCount="indefinite" path="M 230 110 C 340 110, 360 230, 480 230" />
+            </circle>
+
+            <path d="M 730 110 C 620 110, 600 230, 480 230" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="4 4" />
+            <circle class="pulse-particle" r="3.5" fill="#6366f1">
+              <animateMotion dur="3.2s" repeatCount="indefinite" path="M 730 110 C 620 110, 600 230, 480 230" />
+            </circle>
+
+            <path d="M 480 250 C 370 250, 340 370, 230 370" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="4 4" />
+            <circle class="pulse-particle" r="3.5" fill="#3b82f6">
+              <animateMotion dur="3.6s" repeatCount="indefinite" path="M 480 250 C 370 250, 340 370, 230 370" />
+            </circle>
+
+            <path d="M 480 250 C 590 250, 620 370, 730 370" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="4 4" />
+            <circle class="pulse-particle" r="3.5" fill="#f59e0b">
+              <animateMotion dur="3.0s" repeatCount="indefinite" path="M 480 250 C 590 250, 620 370, 730 370" />
+            </circle>
+
+            <circle cx="480" cy="240" r="5" fill="#ffffff" stroke="#1c1d1f" stroke-width="2" />
+          </svg>
+
+          <!-- Node 1: Workstation Chrome Session -->
+          <div class="schema-card node-top-left">
+            <div class="card-head">
+              <div class="entity-icon bg-emerald">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><line x1="21.17" y1="8" x2="12" y2="8"/></svg>
+              </div>
+              <span class="entity-name">Chrome MV3 Session</span>
+              <span class="entity-badge badge-green">Ambient</span>
+            </div>
+            <div class="card-attrs">
+              <div class="attr-row"><span class="attr-bullet active"></span><span class="attr-label">Front Desk Tab Active</span></div>
+              <div class="attr-row"><span class="attr-bullet"></span><span class="attr-label">Zero Background Daemons</span></div>
+              <div class="attr-more">Local Sandbox</div>
+            </div>
+          </div>
+
+          <!-- Node 2: Secure Outbound WSS Tunnel -->
+          <div class="schema-card node-top-right">
+            <div class="card-head">
+              <div class="entity-icon bg-indigo">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </div>
+              <span class="entity-name">Encrypted Tunnel</span>
+              <span class="entity-badge badge-blue">WSS</span>
+            </div>
+            <div class="card-attrs">
+              <div class="attr-row"><span class="attr-bullet"></span><span class="attr-label">100% Outbound Only</span></div>
+              <div class="attr-row"><span class="attr-bullet"></span><span class="attr-label">0 Inbound Ports Open</span></div>
+              <div class="attr-more">Zero Trust Architecture</div>
+            </div>
+          </div>
+
+          <!-- Center Node: Universal Translation Layer -->
+          <div class="schema-card node-center-hub">
+            <div class="card-head">
+              <div class="entity-icon bg-purple">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+              </div>
+              <span class="entity-name">Translation Kernel</span>
+              <span class="entity-badge badge-green">Active</span>
+            </div>
+            <div class="card-attrs">
+              <div class="attr-row highlight-row"><span class="attr-bullet active"></span><span class="attr-label">CMS DOM Adapter Map</span></div>
+              <div class="attr-row"><span class="attr-bullet"></span><span class="attr-label">Pre-Compiled Action ID</span></div>
+              <div class="attr-row"><span class="attr-bullet"></span><span class="attr-label">Two-Way Readback Check</span></div>
+              <div class="attr-more">Deterministic Runtime</div>
+            </div>
+          </div>
+
+          <!-- Bottom Left: Clinic Software -->
+          <div class="schema-card node-bottom-left">
+            <div class="card-head">
+              <div class="entity-icon bg-blue">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              </div>
+              <span class="entity-name">Target Clinic CMS</span>
+              <span class="entity-badge badge-gray">Unmodified</span>
+            </div>
+            <div class="card-attrs">
+              <div class="attr-row"><span class="attr-bullet"></span><span class="attr-label">Kreloses / Dentrix / eCW</span></div>
+              <div class="attr-row"><span class="attr-bullet"></span><span class="attr-label">Zero Database Alteration</span></div>
+              <div class="attr-more">Preserves Warranty</div>
+            </div>
+          </div>
+
+          <!-- Bottom Right: LamaniHub WhatsApp -->
+          <div class="schema-card node-bottom-right">
+            <div class="card-head">
+              <div class="entity-icon bg-amber">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+              </div>
+              <span class="entity-name">LamaniHub Cloud</span>
+              <span class="entity-badge badge-blue">Orchestrator</span>
+            </div>
+            <div class="card-attrs">
+              <div class="attr-row"><span class="attr-bullet"></span><span class="attr-label">24/7 AI Triage Channel</span></div>
+              <div class="attr-row"><span class="attr-bullet"></span><span class="attr-label">Sub-Second Job Queue</span></div>
+              <div class="attr-more">Direct WhatsApp Delivery</div>
+            </div>
+          </div>
+
+          <!-- Contextual Floating Pill -->
+          <div class="floating-query-pill">
+            <div class="pill-sparkle">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            </div>
+            <span class="pill-text">Zero on-premise hardware required; runs in Chrome</span>
+            <div class="pill-status-dot"></div>
+          </div>
+        </div>
       </div>
     </div>
   </section>
 
   <!-- Architecture Comparison Section -->
-  <section class="attio-section shaded-bg" id="architecture">
+  <section class="attio-section shaded-bg border-t border-subtle" id="architecture">
     <div class="attio-container border-x border-subtle">
       <header class="attio-section-head">
         <div class="attio-head-inner">
@@ -145,171 +276,253 @@ const domains = [
   .border-x { border-left: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; }
   .border-subtle { border-color: #e2e8f0; }
 
+  .attio-hero-section { background: #ffffff; position: relative; overflow: hidden; }
   .attio-section { background: #ffffff; position: relative; }
   .attio-section.shaded-bg { background: #fafafa; }
   .attio-container { max-width: 1200px; margin: 0 auto; position: relative; background: #ffffff; }
 
-  .attio-section-head { padding: 6rem 3.5rem 3rem 3.5rem; background: #ffffff; }
-  .attio-head-inner { max-width: 860px; }
+  /* Hero Copy Header */
+  .hero-header {
+    padding: 6.5rem 2rem 3.5rem 2rem;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
 
-  .attio-h2-inline {
-    font-size: clamp(2rem, 3.8vw, 3rem);
+  .eyebrow-wrapper { margin-bottom: 1.5rem; }
+  .hero-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    padding: 0.35rem 0.95rem;
+    border-radius: 9999px;
+    font-size: 0.8125rem;
     font-weight: 500;
-    letter-spacing: -0.03em;
-    line-height: 1.15;
+    color: #475569;
+    letter-spacing: -0.01em;
+    margin: 0;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  }
+  .eyebrow-dot { width: 6px; height: 6px; border-radius: 50%; background: #10b981; }
+
+  .hero-headline {
+    font-size: clamp(2.5rem, 5.5vw, 4.25rem);
+    font-weight: 600;
+    letter-spacing: -0.035em;
+    line-height: 1.1;
+    color: #1c1d1f;
     margin: 0 0 1.25rem 0;
     text-wrap: balance;
   }
+
+  .hero-description {
+    font-size: clamp(1.05rem, 1.8vw, 1.25rem);
+    font-weight: 400;
+    color: #6f7988;
+    line-height: 1.5;
+    margin: 0 0 2.25rem 0;
+    max-width: 680px;
+    text-wrap: balance;
+  }
+
+  .hero-cta-group {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+  }
+  .btn-attio-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #1c1d1f;
+    color: #ffffff;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    padding: 0.65rem 1.4rem;
+    border-radius: 9999px;
+    text-decoration: none;
+    border: 1px solid #1c1d1f;
+    transition: background-color 0.15s ease;
+  }
+  .btn-attio-primary:hover { background-color: #000000; }
+
+  .btn-attio-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    background-color: #ffffff;
+    color: #1c1d1f;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    padding: 0.65rem 1.4rem;
+    border-radius: 9999px;
+    text-decoration: none;
+    border: 1px solid #e2e8f0;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+  }
+  .btn-attio-secondary:hover { background-color: #f8fafc; border-color: #cbd5e1; }
+  .down-arrow { transition: transform 0.15s ease; }
+  .btn-attio-secondary:hover .down-arrow { transform: translateY(2px); }
+
+  /* Diagram Frame & Dot Matrix Canvas */
+  .hero-diagram-frame { position: relative; padding: 0 2rem 5rem 2rem; }
+  .diagram-canvas {
+    position: relative;
+    width: 100%;
+    min-height: 520px;
+    background-color: #ffffff;
+    background-image: radial-gradient(#cbd5e1 1.2px, transparent 1.2px);
+    background-size: 24px 24px;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .diagram-svg-layer {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .schema-card {
+    position: absolute;
+    z-index: 2;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.05);
+    width: 230px;
+    padding: 0.85rem 1rem;
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease;
+  }
+  .schema-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08); }
+
+  .node-top-left { top: 45px; left: 45px; }
+  .node-top-right { top: 45px; right: 45px; }
+  .node-center-hub {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 250px;
+    border-color: #cbd5e1;
+  }
+  .node-center-hub:hover { transform: translate(-50%, calc(-50% - 2px)); }
+  .node-bottom-left { bottom: 65px; left: 60px; }
+  .node-bottom-right { bottom: 65px; right: 60px; }
+
+  .card-head {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #f1f5f9;
+  }
+  .entity-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .bg-emerald { background: #dcfce7; color: #15803d; }
+  .bg-indigo { background: #e0e7ff; color: #4338ca; }
+  .bg-purple { background: #f3e8ff; color: #7e22ce; }
+  .bg-blue { background: #dbeafe; color: #1d4ed8; }
+  .bg-amber { background: #fef3c7; color: #b45309; }
+
+  .entity-name { font-size: 0.8125rem; font-weight: 600; color: #1c1d1f; flex: 1; }
+  .entity-badge { font-size: 0.65rem; font-weight: 500; padding: 0.15rem 0.45rem; border-radius: 9999px; }
+  .badge-blue { background: #eff6ff; color: #2563eb; }
+  .badge-gray { background: #f1f5f9; color: #64748b; }
+  .badge-green { background: #f0fdf4; color: #166534; }
+
+  .card-attrs { display: flex; flex-direction: column; gap: 0.35rem; }
+  .attr-row { display: flex; align-items: center; gap: 0.45rem; font-size: 0.72rem; color: #475569; }
+  .attr-bullet { width: 4px; height: 4px; border-radius: 50%; background: #cbd5e1; }
+  .attr-bullet.active { background: #10b981; }
+  .attr-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .highlight-row { font-weight: 600; color: #1e293b; }
+  .attr-more { font-size: 0.68rem; color: #94a3b8; font-weight: 500; margin-top: 0.2rem; }
+
+  .floating-query-pill {
+    position: absolute;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    padding: 0.45rem 1rem;
+    border-radius: 9999px;
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.08);
+  }
+  .pill-sparkle { color: #8b5cf6; display: flex; align-items: center; }
+  .pill-text { font-size: 0.8125rem; color: #64748b; }
+  .pill-status-dot { width: 7px; height: 7px; border-radius: 50%; background: #10b981; }
+
+  /* Attio Section Head & Comparison */
+  .attio-section-head { padding: 6rem 3.5rem 3rem 3.5rem; background: #ffffff; }
+  .attio-head-inner { max-width: 860px; }
+  .attio-h2-inline { font-size: clamp(2rem, 3.8vw, 3rem); font-weight: 500; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 1.25rem 0; }
   .text-primary { color: #1c1d1f; }
   .text-muted { color: #6f7988; }
   .attio-lead-desc { font-size: 1.0625rem; color: #6f7988; line-height: 1.6; margin: 0; max-width: 680px; }
 
-  .hero-actions-wrap {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin-top: 2rem;
-  }
-
-  .btn-dark-primary {
-    background: #1c1d1f;
-    border: 1px solid #1c1d1f;
-    color: #ffffff;
-    font-size: 0.875rem;
-    font-weight: 500;
-    padding: 0.6rem 1.25rem;
-    border-radius: 6px;
-    text-decoration: none;
-    transition: background 0.15s ease;
-  }
-  .btn-dark-primary:hover { background: #000000; }
-
-  .btn-dark-secondary {
-    background: transparent;
-    border: 1px solid #e2e8f0;
-    color: #1c1d1f;
-    font-size: 0.875rem;
-    font-weight: 500;
-    padding: 0.6rem 1.25rem;
-    border-radius: 6px;
-    text-decoration: none;
-    transition: background 0.15s ease;
-  }
-  .btn-dark-secondary:hover { background: #f8fafc; }
-
   .attio-separator-wrap { position: relative; width: 100%; height: 1px; background: #e2e8f0; }
-  .attio-dashed-line {
-    width: 100%;
-    height: 1px;
-    background-image: linear-gradient(to right, #cbd5e1 50%, transparent 50%);
-    background-size: 8px 1px;
-  }
+  .attio-dashed-line { width: 100%; height: 1px; background-image: linear-gradient(to right, #cbd5e1 50%, transparent 50%); background-size: 8px 1px; }
 
-  /* Hatch Container */
-  .attio-hatch-container {
-    position: relative;
-    background-color: #fafafa;
-    overflow: hidden;
-    padding: 0 2rem;
-  }
-  .attio-hatch-bg {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    background-image: repeating-linear-gradient(125deg, transparent, transparent 6px, rgba(15, 23, 42, 0.035) 6px, rgba(15, 23, 42, 0.035) 7px);
-  }
-  .attio-grid-wrap {
-    position: relative;
-    z-index: 1;
-    border-left: 1px solid #e2e8f0;
-    border-right: 1px solid #e2e8f0;
-  }
+  .attio-hatch-container { position: relative; background-color: #fafafa; overflow: hidden; padding: 0 2rem; }
+  .attio-hatch-bg { position: absolute; inset: 0; pointer-events: none; background-image: repeating-linear-gradient(125deg, transparent, transparent 6px, rgba(15, 23, 42, 0.035) 6px, rgba(15, 23, 42, 0.035) 7px); }
+  .attio-grid-wrap { position: relative; z-index: 1; border-left: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; }
 
-  .compare-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1px;
-    background: #e2e8f0;
-  }
-  .compare-card {
-    background: #ffffff;
-    padding: 3.5rem 2.5rem;
-  }
-  .card-tag {
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: #94a3b8;
-    font-family: ui-monospace, SFMono-Regular, monospace;
-    letter-spacing: 0.08em;
-    margin-bottom: 1.5rem;
-  }
+  .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: #e2e8f0; }
+  .compare-card { background: #ffffff; padding: 3.5rem 2.5rem; }
+  .card-tag { font-size: 0.75rem; font-weight: 600; color: #94a3b8; font-family: ui-monospace, SFMono-Regular, monospace; letter-spacing: 0.08em; margin-bottom: 1.5rem; }
   .card-tag.active { color: #15803d; }
-  .card-title {
-    font-size: 1.25rem;
-    font-weight: 500;
-    color: #1c1d1f;
-    letter-spacing: -0.015em;
-    margin-bottom: 1.5rem;
-  }
-  .compare-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    font-size: 0.88rem;
-    color: #475569;
-    line-height: 1.5;
-  }
+  .card-title { font-size: 1.25rem; font-weight: 500; color: #1c1d1f; letter-spacing: -0.015em; margin-bottom: 1.5rem; }
+  .compare-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 1rem; font-size: 0.88rem; color: #475569; line-height: 1.5; }
 
-  /* Domains Grid */
-  .domains-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1px;
-    background: #e2e8f0;
-  }
-  .domain-card {
-    background: #ffffff;
-    padding: 3rem 2.5rem;
-    display: flex;
-    flex-direction: column;
-    transition: background 0.15s ease;
-  }
+  .domains-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px; background: #e2e8f0; }
+  .domain-card { background: #ffffff; padding: 3rem 2.5rem; display: flex; flex-direction: column; transition: background 0.15s ease; }
   .domain-card:hover { background: #fafafa; }
-  .domain-num {
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: #94a3b8;
-    letter-spacing: 0.08em;
-    font-family: ui-monospace, SFMono-Regular, monospace;
-    margin-bottom: 1.5rem;
-  }
-  .domain-title {
-    font-size: 1.15rem;
-    font-weight: 500;
-    color: #1c1d1f;
-    letter-spacing: -0.015em;
-    margin-bottom: 0.75rem;
-  }
-  .domain-desc {
-    font-size: 0.875rem;
-    color: #6f7988;
-    line-height: 1.6;
-    margin: 0;
-  }
+  .domain-num { font-size: 0.75rem; font-weight: 600; color: #94a3b8; letter-spacing: 0.08em; font-family: ui-monospace, SFMono-Regular, monospace; margin-bottom: 1.5rem; }
+  .domain-title { font-size: 1.15rem; font-weight: 500; color: #1c1d1f; letter-spacing: -0.015em; margin-bottom: 0.75rem; }
+  .domain-desc { font-size: 0.875rem; color: #6f7988; line-height: 1.6; margin: 0; }
 
   @media (max-width: 900px) {
+    .diagram-canvas { min-height: 700px; }
+    .schema-card { width: 190px; padding: 0.65rem 0.75rem; }
+    .node-top-left { top: 20px; left: 20px; }
+    .node-top-right { top: 20px; right: 20px; }
+    .node-bottom-left { bottom: 80px; left: 20px; }
+    .node-bottom-right { bottom: 80px; right: 20px; }
     .compare-grid { grid-template-columns: 1fr; }
     .domains-grid { grid-template-columns: 1fr; }
     .attio-section-head { padding: 4rem 1.5rem 2.5rem 1.5rem; }
-    .attio-hatch-container { padding: 0 1rem; }
+    .hero-header { padding: 4.5rem 1.5rem 2.5rem 1.5rem; }
+    .hero-diagram-frame { padding: 0 1rem 3rem 1rem; }
   }
 
   @media (max-width: 640px) {
+    .diagram-canvas { display: flex; flex-direction: column; gap: 1rem; padding: 1.5rem 1rem 4.5rem 1rem; min-height: auto; }
+    .diagram-svg-layer { display: none; }
+    .schema-card { position: relative; top: auto !important; left: auto !important; right: auto !important; bottom: auto !important; transform: none !important; width: 100%; }
+    .hero-cta-group { flex-direction: column; align-items: stretch; width: 100%; }
     .attio-hatch-container { padding: 0; }
     .attio-grid-wrap { border-left: none; border-right: none; }
-    .hero-actions-wrap { flex-direction: column; align-items: stretch; }
   }
 </style>
