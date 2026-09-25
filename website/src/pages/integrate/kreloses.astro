@@ -1,0 +1,176 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import CtaBanner from '../../components/CtaBanner.astro';
+---
+
+<Layout
+  title="Kreloses Integration & Data Sync | Connect Kreloses to LamaniHub"
+  description="Automate appointment bookings between Kreloses clinic software and LamaniHub WhatsApp in real time. Zero server installation, zero credential sharing, instant live sync."
+>
+  <section class="sync-hero">
+    <div class="bg-grid-pattern"></div>
+    <div class="hero-glow"></div>
+    <div class="container hero-content">
+      <div class="attio-badge crimson">
+        <svg style="width:12px; height:12px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        <span>Certified Ecosystem Adapter</span>
+      </div>
+      <h1 class="hero-title">
+        <span class="heading-dark">Connect Kreloses to LamaniHub.</span><br class="attio-br" />
+        <span class="heading-muted">Automate clinic WhatsApp bookings without changing your software.</span>
+      </h1>
+      <p class="hero-subtitle">
+        Your front desk keeps Kreloses open as usual. LamaniSync runs quietly inside the workstation browser, reading real-time appointment availability and writing confirmed WhatsApp bookings straight into Kreloses.
+      </p>
+      <div class="hero-actions">
+        <a href="/contact" class="btn-primary">Request Kreloses Integration</a>
+        <a href="/docs" class="btn-secondary">Read Documentation</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="section-header">
+        <div class="attio-badge">
+          <span>Workflow Automation</span>
+        </div>
+        <h2 class="attio-h2">
+          <span class="heading-dark">Zero double entry.</span><br class="attio-br" />
+          <span class="heading-muted">Front-desk schedule and WhatsApp calendar stay identical 24/7.</span>
+        </h2>
+      </div>
+
+      <div class="feature-grid">
+        <div class="feature-card">
+          <div class="card-icon">
+            <svg style="width:20px;height:20px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <h3>Real-Time Slot Verification</h3>
+          <p>When a patient texts your clinic WhatsApp at midnight, LamaniSync reads Kreloses' live schedule to offer genuine available slots. No overbooking, no phone tag.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="card-icon">
+            <svg style="width:20px;height:20px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          </div>
+          <h3>Direct Booking Injection</h3>
+          <p>Confirmed appointments appear instantly on your Kreloses calendar with patient name, contact number, and treatment notes pre-filled.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="card-icon">
+            <svg style="width:20px;height:20px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </div>
+          <h3>Zero Credential Sharing</h3>
+          <p>You never share your Kreloses master passwords or API keys. LamaniSync operates within your local authenticated workstation session with client-side encryption.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <CtaBanner />
+</Layout>
+
+<style>
+  .sync-hero {
+    position: relative;
+    padding: 6.5rem 0 4.5rem 0;
+    text-align: center;
+    background: radial-gradient(circle at 50% 0%, rgba(233, 36, 81, 0.04) 0%, rgba(255, 255, 255, 0) 70%);
+  }
+
+  .hero-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .hero-title {
+    font-size: clamp(2.2rem, 4.5vw, 3.5rem);
+    font-weight: 500;
+    line-height: 1.15;
+    letter-spacing: -0.025em;
+    margin: 1.25rem 0 1.5rem 0;
+    max-width: 896px;
+    text-wrap: balance;
+  }
+
+  .hero-subtitle {
+    font-size: 1.1rem;
+    color: var(--color-black-700);
+    max-width: 680px;
+    line-height: 1.6;
+    margin-bottom: 2.25rem;
+    text-wrap: balance;
+  }
+
+  .hero-actions {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+  }
+
+  .section-header {
+    text-align: center;
+    margin-bottom: 3.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .attio-h2 {
+    font-size: clamp(1.8rem, 3.5vw, 2.5rem);
+    font-weight: 500;
+    line-height: 1.18;
+    letter-spacing: -0.025em;
+    margin-top: 1rem;
+    max-width: 896px;
+    text-wrap: balance;
+  }
+
+  .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+  }
+
+  .feature-card {
+    background: #ffffff;
+    border: 1px solid var(--border-hairline);
+    border-radius: var(--radius-lg);
+    padding: 2.25rem 1.75rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  }
+
+  .card-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    background: rgba(233, 36, 81, 0.08);
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.25rem;
+  }
+
+  .feature-card h3 {
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--color-black-100);
+    margin-bottom: 0.65rem;
+  }
+
+  .feature-card p {
+    font-size: 0.92rem;
+    color: var(--color-black-700);
+    line-height: 1.55;
+  }
+
+  @media (max-width: 850px) {
+    .feature-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
