@@ -1,0 +1,37 @@
+# https://lamanisync.com robots.txt
+User-agent: *
+Allow: /
+
+# Canonical XML Sitemap
+Sitemap: https://lamanisync.com/sitemap.xml
+
+# LLM and AI Engine Crawlers (Geo-Search and Knowledge Indexing)
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+User-agent: Meta-ExternalAgent
+Allow: /
+
+User-agent: Amazonbot
+Allow: /
+
+User-agent: Cohere-ai
+Allow: /
