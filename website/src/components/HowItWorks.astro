@@ -21,7 +21,7 @@ const steps = [
 ];
 ---
 
-<section id="how-it-works" class="attio-section border-t border-subtle">
+<section id="how-it-works" class="attio-section shaded-bg border-t border-subtle">
   <div class="attio-container border-x border-subtle">
 
     <header class="attio-section-head">
@@ -40,21 +40,23 @@ const steps = [
       <div class="attio-dashed-line"></div>
     </div>
 
-    <!-- 3-Column Interactive Step Canvas -->
-    <div class="attio-steps-canvas">
-      <div class="attio-dot-bg"></div>
+    <!-- Outer Diagonal Hatch Gutters -->
+    <div class="attio-hatch-container">
+      <div class="attio-hatch-bg" aria-hidden="true"></div>
 
-      <div class="attio-steps-grid">
-        {steps.map((step) => (
-          <div class="attio-step-cell">
-            <div class="step-meta">
-              <span class="step-num">[{step.num}]</span>
-              <span class="step-time">{step.time}</span>
+      <div class="attio-grid-wrap">
+        <div class="attio-steps-grid">
+          {steps.map((step) => (
+            <div class="attio-step-cell">
+              <div class="step-meta">
+                <span class="step-num">[{step.num}]</span>
+                <span class="step-time">{step.time}</span>
+              </div>
+              <h3 class="step-title">{step.title}</h3>
+              <p class="step-desc">{step.desc}</p>
             </div>
-            <h3 class="step-title">{step.title}</h3>
-            <p class="step-desc">{step.desc}</p>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </div>
 
@@ -85,6 +87,7 @@ const steps = [
   .border-x { border-left: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; }
   .border-subtle { border-color: #e2e8f0; }
   .attio-section { background: #ffffff; position: relative; }
+  .attio-section.shaded-bg { background: #fafafa; }
   .attio-container { max-width: 1200px; margin: 0 auto; position: relative; background: #ffffff; }
 
   .attio-section-head { padding: 6rem 3.5rem 3rem 3.5rem; background: #ffffff; }
@@ -109,19 +112,29 @@ const steps = [
     background-size: 8px 1px;
   }
 
-  .attio-steps-canvas { position: relative; background: #fafafa; overflow: hidden; }
-  .attio-dot-bg {
+  /* Diagonal Hatch Gutters Container */
+  .attio-hatch-container {
+    position: relative;
+    background-color: #fafafa;
+    overflow: hidden;
+    padding: 0 2rem;
+  }
+
+  .attio-hatch-bg {
     position: absolute;
     inset: 0;
     pointer-events: none;
-    background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
-    background-size: 20px 20px;
-    opacity: 0.55;
+    background-image: repeating-linear-gradient(125deg, transparent, transparent 6px, rgba(15, 23, 42, 0.035) 6px, rgba(15, 23, 42, 0.035) 7px);
+  }
+
+  .attio-grid-wrap {
+    position: relative;
+    z-index: 1;
+    border-left: 1px solid #e2e8f0;
+    border-right: 1px solid #e2e8f0;
   }
 
   .attio-steps-grid {
-    position: relative;
-    z-index: 1;
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 1px;
@@ -195,5 +208,11 @@ const steps = [
     .attio-section-head { padding: 4rem 1.5rem 2.5rem 1.5rem; }
     .attio-step-cell { padding: 2.25rem 1.5rem; }
     .attio-console-strip { flex-direction: column; align-items: flex-start; gap: 0.75rem; padding: 1.25rem 1.5rem; }
+    .attio-hatch-container { padding: 0 1rem; }
+  }
+
+  @media (max-width: 600px) {
+    .attio-hatch-container { padding: 0; }
+    .attio-grid-wrap { border-left: none; border-right: none; }
   }
 </style>
