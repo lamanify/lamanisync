@@ -1,710 +1,317 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import CtaBanner from '../components/CtaBanner.astro';
+
+const pillars = [
+  {
+    num: "01",
+    title: "Sub-Second Bidirectional Sync",
+    desc: "Appointments created via LamaniHub WhatsApp bots write to your CMS schedule in < 1.2s. Status changes inside the clinic reflect back to patients instantly."
+  },
+  {
+    num: "02",
+    title: "Operatory & Chair Routing",
+    desc: "Route appointments based on physical operatory, doctor schedule, procedure duration, and chair availability. Prevents scheduling double-bookings automatically."
+  },
+  {
+    num: "03",
+    title: "WhatsApp Triage & Auto-Booking",
+    desc: "Connect 24/7 AI chat with real-time calendar availability. Patients select available slots on WhatsApp; LamaniSync writes them directly into your doctor's chair."
+  },
+  {
+    num: "04",
+    title: "Two-Way Readback Verification",
+    desc: "Every write is verified by a secondary readback of the CMS DOM state. Zero phantom bookings; if the clinic schedule rejects the write, LamaniHub is alerted."
+  },
+  {
+    num: "05",
+    title: "Manifest V3 Isolated Sandboxing",
+    desc: "Strict Chrome MV3 execution policy. Host permissions scoped exclusively to your clinic origin. Zero background native binaries, zero open firewall ports."
+  },
+  {
+    num: "06",
+    title: "Multi-Workstation Redundancy",
+    desc: "Deploy across multiple reception desks. LamaniSync elects an active bridge with sub-second failover. If one PC sleeps, the secondary takes over instantly."
+  }
+];
+
+const actionIds = [
+  { id: "APPOINTMENT_READ_SLOTS", desc: "Queries real-time calendar grid for doctor availability and open time windows." },
+  { id: "APPOINTMENT_WRITE_BOOKING", desc: "Injects verified patient name, phone, chair, and appointment type into schedule." },
+  { id: "APPOINTMENT_VERIFY_READBACK", desc: "Re-queries newly written appointment slot to confirm database persistence." },
+  { id: "PATIENT_QUERY_RECORD", desc: "Checks existing patient record by national ID or phone number before booking." },
+  { id: "PATIENT_CREATE_RECORD", desc: "Generates new patient file in CMS when a first-time patient books via WhatsApp." },
+  { id: "CHAIR_BLOCK_TIME", desc: "Synchronizes emergency doctor holds or operatory maintenance across channels." }
+];
 ---
 
 <Layout
   title="Features & Capabilities | LamaniSync Healthcare Bridge"
   description="Explore the comprehensive features of LamaniSync: Sub-second sync, multi-operatory chair routing, LamaniHub WhatsApp triage, verified writes, Manifest V3 security, and multi-branch support."
 >
-  <!-- Hero Section -->
-  <section class="features-hero">
-    <div class="bg-grid-pattern"></div>
-    <div class="hero-glow"></div>
-    <div class="container hero-content">
-      <div class="attio-badge crimson">
-        <svg style="width:12px; height:12px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-        <span>Engineered for Clinical Velocity</span>
-      </div>
-      <h1 class="hero-title">
-        <span class="heading-dark">Built for High-Volume Clinics.</span>
-        <span class="heading-muted">Healthcare practices, specialist centers, and dental networks.</span>
-      </h1>
-      <p class="hero-subtitle">
-        Every layer of LamaniSync is purpose-built to eliminate manual front-desk entry, prevent double-bookings, and unlock autonomous 24/7 WhatsApp appointments.
-      </p>
+  <!-- Architectural Hero Section -->
+  <section class="attio-section border-t border-subtle">
+    <div class="attio-container border-x border-subtle">
+      <header class="attio-section-head">
+        <div class="attio-head-inner">
+          <h1 class="attio-h2-inline">
+            <span class="text-primary">Built for high-volume clinics.</span>
+            <span class="text-muted font-normal"> Healthcare practices, specialist centers, and multi-operatory dental networks.</span>
+          </h1>
+          <p class="attio-lead-desc">
+            Every layer of LamaniSync is purpose-built to eliminate manual front-desk entry, prevent double-bookings, and unlock autonomous 24/7 WhatsApp appointments.
+          </p>
+          <div class="hero-actions-wrap">
+            <a href="#core-features" class="btn-dark-primary">Explore all features</a>
+            <a href="https://lamanihub.com" target="_blank" rel="noopener noreferrer" class="btn-dark-secondary">View in LamaniHub</a>
+          </div>
+        </div>
+      </header>
 
-      <div class="hero-actions">
-        <a href="#core-features" class="btn-primary">
-          <span>Explore All Features</span>
-          <svg style="width:14px; height:14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-        </a>
-        <a href="https://lamanihub.com" target="_blank" rel="noopener noreferrer" class="btn-secondary">
-          <span>View in LamaniHub</span>
-        </a>
+      <div class="attio-separator-wrap">
+        <div class="attio-dashed-line"></div>
       </div>
     </div>
   </section>
 
-  <!-- Feature Grid Highlights -->
-  <section class="section" id="core-features">
-    <div class="container">
-      <div class="section-head text-center">
-        <div class="attio-badge crimson">
-          <span>Core Capabilities</span>
+  <!-- 6 Pillars Feature Grid (Attio Shaded Hatch Container + 1px Grid) -->
+  <section class="attio-section shaded-bg" id="core-features">
+    <div class="attio-container border-x border-subtle">
+      <header class="attio-section-head">
+        <div class="attio-head-inner">
+          <h2 class="attio-h2-inline">
+            <span class="text-primary">Six pillars of reliability.</span>
+            <span class="text-muted font-normal"> Engineered under the hood of the universal ambient bridge.</span>
+          </h2>
+          <p class="attio-lead-desc">
+            A hardened synchronization runtime designed to operate in background harmony with your existing clinic workflow.
+          </p>
         </div>
-        <h2 class="section-title">
-          <span class="heading-dark">Six Pillars of Reliability</span><br />
-          <span class="heading-muted">Under the hood of the ambient bridge.</span>
-        </h2>
-        <p class="section-desc">
-          From patient conversation to doctor chair in sub-second latency, guarded by zero-trust browser cryptography.
-        </p>
+      </header>
+
+      <div class="attio-separator-wrap">
+        <div class="attio-dashed-line"></div>
       </div>
 
-      <div class="features-grid">
-        <!-- Feature 1: Sub-Second Sync -->
-        <div class="feature-card highlight-card">
-          <div class="feature-icon-wrapper red">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      <div class="attio-hatch-container">
+        <div class="attio-hatch-bg" aria-hidden="true"></div>
+        <div class="attio-grid-wrap">
+          <div class="attio-pillars-grid">
+            {pillars.map((item) => (
+              <div class="attio-cell">
+                <div class="cell-overline">[{item.num}]</div>
+                <h3 class="cell-title">{item.title}</h3>
+                <p class="cell-desc">{item.desc}</p>
+              </div>
+            ))}
           </div>
-          <div class="feature-badge">Velocity</div>
-          <h3 class="feature-title">Sub-Second Bidirectional Sync</h3>
-          <p class="feature-desc">
-            No 15-minute polling intervals or stale spreadsheets. When a front-desk receptionist changes a booking or a walk-in arrives, LamaniSync streams schedule mutations directly to LamaniHub in under 400 milliseconds.
-          </p>
-          <ul class="feature-bullets">
-            <li>Instant calendar slot state updates</li>
-            <li>Event-driven WebSocket synchronization</li>
-            <li>Zero lag between front desk and WhatsApp bot</li>
-          </ul>
-        </div>
-
-        <!-- Feature 2: Operatory & Chair Management -->
-        <div class="feature-card">
-          <div class="feature-icon-wrapper blue">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-          </div>
-          <div class="feature-badge">Logistics</div>
-          <h3 class="feature-title">Operatory & Chair Routing</h3>
-          <p class="feature-desc">
-            Smart clinic scheduling isn't just about doctor hours—it is about room capacity and physical equipment. Route appointments based on specialized operatory setups (e.g. Chair 1: Orthodontics, Chair 2: Panoramic X-Ray).
-          </p>
-          <ul class="feature-bullets">
-            <li>Dynamic room and chair allocation</li>
-            <li>Custom doctor-to-operatory rosters</li>
-            <li>Automatic sanitization buffer time between patients</li>
-          </ul>
-        </div>
-
-        <!-- Feature 3: LamaniHub WhatsApp Triage -->
-        <div class="feature-card">
-          <div class="feature-icon-wrapper green">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
-          </div>
-          <div class="feature-badge">Conversational</div>
-          <h3 class="feature-title">LamaniHub WhatsApp Triage & Booking</h3>
-          <p class="feature-desc">
-            Integrated natively with LamaniHub. LamaniHub engages incoming WhatsApp patients 24/7, triages clinical chief complaints, matches appropriate appointment lengths, and inserts bookings directly into your CMS.
-          </p>
-          <ul class="feature-bullets">
-            <li>Multilingual fluency: English, BM, Chinese, Tamil</li>
-            <li>Automated pre-consultation intake forms</li>
-            <li>Instant WhatsApp calendar invite & reminders</li>
-          </ul>
-        </div>
-
-        <!-- Feature 4: Two-Way Verified Write -->
-        <div class="feature-card highlight-card">
-          <div class="feature-icon-wrapper emerald">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
-          </div>
-          <div class="feature-badge">Zero Error</div>
-          <h3 class="feature-title">Two-Way Readback Verification</h3>
-          <p class="feature-desc">
-            Never suffer from phantom bookings. LamaniSync uses a two-phase commit protocol: after issuing an insertion command, an independent verification probe reads the appointment back from the primary CMS calendar before confirming to the patient.
-          </p>
-          <ul class="feature-bullets">
-            <li>Cryptographic write receipts with SHA-256 hashes</li>
-            <li>Automatic rollback on collision or timeout</li>
-            <li>Zero false-positive appointment confirmations</li>
-          </ul>
-        </div>
-
-        <!-- Feature 5: Manifest V3 Isolated Sandboxing -->
-        <div class="feature-card">
-          <div class="feature-icon-wrapper purple">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M7 7h.01M17 7h.01M7 17h.01M17 17h.01"/></svg>
-          </div>
-          <div class="feature-badge">Zero-Trust</div>
-          <h3 class="feature-title">Manifest V3 Isolated Sandboxing</h3>
-          <p class="feature-desc">
-            Built strictly under Google's enterprise Manifest V3 standard. Prohibits arbitrary remote code execution, restricts host permissions strictly to your exact CMS domain, and executes purely in ephemeral browser memory.
-          </p>
-          <ul class="feature-bullets">
-            <li>Zero local storage of raw patient health info (PHI)</li>
-            <li>WebCrypto Ed25519 hardware-backed device keys</li>
-            <li>Google Web Store audited and code signed</li>
-          </ul>
-        </div>
-
-        <!-- Feature 6: Multi-Branch & Workstation Lease Failover -->
-        <div class="feature-card">
-          <div class="feature-icon-wrapper amber">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="16" height="20" x="4" y="2" rx="2" ry="2"/><path d="M9 22v-4h6v4M8 6h.01M16 6h.01M12 6h.01M12 10h.01M12 14h.01M16 10h.01M16 14h.01M8 10h.01M8 14h.01"/></svg>
-          </div>
-          <div class="feature-badge">Enterprise Scale</div>
-          <h3 class="feature-title">Multi-Branch Workstation Redundancy</h3>
-          <p class="feature-desc">
-            Run LamaniSync across 20+ front-desk computers across multiple clinic branches. Automated lease negotiation ensures that if Workstation 1 goes to sleep or restarts, Workstation 2 instantly takes over synchronization seamlessly.
-          </p>
-          <ul class="feature-bullets">
-            <li>Distributed active-standby lease coordinator</li>
-            <li>Centralized multi-branch HQ dashboard on LamaniHub</li>
-            <li>Zero disruption during computer reboots</li>
-          </ul>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Deep Dive Technical Feature Matrix -->
-  <section class="section bg-light">
-    <div class="container">
-      <div class="section-head text-center">
-        <div class="attio-badge blue">
-          <span>Technical Architecture</span>
+  <!-- Action IDs Architecture Section -->
+  <section class="attio-section border-t border-subtle" id="action-ids">
+    <div class="attio-container border-x border-subtle">
+      <header class="attio-section-head">
+        <div class="attio-head-inner">
+          <h2 class="attio-h2-inline">
+            <span class="text-primary">Predefined adapter action IDs.</span>
+            <span class="text-muted font-normal"> Bounded page execution with zero arbitrary remote code injection.</span>
+          </h2>
+          <p class="attio-lead-desc">
+            LamaniSync executes only pre-compiled, cryptographically whitelisted functions. Third-party or unverified scripts are strictly blocked by browser extension security policies.
+          </p>
         </div>
-        <h2 class="section-title">
-          <span class="heading-dark">Comprehensive Capability</span><br />
-          <span class="heading-muted">Comparison Matrix.</span>
-        </h2>
+      </header>
+
+      <div class="attio-separator-wrap">
+        <div class="attio-dashed-line"></div>
       </div>
 
-      <div class="table-container">
-        <table class="capability-table">
-          <thead>
-            <tr>
-              <th>Feature Capability</th>
-              <th>Legacy Portals / Bots</th>
-              <th>On-Premise Agents</th>
-              <th class="col-highlight">LamaniSync Bridge</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><strong>Sync Latency</strong></td>
-              <td>15 to 60 minutes</td>
-              <td>1 to 5 minutes</td>
-              <td class="col-highlight"><strong>&lt; 400 milliseconds</strong></td>
-            </tr>
-            <tr>
-              <td><strong>Installation Time</strong></td>
-              <td>N/A (Scraper)</td>
-              <td>2 to 4 hours IT setup</td>
-              <td class="col-highlight"><strong>30 seconds (Chrome Add)</strong></td>
-            </tr>
-            <tr>
-              <td><strong>Inbound Firewall Ports</strong></td>
-              <td>Varies</td>
-              <td>Port forwarding (1433/3306)</td>
-              <td class="col-highlight"><strong>Zero (Strictly Outbound TLS)</strong></td>
-            </tr>
-            <tr>
-              <td><strong>Ghost Booking Prevention</strong></td>
-              <td>None (Blind Write)</td>
-              <td>Partial</td>
-              <td class="col-highlight"><strong>100% Readback Verified</strong></td>
-            </tr>
-            <tr>
-              <td><strong>WhatsApp AI Integration</strong></td>
-              <td>Disconnected</td>
-              <td>Custom Webhooks Needed</td>
-              <td class="col-highlight"><strong>Native LamaniHub Coordination</strong></td>
-            </tr>
-            <tr>
-              <td><strong>Local PHI Footprint</strong></td>
-              <td>Unsecured Cache</td>
-              <td>Full Local DB Access</td>
-              <td class="col-highlight"><strong>Zero Raw PHI in Storage</strong></td>
-            </tr>
-            <tr>
-              <td><strong>Multi-Computer Failover</strong></td>
-              <td>Single point of failure</td>
-              <td>Single server box</td>
-              <td class="col-highlight"><strong>Distributed Lease Protocol</strong></td>
-            </tr>
-          </tbody>
-        </table>
+      <div class="action-grid-wrap">
+        <div class="action-grid">
+          {actionIds.map((act) => (
+            <div class="action-cell">
+              <div class="action-id-tag"><code>{act.id}</code></div>
+              <p class="action-desc">{act.desc}</p>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- Predefined Adapter Action IDs (AGENTS.md Rule 8) -->
-  <section class="section action-ids-section" id="action-ids">
-    <div class="container">
-      <div class="section-head text-center">
-        <div class="attio-badge crimson">
-          <span>AGENTS.md Rule 8 Compliance</span>
-        </div>
-        <h2 class="section-title">
-          <span class="heading-dark">Predefined Adapter Action IDs</span><br />
-          <span class="heading-muted">Bounded page-world execution with zero arbitrary code.</span>
-        </h2>
-        <p class="section-desc">
-          LamaniSync enforces strict Manifest V3 isolation. Page-world code may execute only predefined adapter action IDs—never arbitrary remote URLs, HTTP methods, or dynamically fetched scripts.
-        </p>
-      </div>
-
-      <div class="table-container">
-        <table class="capability-table action-id-table">
-          <thead>
-            <tr>
-              <th>Action ID</th>
-              <th>Execution Realm</th>
-              <th>CMS Target Operation</th>
-              <th>Security & Guardrail Guarantee</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><code>ACTION_APPOINTMENT_CREATE</code></td>
-              <td>Page Runner (Isolated)</td>
-              <td>Writes appointment record into operatory chair calendar</td>
-              <td>Ephemeral lock token; duplicate check; requires readback verification</td>
-            </tr>
-            <tr>
-              <td><code>ACTION_APPOINTMENT_RESCHEDULE</code></td>
-              <td>Page Runner (Isolated)</td>
-              <td>Updates start time, duration, and provider chair allocation</td>
-              <td>Atomic shift validation; doctor break and shift boundary verification</td>
-            </tr>
-            <tr>
-              <td><code>ACTION_APPOINTMENT_CANCEL</code></td>
-              <td>Page Runner (Isolated)</td>
-              <td>Marks calendar booking cancelled without record deletion</td>
-              <td>Audit trail logged; cryptographic confirmation receipt issued</td>
-            </tr>
-            <tr>
-              <td><code>ACTION_PATIENT_CREATE</code></td>
-              <td>Page Runner (Isolated)</td>
-              <td>Registers basic demographic record for first-time patient</td>
-              <td>Zero raw PHI cached on workstation disk; volatile memory only</td>
-            </tr>
-            <tr>
-              <td><code>ACTION_SCHEDULE_QUERY</code></td>
-              <td>Page Runner (Isolated)</td>
-              <td>Reads doctor schedules, blocked lunches, and free chair slots</td>
-              <td>Read-only DOM inspection; zero state alteration; scoped to clinic origin</td>
-            </tr>
-            <tr>
-              <td><code>ACTION_READBACK_VERIFY</code></td>
-              <td>Background & Page Runner</td>
-              <td>Queries CMS DOM after write to verify slot persistence</td>
-              <td>Mandatory Rule 10 gate; appointment unconfirmed until verified</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </section>
-
-  <!-- Live Code / Event Payload Preview -->
-  <section class="section">
-    <div class="container">
-      <div class="section-head text-center">
-        <div class="attio-badge crimson">
-          <span>Developer & Enterprise Specs</span>
-        </div>
-        <h2 class="section-title">
-          <span class="heading-dark">Canonical Clinical Event</span><br />
-          <span class="heading-muted">Normalized schema across all CMS vendors.</span>
-        </h2>
-        <p class="section-desc">
-          Regardless of whether your clinic runs Dentrix, eClinicalWorks, or LamaniPulse, LamaniSync normalizes sync events into a clean, cryptographically signed format.
-        </p>
-      </div>
-
-      <div class="code-preview-card">
-        <div class="code-header">
-          <div class="code-title">
-            <span class="code-dot"></span>
-            <span>sync-event-verified-receipt.json</span>
-          </div>
-          <span class="code-badge">WebCrypto Ed25519 Signed</span>
-        </div>
-        <pre class="code-block"><code>{`{
-  "eventId": "evt_01j8m49f7q18zk9v3r",
-  "clinicId": "clinic_bangsar_utama",
-  "cmsAdapter": "dentrix-ascend-v2",
-  "workstationId": "mac-frontdesk-01",
-  "timestamp": "2026-09-24T12:38:22.408Z",
-  "action": "APPOINTMENT_WRITE_AND_VERIFY",
-  "payload": {
-    "patientId": "pt_98231",
-    "providerId": "dr_maya_lim",
-    "operatoryId": "chair_ortho_02",
-    "startTime": "2026-09-25T14:30:00+08:00",
-    "durationMinutes": 45,
-    "treatmentCategory": "BRACE_ADJUSTMENT",
-    "channel": "WHATSAPP_LAMANIHUB"
-  },
-  "readbackStatus": {
-    "verified": true,
-    "verifiedAt": "2026-09-24T12:38:22.712Z",
-    "cmsRecordId": "DX-APPT-883921",
-    "durationLatencyMs": 304
-  },
-  "cryptoSignature": "ed25519:64dfa98e82...c7a10f92"
-}`}</code></pre>
-      </div>
-    </div>
-  </section>
-
-  <!-- CTA Banner -->
   <CtaBanner />
 </Layout>
 
 <style>
-  .features-hero {
-    position: relative;
-    padding: 5.5rem 0 3.5rem 0;
-    overflow: hidden;
-    background: #ffffff;
-  }
+  .border-t { border-top: 1px solid #e2e8f0; }
+  .border-x { border-left: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; }
+  .border-subtle { border-color: #e2e8f0; }
 
-  .hero-glow {
-    position: absolute;
-    top: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: min(700px, 100%);
-    max-width: 100%;
-    height: 380px;
-    background: radial-gradient(circle, rgba(15, 23, 42, 0.025) 0%, rgba(255, 255, 255, 0) 70%);
-    pointer-events: none;
-  }
+  .attio-section { background: #ffffff; position: relative; }
+  .attio-section.shaded-bg { background: #fafafa; }
+  .attio-container { max-width: 1200px; margin: 0 auto; position: relative; background: #ffffff; }
 
-  .hero-content {
+  .attio-section-head { padding: 6rem 3.5rem 3rem 3.5rem; background: #ffffff; }
+  .attio-head-inner { max-width: 860px; }
+
+  .attio-h2-inline {
+    font-size: clamp(2rem, 3.8vw, 3rem);
+    font-weight: 500;
+    letter-spacing: -0.03em;
+    line-height: 1.15;
+    margin: 0 0 1.25rem 0;
+    text-wrap: balance;
+  }
+  .text-primary { color: #1c1d1f; }
+  .text-muted { color: #6f7988; }
+  .attio-lead-desc { font-size: 1.0625rem; color: #6f7988; line-height: 1.6; margin: 0; max-width: 680px; }
+
+  .hero-actions-wrap {
     display: flex;
-    flex-direction: column;
     align-items: center;
-    text-align: center;
+    gap: 0.75rem;
+    margin-top: 2rem;
+  }
+
+  .btn-dark-primary {
+    background: #1c1d1f;
+    border: 1px solid #1c1d1f;
+    color: #ffffff;
+    font-size: 0.875rem;
+    font-weight: 500;
+    padding: 0.6rem 1.25rem;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: background 0.15s ease;
+  }
+  .btn-dark-primary:hover { background: #000000; }
+
+  .btn-dark-secondary {
+    background: transparent;
+    border: 1px solid #e2e8f0;
+    color: #1c1d1f;
+    font-size: 0.875rem;
+    font-weight: 500;
+    padding: 0.6rem 1.25rem;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: background 0.15s ease;
+  }
+  .btn-dark-secondary:hover { background: #f8fafc; }
+
+  .attio-separator-wrap { position: relative; width: 100%; height: 1px; background: #e2e8f0; }
+  .attio-dashed-line {
+    width: 100%;
+    height: 1px;
+    background-image: linear-gradient(to right, #cbd5e1 50%, transparent 50%);
+    background-size: 8px 1px;
+  }
+
+  /* Hatch Container & Inset Grid */
+  .attio-hatch-container {
+    position: relative;
+    background-color: #fafafa;
+    overflow: hidden;
+    padding: 0 2rem;
+  }
+  .attio-hatch-bg {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image: repeating-linear-gradient(125deg, transparent, transparent 6px, rgba(15, 23, 42, 0.035) 6px, rgba(15, 23, 42, 0.035) 7px);
+  }
+  .attio-grid-wrap {
     position: relative;
     z-index: 1;
+    border-left: 1px solid #e2e8f0;
+    border-right: 1px solid #e2e8f0;
   }
 
-  .hero-title {
-    font-size: clamp(1.9rem, 4.5vw, 3.8rem);
-    font-weight: 800;
-    line-height: 1.15;
-    letter-spacing: -0.03em;
-    margin-top: 1.25rem;
-    margin-bottom: 1.25rem;
-    max-width: 900px;
-    overflow-wrap: break-word;
-  }
-
-  .hero-subtitle {
-    font-size: 1.15rem;
-    color: var(--text-muted);
-    max-width: 740px;
-    line-height: 1.6;
-    margin-bottom: 2rem;
-  }
-
-  .hero-actions {
-    display: flex;
-    gap: 0.85rem;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-
-  /* Core Features Grid */
-  .section {
-    padding: 5rem 0;
-  }
-
-  .section.bg-light {
-    background: #fafafa;
-    border-top: 1px solid var(--border-hairline);
-    border-bottom: 1px solid var(--border-hairline);
-  }
-
-  .section-head.text-center {
-    text-align: center;
-    margin-bottom: 3.5rem;
-  }
-
-  .section-head .attio-badge {
-    margin-bottom: 1rem;
-  }
-
-  .section-title {
-    font-size: clamp(1.8rem, 3.2vw, 2.75rem);
-    font-weight: 800;
-    line-height: 1.2;
-    letter-spacing: -0.025em;
-    margin-bottom: 1rem;
-  }
-
-  .section-desc {
-    font-size: 1.05rem;
-    color: var(--text-muted);
-    max-width: 680px;
-    line-height: 1.6;
-    margin: 0 auto;
-  }
-
-  .features-grid {
+  .attio-pillars-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 1.5rem;
+    gap: 1px;
+    background: #e2e8f0;
   }
 
-  .feature-card {
+  .attio-cell {
     background: #ffffff;
-    border: 1px solid var(--border-hairline);
-    border-radius: var(--radius-card);
-    padding: 2.25rem 1.75rem;
-    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.02);
+    padding: 3rem 2.25rem;
     display: flex;
     flex-direction: column;
-    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s, border-color 0.2s;
+    transition: background 0.15s ease;
   }
+  .attio-cell:hover { background: #fafafa; }
 
-  .feature-card:hover {
-    transform: translateY(-2px);
-    border-color: #cbd5e1;
-    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05);
-  }
-
-  .feature-card.highlight-card {
-    border-color: var(--border-hairline);
-    background: #ffffff;
-  }
-
-  .feature-icon-wrapper {
-    width: 44px;
-    height: 44px;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 1rem;
-    background: #f8fafc;
-    border: 1px solid var(--border-hairline);
-    color: var(--text-main);
-    transition: all 0.15s ease;
-  }
-
-  .feature-card:hover .feature-icon-wrapper {
-    color: var(--primary);
-    border-color: #cbd5e1;
-  }
-
-  .feature-icon-wrapper svg {
-    width: 22px;
-    height: 22px;
-  }
-
-  .feature-icon-wrapper.red { background: #f8fafc; color: var(--text-main); }
-  .feature-icon-wrapper.blue { background: #f8fafc; color: var(--text-main); }
-  .feature-icon-wrapper.green { background: #f8fafc; color: var(--text-main); }
-  .feature-icon-wrapper.emerald { background: #f8fafc; color: var(--text-main); }
-  .feature-icon-wrapper.purple { background: #f8fafc; color: var(--text-main); }
-  .feature-icon-wrapper.amber { background: #f8fafc; color: var(--text-main); }
-
-  .feature-badge {
-    font-size: 0.72rem;
+  .cell-overline {
+    font-size: 0.75rem;
     font-weight: 600;
-    text-transform: uppercase;
+    color: #94a3b8;
     letter-spacing: 0.08em;
-    color: var(--text-muted);
-    margin-bottom: 0.5rem;
+    font-family: ui-monospace, SFMono-Regular, monospace;
+    margin-bottom: 1.75rem;
   }
-
-  .feature-title {
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: #0f172a;
-    margin-bottom: 0.75rem;
+  .cell-title {
+    font-size: 1.125rem;
+    font-weight: 500;
+    color: #1c1d1f;
     letter-spacing: -0.015em;
+    line-height: 1.35;
+    margin: 0 0 0.85rem 0;
   }
+  .cell-desc { font-size: 0.875rem; color: #6f7988; line-height: 1.6; margin: 0; }
 
-  .feature-desc {
-    font-size: 0.88rem;
-    color: var(--text-muted);
-    line-height: 1.6;
-    margin-bottom: 1.5rem;
-    flex-grow: 1;
+  /* Action Grid */
+  .action-grid-wrap {
+    background: #fafafa;
+    padding: 3.5rem;
   }
-
-  .feature-bullets {
-    list-style: none;
+  .action-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1px;
+    background: #e2e8f0;
+    border: 1px solid #e2e8f0;
+  }
+  .action-cell {
+    background: #ffffff;
+    padding: 2rem;
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
-    padding-top: 1.25rem;
-    border-top: 1px solid var(--border-hairline);
+    gap: 0.75rem;
   }
-
-  .feature-bullets li {
-    position: relative;
-    padding-left: 1.25rem;
-    font-size: 0.8rem;
-    color: #334155;
-    font-weight: 500;
-    line-height: 1.4;
-  }
-
-  .feature-bullets li::before {
-    content: "•";
-    position: absolute;
-    left: 0;
-    color: var(--primary);
-    font-weight: 700;
-  }
-
-  /* Capability Table */
-  .table-container {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    background: #ffffff;
-    border: 1px solid var(--border-hairline);
-    border-radius: var(--radius-container);
-    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.02);
-  }
-
-  .capability-table {
-    width: 100%;
-    border-collapse: collapse;
-    text-align: left;
-    font-size: 0.9rem;
-  }
-
-  .capability-table th {
-    padding: 1.15rem 1.5rem;
-    background: #f8fafc;
-    font-weight: 700;
-    font-size: 0.82rem;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: #475569;
-    border-bottom: 1px solid var(--border-hairline);
-  }
-
-  .capability-table td {
-    padding: 1.15rem 1.5rem;
-    border-bottom: 1px solid var(--border-hairline);
-    color: #334155;
-  }
-
-  .capability-table tr:last-child td {
-    border-bottom: none;
-  }
-
-  .capability-table th.col-highlight,
-  .capability-table td.col-highlight {
-    background: #fcfcfd;
-    border-left: 1px solid var(--border-hairline);
-    border-right: 1px solid var(--border-hairline);
-  }
-
-  .capability-table td.col-highlight strong {
-    color: var(--primary);
-  }
-
-  .action-id-table code {
+  .action-id-tag code {
+    font-size: 0.78rem;
+    font-weight: 600;
+    font-family: ui-monospace, SFMono-Regular, monospace;
     background: #f1f5f9;
     color: #0f172a;
-    font-size: 0.82rem;
-    font-weight: 600;
-    padding: 0.2rem 0.45rem;
+    padding: 0.2rem 0.5rem;
     border-radius: 4px;
-    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-    white-space: nowrap;
-    border: 1px solid var(--border-hairline);
+    border: 1px solid #e2e8f0;
+  }
+  .action-desc {
+    font-size: 0.875rem;
+    color: #6f7988;
+    line-height: 1.55;
+    margin: 0;
   }
 
-  /* Code Preview Card */
-  .code-preview-card {
-    max-width: 800px;
-    margin: 0 auto;
-    background: #0f172a;
-    border: 1px solid #1e293b;
-    border-radius: var(--radius-card);
-    overflow: hidden;
-    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+  @media (max-width: 960px) {
+    .attio-pillars-grid { grid-template-columns: repeat(2, 1fr); }
+    .action-grid { grid-template-columns: 1fr; }
+    .action-grid-wrap { padding: 1.5rem; }
+    .attio-section-head { padding: 4rem 1.5rem 2.5rem 1.5rem; }
+    .attio-hatch-container { padding: 0 1rem; }
   }
 
-  .code-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.85rem 1.25rem;
-    background: #171717;
-    border-bottom: 1px solid #262626;
-  }
-
-  .code-title {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 0.8rem;
-    color: #a3a3a3;
-    font-family: monospace;
-  }
-
-  .code-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: #10b981;
-  }
-
-  .code-badge {
-    font-size: 0.72rem;
-    color: #60a5fa;
-    background: rgba(37, 99, 235, 0.15);
-    padding: 0.2rem 0.6rem;
-    border-radius: 4px;
-    font-weight: 600;
-  }
-
-  .code-block {
-    padding: 1.5rem;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-    font-size: 0.82rem;
-    line-height: 1.6;
-    color: #e2e8f0;
-  }
-
-  @media (max-width: 900px) {
-    .features-grid {
-      grid-template-columns: 1fr;
-    }
-  }
-
-  @media (max-width: 600px) {
-    .features-hero {
-      padding: 4rem 0 2.5rem 0;
-    }
-    .hero-actions {
-      flex-direction: column;
-      width: 100%;
-    }
-    .hero-actions .btn-primary,
-    .hero-actions .btn-secondary {
-      width: 100%;
-      min-height: 44px;
-    }
-    .feature-card {
-      padding: 1.5rem 1rem;
-    }
-    .capability-table th,
-    .capability-table td {
-      padding: 0.75rem 0.85rem;
-      font-size: 0.8rem;
-    }
-    .code-block {
-      padding: 1rem 0.75rem;
-      font-size: 0.75rem;
-    }
-    .section {
-      padding: 3.5rem 0;
-    }
+  @media (max-width: 640px) {
+    .attio-pillars-grid { grid-template-columns: 1fr; }
+    .attio-hatch-container { padding: 0; }
+    .attio-grid-wrap { border-left: none; border-right: none; }
+    .hero-actions-wrap { flex-direction: column; align-items: stretch; }
   }
 </style>
