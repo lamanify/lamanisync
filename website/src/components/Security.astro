@@ -1,183 +1,237 @@
 ---
 const securityPillars = [
   {
+    num: "01",
     title: "Zero Raw PHI Workstation Storage",
-    desc: "LamaniSync processes appointments in memory only. Patient data is never stored locally in Chrome storage or unencrypted disk caches, safeguarding against local device extraction.",
-    icon: "shield"
+    desc: "LamaniSync processes appointments in memory only. Patient data is never stored locally in Chrome storage or unencrypted disk caches, safeguarding against local device extraction."
   },
   {
+    num: "02",
     title: "No Password or Cookie Sharing",
-    desc: "Your clinic credentials and session tokens stay strictly within your CMS tab. LamaniSync never transmits login passwords, cookies, or CSRF secrets to LamaniHub servers.",
-    icon: "lock"
+    desc: "Your clinic credentials and session tokens stay strictly within your CMS tab. LamaniSync never transmits login passwords, cookies, or CSRF secrets to LamaniHub servers."
   },
   {
+    num: "03",
     title: "Hardware WebCrypto Ed25519 Keys",
-    desc: "Pairing uses non-exportable asymmetric cryptographic keypairs generated directly on your workstation hardware. Every message is cryptographically signed and authenticated.",
-    icon: "key"
+    desc: "Pairing uses non-exportable asymmetric cryptographic keypairs generated directly on your workstation hardware. Every message is cryptographically signed and authenticated."
   },
   {
+    num: "04",
     title: "Strict Action Whitelist Execution",
-    desc: "LamaniSync strictly executes pre-compiled, immutable adapter action IDs. Arbitrary remote code, eval(), or unverified external scripts are strictly blocked by MV3 policy.",
-    icon: "code"
+    desc: "LamaniSync strictly executes pre-compiled, immutable adapter action IDs. Arbitrary remote code or unverified external scripts are strictly blocked by MV3 policy."
   },
   {
+    num: "05",
     title: "Two-Step Readback Verification",
-    desc: "An appointment is never marked confirmed in LamaniHub until LamaniSync re-queries your clinic's database and reads back the newly booked slot, guaranteeing zero phantom records.",
-    icon: "check"
+    desc: "An appointment is never marked confirmed in LamaniHub until LamaniSync re-queries your clinic database and reads back the newly booked slot, guaranteeing zero phantom records."
   },
   {
+    num: "06",
     title: "Exact Origin Scoping",
-    desc: "Host permissions are restricted strictly to your paired clinic portal origin and the secure LamaniHub WebSocket endpoint—protecting your other browsing activity entirely.",
-    icon: "globe"
+    desc: "Host permissions are restricted strictly to your paired clinic portal origin and the secure LamaniHub WebSocket endpoint, protecting your other browsing activity entirely."
   }
 ];
 ---
 
-<section id="security" class="section security-section">
-  <div class="container">
-    <div class="section-head">
-      <div class="attio-badge crimson">
-        <svg style="width:12px; height:12px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-        <span>Security & Healthcare Privacy</span>
+<section id="security" class="attio-section border-t border-subtle">
+  <div class="attio-container border-x border-subtle">
+    
+    <!-- Attio Left-Aligned Structural Header (no badges, tight typography) -->
+    <header class="attio-section-head">
+      <div class="attio-head-inner">
+        <h2 class="attio-h2-inline">
+          <span class="text-primary">Engineered for healthcare compliance.</span>
+          <span class="text-muted font-normal"> Uncompromising data privacy with hardware-isolated WebCrypto keys.</span>
+        </h2>
+        <p class="attio-lead-desc">
+          Designed from the ground up to comply with medical data privacy principles (PDPA & HIPAA-aligned architectures). Your patient records and clinic credentials remain protected at all times.
+        </p>
       </div>
-      <h2 class="section-title">
-        <span class="heading-dark">Engineered for healthcare compliance.</span>
-        <br class="attio-br" />
-        <span class="heading-muted">Uncompromising data privacy with hardware-isolated WebCrypto keys.</span>
-      </h2>
-      <p class="section-desc">
-        Designed from the ground up to comply with medical data privacy principles (PDPA & HIPAA-aligned architectures). Your patient records and clinic credentials remain protected at all times.
-      </p>
+    </header>
+
+    <!-- Structural Hairline Separator with Dashed Connector Line -->
+    <div class="attio-separator-wrap">
+      <div class="attio-dashed-line"></div>
     </div>
 
-    <div class="security-grid">
-      {securityPillars.map((item) => (
-        <div class="sec-card">
-          <div class="sec-icon-box">
-            {item.icon === 'shield' && (
-              <svg style="width:20px; height:20px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-            )}
-            {item.icon === 'lock' && (
-              <svg style="width:20px; height:20px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-            )}
-            {item.icon === 'key' && (
-              <svg style="width:20px; height:20px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21 2-2 2m-6 6a5 5 0 1 0-7 7 5 5 0 0 0 7-7zm-4 4 6-6m-2 2h3m-1 1h3"/></svg>
-            )}
-            {item.icon === 'code' && (
-              <svg style="width:20px; height:20px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
-            )}
-            {item.icon === 'check' && (
-              <svg style="width:20px; height:20px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-            )}
-            {item.icon === 'globe' && (
-              <svg style="width:20px; height:20px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" x2="22" y1="12" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-            )}
+    <!-- 1px Gap Grid on Subtle Stroke Canvas (Attio Architectural Layout) -->
+    <div class="attio-grid-canvas">
+      <div class="attio-dot-bg"></div>
+      <div class="attio-pillars-grid">
+        {securityPillars.map((item) => (
+          <div class="attio-cell">
+            <div class="cell-overline">[{item.num}]</div>
+            <h3 class="cell-title">{item.title}</h3>
+            <p class="cell-desc">{item.desc}</p>
           </div>
-          <h4 class="sec-title">{item.title}</h4>
-          <p class="sec-desc">{item.desc}</p>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
+
   </div>
 </section>
 
 <style>
-  .security-section {
-    padding: 6rem 0;
-    background: #fafafa;
-    border-top: 1px solid var(--border-hairline);
+  .border-t {
+    border-top: 1px solid #e2e8f0;
+  }
+  .border-x {
+    border-left: 1px solid #e2e8f0;
+    border-right: 1px solid #e2e8f0;
+  }
+  .border-subtle {
+    border-color: #e2e8f0;
   }
 
-  .section-head {
-    text-align: center;
-    max-width: 840px;
-    margin: 0 auto 3.5rem auto;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+  .attio-section {
+    background: #ffffff;
+    position: relative;
   }
 
-  .section-title {
-    font-size: clamp(2rem, 3.5vw, 2.75rem);
+  .attio-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    position: relative;
+    background: #ffffff;
+  }
+
+  /* Attio Left-Aligned Structural Header (no badges, tight typography) */
+  .attio-section-head {
+    padding: 6rem 3.5rem 3rem 3.5rem;
+    background: #ffffff;
+  }
+
+  .attio-head-inner {
+    max-width: 860px;
+  }
+
+  .attio-h2-inline {
+    font-size: clamp(2rem, 3.8vw, 3rem);
     font-weight: 500;
-    line-height: 1.22;
-    letter-spacing: -0.025em;
-    margin-top: 1.25rem;
-    margin-bottom: 1.2rem;
+    letter-spacing: -0.03em;
+    line-height: 1.15;
+    margin: 0 0 1.25rem 0;
+    text-wrap: balance;
   }
 
-  .section-desc {
-    font-size: 1.05rem;
-    color: var(--text-muted);
+  .text-primary {
+    color: #1c1d1f;
+  }
+
+  .text-muted {
+    color: #6f7988;
+  }
+
+  .attio-lead-desc {
+    font-size: 1.0625rem;
+    color: #6f7988;
     line-height: 1.6;
+    margin: 0;
+    max-width: 680px;
   }
 
-  .security-grid {
+  /* Dashed Divider Line */
+  .attio-separator-wrap {
+    position: relative;
+    width: 100%;
+    height: 1px;
+    background: #e2e8f0;
+  }
+
+  .attio-dashed-line {
+    width: 100%;
+    height: 1px;
+    background-image: linear-gradient(to right, #cbd5e1 50%, transparent 50%);
+    background-size: 8px 1px;
+  }
+
+  /* Canvas with Dotted Pattern & 1px Gap Border Grid */
+  .attio-grid-canvas {
+    position: relative;
+    background: #fafafa;
+    overflow: hidden;
+  }
+
+  /* Attio Signature Dotted Matrix */
+  .attio-dot-bg {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+    background-size: 20px 20px;
+    opacity: 0.55;
+  }
+
+  /* Attio Border Gap Grid: 1px gap background creates perfect hairlines */
+  .attio-pillars-grid {
+    position: relative;
+    z-index: 1;
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 1.75rem;
+    gap: 1px;
+    background: #e2e8f0;
+    border-bottom: 1px solid #e2e8f0;
   }
 
-  .sec-card {
+  .attio-cell {
     background: #ffffff;
-    border: 1px solid var(--border-hairline);
-    border-radius: var(--radius-card);
-    padding: 2rem;
-    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s, box-shadow 0.2s;
-    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.02);
-  }
-
-  .sec-card:hover {
-    transform: translateY(-2px);
-    border-color: #cbd5e1;
-    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05);
-  }
-
-  .sec-icon-box {
-    width: 40px;
-    height: 40px;
-    border-radius: 8px;
-    background: #f8fafc;
-    border: 1px solid var(--border-hairline);
-    color: var(--text-main);
+    padding: 3rem 2.25rem;
     display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 1.2rem;
-    transition: all 0.15s ease;
+    flex-direction: column;
+    transition: background 0.15s ease;
   }
 
-  .sec-card:hover .sec-icon-box {
-    color: var(--primary);
-    border-color: #cbd5e1;
+  .attio-cell:hover {
+    background: #fafafa;
   }
 
-  .sec-title {
-    font-size: 1.05rem;
-    font-weight: 700;
-    color: #0f172a;
-    margin-bottom: 0.55rem;
-    letter-spacing: -0.01em;
+  .cell-overline {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #94a3b8;
+    letter-spacing: 0.08em;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    margin-bottom: 1.75rem;
   }
 
-  .sec-desc {
-    font-size: 0.88rem;
-    color: var(--text-muted);
-    line-height: 1.55;
+  .cell-title {
+    font-size: 1.125rem;
+    font-weight: 500;
+    color: #1c1d1f;
+    letter-spacing: -0.015em;
+    line-height: 1.35;
+    margin: 0 0 0.85rem 0;
   }
 
-  @media (max-width: 900px) {
-    .security-grid {
+  .cell-desc {
+    font-size: 0.875rem;
+    color: #6f7988;
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  @media (max-width: 960px) {
+    .attio-section-head {
+      padding: 4rem 1.5rem 2.5rem 1.5rem;
+    }
+    .attio-pillars-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .attio-cell {
+      padding: 2.25rem 1.5rem;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .attio-pillars-grid {
       grid-template-columns: 1fr;
     }
-  }
-
-  @media (max-width: 600px) {
-    .security-section {
-      padding: 4rem 0;
+    .border-x {
+      border-left: none;
+      border-right: none;
     }
-    .sec-card {
-      padding: 1.5rem 1rem;
+    .attio-section-head {
+      padding: 3.5rem 1.25rem 2rem 1.25rem;
     }
   }
 </style>
