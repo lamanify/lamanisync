@@ -1,6 +1,24 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import CtaBanner from '../../components/CtaBanner.astro';
+
+const cards = [
+  {
+    num: "01",
+    title: "Real-Time Slot Verification",
+    desc: "When a patient texts your clinic WhatsApp at midnight, LamaniSync checks Kreloses live availability. No overbooking, no phone tag."
+  },
+  {
+    num: "02",
+    title: "Direct Booking Injection",
+    desc: "Confirmed appointments appear directly on your Kreloses calendar with patient name, contact number, and treatment notes pre-filled."
+  },
+  {
+    num: "03",
+    title: "Zero Credential Sharing",
+    desc: "Never share your Kreloses master passwords or API keys. Operates within your local workstation browser with hardware-level encryption."
+  }
+];
 ---
 
 <Layout
@@ -34,35 +52,37 @@ import CtaBanner from '../../components/CtaBanner.astro';
       </div>
     </header>
 
-    <!-- Content Section -->
-    <section class="attio-content-section">
-      <div class="container">
-        <div class="attio-section-header">
-          <h2 class="attio-section-title">
-            Built for clinical flow. Zero double entry.
-          </h2>
-          <p class="attio-section-desc">
-            Front-desk schedule and WhatsApp calendar stay identical 24/7.
-          </p>
+    <!-- Content Section with Diagonal Hatch Gutters & Hairline 1px Grid -->
+    <section class="attio-section shaded-bg border-t border-subtle">
+      <div class="attio-container border-x border-subtle">
+        <header class="attio-section-head">
+          <div class="attio-head-inner">
+            <h2 class="attio-h2-inline">
+              <span class="text-primary">Built for clinical flow.</span>
+              <span class="text-muted font-normal"> Zero double data entry between front desk and WhatsApp.</span>
+            </h2>
+            <p class="attio-lead-desc">
+              Your front-desk Kreloses calendar and patient communication channels stay in lockstep 24/7 without manual phone confirmations.
+            </p>
+          </div>
+        </header>
+
+        <div class="attio-separator-wrap">
+          <div class="attio-dashed-line"></div>
         </div>
 
-        <div class="attio-card-grid">
-          <div class="attio-card">
-            <div class="card-num">01</div>
-            <h3>Real-Time Slot Verification</h3>
-            <p>When a patient texts your clinic WhatsApp at midnight, LamaniSync checks Kreloses live availability. No overbooking, no phone tag.</p>
-          </div>
-
-          <div class="attio-card">
-            <div class="card-num">02</div>
-            <h3>Direct Booking Injection</h3>
-            <p>Confirmed appointments appear directly on your Kreloses calendar with patient name, contact number, and treatment notes pre-filled.</p>
-          </div>
-
-          <div class="attio-card">
-            <div class="card-num">03</div>
-            <h3>Zero Credential Sharing</h3>
-            <p>Never share your Kreloses master passwords or API keys. Operates within your local workstation browser with hardware-level encryption.</p>
+        <div class="attio-hatch-container">
+          <div class="attio-hatch-bg" aria-hidden="true"></div>
+          <div class="attio-grid-wrap">
+            <div class="attio-card-grid">
+              {cards.map((c) => (
+                <div class="attio-card">
+                  <div class="card-num">[{c.num}]</div>
+                  <h3 class="card-title">{c.title}</h3>
+                  <p class="card-desc">{c.desc}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -73,13 +93,12 @@ import CtaBanner from '../../components/CtaBanner.astro';
 </Layout>
 
 <style>
-  .attio-page-wrapper {
-    position: relative;
-    background: #ffffff;
-    min-height: 100vh;
-  }
+  .border-t { border-top: 1px solid #e2e8f0; }
+  .border-x { border-left: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; }
+  .border-subtle { border-color: #e2e8f0; }
 
-  /* Attio subtle vertical pinstripe background */
+  .attio-page-wrapper { position: relative; background: #ffffff; min-height: 100vh; }
+
   .attio-pinstripe-bg {
     position: absolute;
     inset: 0;
@@ -92,20 +111,9 @@ import CtaBanner from '../../components/CtaBanner.astro';
     z-index: 0;
   }
 
-  .attio-hero {
-    position: relative;
-    z-index: 1;
-    padding: 7.5rem 0 5rem 0;
-    text-align: center;
-  }
+  .attio-hero { position: relative; z-index: 1; padding: 7.5rem 0 5rem 0; text-align: center; }
+  .hero-inner { display: flex; flex-direction: column; align-items: center; max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; }
 
-  .hero-inner {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-
-  /* Attio H1: High-impact single clean title */
   .attio-title {
     font-size: clamp(3rem, 6vw, 4.5rem);
     font-weight: 500;
@@ -115,146 +123,145 @@ import CtaBanner from '../../components/CtaBanner.astro';
     margin: 0 0 1.25rem 0;
   }
 
-  /* Attio Subtitle: 2-line balanced clean text */
   .attio-subtitle {
     font-size: clamp(1.125rem, 2vw, 1.35rem);
     font-weight: 400;
-    color: #6f7988;
     line-height: 1.45;
-    letter-spacing: -0.015em;
-    max-width: 640px;
-    margin: 0 0 2.5rem 0;
+    letter-spacing: -0.02em;
+    color: #6f7988;
+    margin: 0 0 2.25rem 0;
     text-wrap: balance;
   }
 
-  .attio-cta-group {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.65rem;
-    flex-wrap: wrap;
-  }
-
-  /* Attio Pill Buttons */
+  .attio-cta-group { display: flex; align-items: center; justify-content: center; gap: 0.75rem; }
   .attio-btn-primary {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background: #1c1d1f;
+    background-color: #1c1d1f;
     color: #ffffff;
-    font-size: 0.875rem;
+    font-size: 0.9375rem;
     font-weight: 500;
-    padding: 0.55rem 1.15rem;
+    padding: 0.65rem 1.4rem;
     border-radius: 9999px;
     text-decoration: none;
-    transition: background 0.15s ease;
+    border: 1px solid #1c1d1f;
+    transition: background-color 0.15s ease;
   }
-
-  .attio-btn-primary:hover {
-    background: #000000;
-  }
+  .attio-btn-primary:hover { background-color: #000000; }
 
   .attio-btn-secondary {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 0.4rem;
-    background: #ffffff;
+    background-color: #ffffff;
     color: #1c1d1f;
-    border: 1px solid #e2e8f0;
-    font-size: 0.875rem;
+    font-size: 0.9375rem;
     font-weight: 500;
-    padding: 0.55rem 1.15rem;
+    padding: 0.65rem 1.4rem;
     border-radius: 9999px;
     text-decoration: none;
-    transition: all 0.15s ease;
+    border: 1px solid #e2e8f0;
+    transition: background-color 0.15s ease;
   }
+  .attio-btn-secondary:hover { background-color: #f8fafc; }
 
-  .attio-btn-secondary:hover {
-    border-color: #cbd5e1;
-    background: #f8fafc;
-  }
+  /* Attio Section Styling */
+  .attio-section { background: #ffffff; position: relative; }
+  .attio-section.shaded-bg { background: #fafafa; }
+  .attio-container { max-width: 1200px; margin: 0 auto; position: relative; background: #ffffff; }
 
-  /* Content Section */
-  .attio-content-section {
-    position: relative;
-    z-index: 1;
-    padding: 5rem 0 6rem 0;
-    border-top: 1px solid #f1f5f9;
-  }
+  .attio-section-head { padding: 6rem 3.5rem 3rem 3.5rem; background: #ffffff; }
+  .attio-head-inner { max-width: 860px; }
 
-  .attio-section-header {
-    text-align: center;
-    margin-bottom: 4rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .attio-section-title {
-    font-size: clamp(2rem, 3.5vw, 2.75rem);
+  .attio-h2-inline {
+    font-size: clamp(2rem, 3.8vw, 3rem);
     font-weight: 500;
-    color: #1c1d1f;
-    letter-spacing: -0.025em;
-    line-height: 1.18;
-    margin: 0 0 0.75rem 0;
-    max-width: 800px;
+    letter-spacing: -0.03em;
+    line-height: 1.15;
+    margin: 0 0 1.25rem 0;
     text-wrap: balance;
   }
+  .text-primary { color: #1c1d1f; }
+  .text-muted { color: #6f7988; }
+  .attio-lead-desc { font-size: 1.0625rem; color: #6f7988; line-height: 1.6; margin: 0; max-width: 680px; }
 
-  .attio-section-desc {
-    font-size: 1.05rem;
-    color: #6f7988;
-    max-width: 540px;
-    margin: 0;
-    line-height: 1.5;
+  .attio-separator-wrap { position: relative; width: 100%; height: 1px; background: #e2e8f0; }
+  .attio-dashed-line {
+    width: 100%;
+    height: 1px;
+    background-image: linear-gradient(to right, #cbd5e1 50%, transparent 50%);
+    background-size: 8px 1px;
+  }
+
+  /* Hatch Container */
+  .attio-hatch-container {
+    position: relative;
+    background-color: #fafafa;
+    overflow: hidden;
+    padding: 0 2rem;
+  }
+  .attio-hatch-bg {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image: repeating-linear-gradient(125deg, transparent, transparent 6px, rgba(15, 23, 42, 0.035) 6px, rgba(15, 23, 42, 0.035) 7px);
+  }
+  .attio-grid-wrap {
+    position: relative;
+    z-index: 1;
+    border-left: 1px solid #e2e8f0;
+    border-right: 1px solid #e2e8f0;
   }
 
   .attio-card-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 1.5rem;
+    gap: 1px;
+    background: #e2e8f0;
   }
 
   .attio-card {
     background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 14px;
-    padding: 2.25rem 1.75rem;
-    position: relative;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+    padding: 3rem 2.25rem;
+    display: flex;
+    flex-direction: column;
+    transition: background-color 0.15s ease;
   }
+  .attio-card:hover { background: #fafafa; }
 
   .card-num {
     font-size: 0.75rem;
     font-weight: 600;
     color: #94a3b8;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.08em;
+    font-family: ui-monospace, SFMono-Regular, monospace;
     margin-bottom: 1.5rem;
-    font-variant-numeric: tabular-nums;
   }
-
-  .attio-card h3 {
-    font-size: 1.125rem;
+  .card-title {
+    font-size: 1.15rem;
     font-weight: 500;
     color: #1c1d1f;
     letter-spacing: -0.015em;
-    margin: 0 0 0.65rem 0;
+    margin: 0 0 0.75rem 0;
+    line-height: 1.35;
   }
-
-  .attio-card p {
-    font-size: 0.9rem;
+  .card-desc {
+    font-size: 0.875rem;
     color: #6f7988;
-    line-height: 1.55;
+    line-height: 1.6;
     margin: 0;
   }
 
-  @media (max-width: 860px) {
-    .attio-card-grid {
-      grid-template-columns: 1fr;
-    }
-    .attio-hero {
-      padding: 5rem 0 3.5rem 0;
-    }
+  @media (max-width: 900px) {
+    .attio-card-grid { grid-template-columns: 1fr; }
+    .attio-section-head { padding: 4rem 1.5rem 2.5rem 1.5rem; }
+    .attio-hatch-container { padding: 0 1rem; }
+  }
+
+  @media (max-width: 640px) {
+    .attio-hatch-container { padding: 0; }
+    .attio-grid-wrap { border-left: none; border-right: none; }
   }
 </style>
